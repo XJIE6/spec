@@ -1,13 +1,18 @@
+#pragma once
 typedef int Label;
 
-enum Op {hd, tl, cons};
 typedef char* Var;
-typedef int Cons;
+typedef int Const;
 
 typedef struct _Expr {
-    enum ExprType {CONST, VAR, OP} type;
+    enum ExprType {CONST, VAR, BOP} type;
     void* expr;
 } Expr;
+
+typedef struct _Bop {
+    char* op;
+    Expr left, right;
+} Bop;
 
 
 typedef Label GoTo;
@@ -18,8 +23,8 @@ typedef struct _If {
 } If;
 
 typedef struct _Jump {
-    enum JumpType {LABEL, EXPR, IF} type;
-    void* expr;
+    enum JumpType {GOTO, RETURN, IF} type;
+    void* jump;
 } Jump;
 
 typedef struct _Assignment {
@@ -30,13 +35,13 @@ typedef struct _Assignment {
 typedef struct _BasicBlock {
     Label label;
     Assignment* assignments;
-    int assignmentSize;
+    int assignmentCount;
     Jump jump;
 } BasicBlock;
 
 typedef struct _Program {
-    Var input;
-    int varsSize;
+    Var* input;
+    int varCount;
     BasicBlock* basicBlocks;
-    int blockSize;
+    int blockCount;
 } Program;

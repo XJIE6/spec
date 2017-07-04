@@ -1,0 +1,29 @@
+read x, y;
+1: 
+b := x;
+c := 0;
+goto 2.
+
+2:
+a := 1;
+goto 3.
+
+3:
+if _== b 0 then 5 else 4.
+
+4:
+a := _* a b;
+b := _- b 1;
+goto 3.
+
+5:
+if _== c 0 then 6 else 7.
+
+6:
+d := a;
+b := y;
+c := 1;
+goto 2.
+
+7:
+return _+ d a.
