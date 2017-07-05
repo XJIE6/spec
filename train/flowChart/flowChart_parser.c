@@ -74,7 +74,7 @@ int count(char* source, char c) {
 }
 
 Const* parceConst(char** input) {
-    fprintf(stderr, "parceConst\n");
+    //fprintf(stderr, "parceConst\n");
     skipT(input);
     Const* res = malloc(sizeof(Const));
     *res = 0;
@@ -89,7 +89,7 @@ Const* parceConst(char** input) {
 Bop parceBop(char**);
 
 Expr parceExpr(char** input) {
-    fprintf(stderr, "parceExpr\n");
+    //fprintf(stderr, "parceExpr\n");
     Expr expr;
     skipT(input);
     if (**input >= '0' && **input <= '9') {
@@ -112,7 +112,7 @@ Expr parceExpr(char** input) {
 }
 
 Bop parceBop(char** input) {
-    fprintf(stderr, "parceBop\n");
+    //fprintf(stderr, "parceBop\n");
     Bop bop;
     skipT(input);
     bop.op = readUntil(input, ' ');
@@ -122,7 +122,7 @@ Bop parceBop(char** input) {
 }
 
 If parceIf(char** input) {
-    fprintf(stderr, "parceIf\n");
+    //fprintf(stderr, "parceIf\n");
     If iF;
     skipT(input);
     iF.expr = parceExpr(input);
@@ -135,7 +135,7 @@ If parceIf(char** input) {
 }
 
 Jump parceJump(char** input) {
-    fprintf(stderr, "parceJump\n");
+    //fprintf(stderr, "parceJump\n");
     Jump jump;
     skipT(input);
     if (**input == 'g') {
@@ -163,7 +163,7 @@ Jump parceJump(char** input) {
 }
 
 Assignment parceAssignment(char** input) {
-    fprintf(stderr, "parceAssignment\n");
+    //fprintf(stderr, "parceAssignment\n");
     Assignment assignment;
     skipT(input);
     char* curAssignment = readUntil(input, ';');
@@ -176,7 +176,7 @@ Assignment parceAssignment(char** input) {
 }
 
 BasicBlock parceBlock(char** input) {
-    fprintf(stderr, "parceBlock\n");
+    //fprintf(stderr, "parceBlock\n");
     BasicBlock block;
     skipT(input);
     char* curBlock = readUntil(input, '.');
@@ -193,7 +193,7 @@ BasicBlock parceBlock(char** input) {
 }
 
 Program parceProgram(char** input) {
-    fprintf(stderr, "parceProgram\n");
+    //fprintf(stderr, "parceProgram\n");
     Program program;
     addVar(0, NULL, NULL);
     skipT(input);

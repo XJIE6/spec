@@ -40,7 +40,7 @@ typedef struct _BasicBlock {
 } BasicBlock;
 
 typedef struct _Program {
-    char** varNames;
+    Var* varNames;
     int varCount;
     Var* input;
     int inputCount;
