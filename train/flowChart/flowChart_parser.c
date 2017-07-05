@@ -2,6 +2,37 @@
 #include "serealiser.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+int MAX_VAR_COUT = 100;
+
+int addVar(int param, char* var, char*** answer) {
+    static char** result;
+    static int len = 0;
+    int f;
+    switch (param) {
+        case 0:
+            result = malloc(sizeof(char*) * MAX_VAR_COUT);
+            break;
+        case 1:
+            f = 1;
+            for (int i = 0; i < len; ++i) {
+                if (!strcmp(var, result[i])) {
+                    f = 0;
+                    break;
+                }
+            }
+            if (f) {
+                result[len] = var;
+                len++;
+            }
+            break;
+        case 2:
+            *answer = result;
+            break;
+    }
+    return len;
+}
 
 void skipT(char** source) {
     while (**source == ' ' || **source == '\n' || **source == '\t') {
@@ -73,7 +104,9 @@ Expr parceExpr(char** input) {
     }
     else {
         expr.type = VAR;
-        expr.expr = readUntil(input, ' ');
+        char * var = readUntil(input, ' ');
+        expr.expr = var;
+        addVar(1, var, NULL);
     }
     return expr;
 }
@@ -134,7 +167,9 @@ Assignment parceAssignment(char** input) {
     Assignment assignment;
     skipT(input);
     char* curAssignment = readUntil(input, ';');
-    assignment.var = readUntil(&curAssignment, ' ');
+    char* var = readUntil(&curAssignment, ' ');
+    assignment.var = var;
+    addVar(1, var, NULL);
     skip(&curAssignment, ":=");
     assignment.expr = parceExpr(&curAssignment);
     return assignment;
@@ -157,27 +192,30 @@ BasicBlock parceBlock(char** input) {
     return block;
 }
 
-Program parceProgram(char* input) {
+Program parceProgram(char** input) {
     fprintf(stderr, "parceProgram\n");
     Program program;
-    skipT(&input);
-    skip(&input, "read");
-    char* vars = readUntil(&input, ';');
-    program.varCount = count(vars, ',') + 1;
-    program.input = (Var*) malloc(sizeof(Var) * program.varCount);
-    for (int i = 0; i < program.varCount; ++i) {
-        program.input[i] = readUntil(&vars, ',');
+    addVar(0, NULL, NULL);
+    skipT(input);
+    skip(input, "read");
+    char* vars = readUntil(input, ';');
+    program.inputCount = count(vars, ',') + 1;
+    program.input = (Var*) malloc(sizeof(Var) * program.inputCount);
+    for (int i = 0; i < program.inputCount; ++i) {
+        char* var = readUntil(&vars, ',');
+        program.input[i] = var;
+        addVar(1, var, NULL);
     }
-    program.blockCount = count(input, '.');
+    program.blockCount = count(*input, '.');
     program.basicBlocks = (BasicBlock*) malloc(sizeof(BasicBlock) * program.blockCount);
 
     for (int i = 0; i < program.blockCount; ++i) {
-        program.basicBlocks[i] = parceBlock(&input);
+        program.basicBlocks[i] = parceBlock(input);
     }
-
+    program.varCount = addVar(2, NULL, &program.varNames);
     return program;
 }
 
 Program parce(char* input) {
-    return parceProgram(input);
+    return parceProgram(&input);
 }

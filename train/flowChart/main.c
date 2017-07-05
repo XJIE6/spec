@@ -7,6 +7,6 @@ int main(int argc, char** argv) {
 	printf("%s\n", input);
 	fflush(stdout);
 	Program p = parce(input);
-	serealiseProgram(p);
+	serealise(p);
 	return 0;
 }

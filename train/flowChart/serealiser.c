@@ -71,6 +71,11 @@ void serealiseProgram(Program p) {
 	printf("VARS\n");
 	printf("%d\n", p.varCount);
 	for (int i = 0; i < p.varCount; ++i) {
+		printf("%s\n", p.varNames[i]);
+	}
+	printf("INPUT\n");
+	printf("%d\n", p.inputCount);
+	for (int i = 0; i < p.inputCount; ++i) {
 		printf("%s\n", p.input[i]);
 	}
 	printf("BLOCKS\n");
@@ -78,4 +83,8 @@ void serealiseProgram(Program p) {
 	for (int i = 0; i < p.blockCount; ++i) {
 		serealiseBlock(p.basicBlocks[i]);
 	}
+}
+
+void serealise(Program p) {
+	serealiseProgram(p);
 }
