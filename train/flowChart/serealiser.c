@@ -4,21 +4,21 @@
 void serealiseExpr (Expr);
 
 void serealiseIf(If i) {
-	printf("If\n");
+	printf("if ");
 	serealiseExpr(i.expr);
-	printf("IFTRUE\n%d\n", i.ifTrue);
-	printf("IFFALSE\n%d\n", i.ifFalse);
+	printf("then %d ", i.ifTrue);
+	printf("else %d.\n\n", i.ifFalse);
 }
 
 void serealiseJump(Jump j) {
-	printf("JUMP\n");
 	switch (j.type) {
 		case GOTO:
-			printf("GOTO\n%d\n", *((GoTo*)j.jump));
+			printf("goto %d.\n\n", *((GoTo*)j.jump));
 			break;
 		case RETURN:
-			printf("RETURN\n");
+			printf("return ");
 			serealiseExpr(*((Expr*)j.jump));
+			printf(".\n\n");
 			break;
 		case IF:
 			serealiseIf(*((If*)j.jump));
@@ -27,19 +27,18 @@ void serealiseJump(Jump j) {
 }
 
 void serealiseBop(Bop b) {
-	printf("BOP\n%s\n", b.op);
+	printf("%s ", b.op);
 	serealiseExpr(b.left);
 	serealiseExpr(b.right);
 }
 
 void serealiseExpr (Expr e) {
-	printf("EXPR\n");
 	switch (e.type) {
 		case CONST:
-			printf("CONST\n%d\n", *((Const*)e.expr));
+			printf("%d ", *((Const*)e.expr));
 			break;
 		case VAR:
-			printf("VAR\n%s\n", (Var)e.expr);
+			printf("%s ", (Var)e.expr);
 			break;
 		case BOP:
 			serealiseBop(*((Bop*)e.expr));
@@ -48,18 +47,13 @@ void serealiseExpr (Expr e) {
 }
 
 void serealiseAssignment(Assignment a) {	
-	printf("ASSIGNMENT\n");
-	printf("VAR\n");
-	printf("%s\n", a.var);
-	serealiseExpr(a.expr);	
+	printf("%s := ", a.var);
+	serealiseExpr(a.expr);
+	printf(";\n");
 }
 
 void serealiseBlock(BasicBlock b) {
-	printf("BLOCK\n");
-	printf("LABEL\n");
-	printf("%d\n", b.label);
-	printf("ASSIGNMENTS\n");
-	printf("%d\n", b.assignmentCount);
+	printf("%d:\n", b.label);
 	for (int i = 0; i < b.assignmentCount; ++i) {
 		serealiseAssignment(b.assignments[i]);
 	}
@@ -67,19 +61,14 @@ void serealiseBlock(BasicBlock b) {
 }
 
 void serealiseProgram(Program p) {	
-	printf("PROGRAM\n");
-	printf("VARS\n");
-	printf("%d\n", p.varCount);
-	for (int i = 0; i < p.varCount; ++i) {
-		printf("%s\n", p.varNames[i]);
-	}
-	printf("INPUT\n");
-	printf("%d\n", p.inputCount);
+	printf("read ");
 	for (int i = 0; i < p.inputCount; ++i) {
-		printf("%s\n", p.input[i]);
+		if (i != 0) {
+			printf(",");
+		}
+		printf("%s", p.input[i]);
 	}
-	printf("BLOCKS\n");
-	printf("%d\n", p.blockCount);
+	printf(";\n\n");
 	for (int i = 0; i < p.blockCount; ++i) {
 		serealiseBlock(p.basicBlocks[i]);
 	}
