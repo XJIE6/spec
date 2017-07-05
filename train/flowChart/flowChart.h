@@ -16,7 +16,7 @@ typedef struct _Bop {
 
 
 typedef Label GoTo;
-typedef Expr Returun;
+typedef Expr Return;
 typedef struct _If {
     Expr expr;
     Label ifTrue, ifFalse;

@@ -72,7 +72,7 @@ Expr interpretExpr (Expr e, char** varNames, int len, int** state) {
 			return e;
 		case VAR:
 			i = find(varNames, len, (Var)e.expr);
-			if (i != -1) {
+			if (i != -1 && (*state)[i] != -1) {
 				Expr ee;
 				ee.type = CONST;
 				int *res = malloc(sizeof(int));

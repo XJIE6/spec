@@ -6,7 +6,7 @@ void serealiseExpr (Expr);
 void serealiseIf(If i) {
 	printf("if ");
 	serealiseExpr(i.expr);
-	printf("then %d ", i.ifTrue);
+	printf(" then %d ", i.ifTrue);
 	printf("else %d.\n\n", i.ifFalse);
 }
 
@@ -29,16 +29,17 @@ void serealiseJump(Jump j) {
 void serealiseBop(Bop b) {
 	printf("%s ", b.op);
 	serealiseExpr(b.left);
+	printf(" ", b.op);
 	serealiseExpr(b.right);
 }
 
 void serealiseExpr (Expr e) {
 	switch (e.type) {
 		case CONST:
-			printf("%d ", *((Const*)e.expr));
+			printf("%d", *((Const*)e.expr));
 			break;
 		case VAR:
-			printf("%s ", (Var)e.expr);
+			printf("%s", (Var)e.expr);
 			break;
 		case BOP:
 			serealiseBop(*((Bop*)e.expr));
