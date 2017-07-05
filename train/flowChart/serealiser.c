@@ -29,20 +29,52 @@ void serealiseJump(Jump j) {
 void serealiseBop(Bop b) {
 	printf("%s ", b.op);
 	serealiseExpr(b.left);
-	printf(" ", b.op);
+	printf(" ");
 	serealiseExpr(b.right);
+}
+
+void serealiseUop(Uop b) {
+	printf("%s ", b.op);
+	serealiseExpr(b.left);
+}
+
+void serealiseConst (Const c);
+
+void serealiseList (List l) {
+	printf("(");
+	for (int i = 0; i < l.listLen; ++i) {
+		if (i != 0) {
+			printf(" ");
+		}
+		serealiseConst(l.list[i]);
+	}
+	printf(") ");
+}
+
+void serealiseConst (Const c) {
+	switch (c.type) {
+		case NUMBER:
+			printf("%d", *((int*)c.expr));
+			break;
+		case LIST:
+			serealiseList(*((List*)c.expr));
+			break;
+	}
 }
 
 void serealiseExpr (Expr e) {
 	switch (e.type) {
 		case CONST:
-			printf("%d", *((Const*)e.expr));
+			serealiseConst(*((Const*)e.expr));
 			break;
 		case VAR:
 			printf("%s", (Var)e.expr);
 			break;
 		case BOP:
 			serealiseBop(*((Bop*)e.expr));
+			break;
+		case UOP:
+			serealiseUop(*((Uop*)e.expr));
 			break;
 	} 
 }

@@ -5,6 +5,7 @@
 #include <string.h>
 
 int MAX_VAR_COUT = 100;
+int MAX_LIST_LEN = 100;
 
 int addVar(int param, char* var, char*** answer) {
     static char** result;
@@ -73,28 +74,50 @@ int count(char* source, char c) {
     return res;
 }
 
-Const* parceConst(char** input) {
+Const parceConst(char** input) {
     //fprintf(stderr, "parceConst\n");
     skipT(input);
-    Const* res = malloc(sizeof(Const));
-    *res = 0;
+    Const res;
+    if (**input == '(') {
+        res.type = LIST;
+        List* l =  malloc(sizeof(List));
+        (*l).list = malloc(sizeof(Const) * MAX_LIST_LEN);
+        int i = 0;
+        skip(input, "(");
+        while (**input != ')') {
+            (*l).list[i] = parceConst(input);
+            ++i;
+            skipT(input);
+        }
+        skip(input, ")");
+        (*l).listLen = i;
+        res.expr = l;
+        return res;
+    }
+    int* n = malloc(sizeof(int));
+    *n = 0;
     while (**input >= '0' && **input <= '9') {
-        *res = *res * 10;
-        *res = *res + **input - '0';
+        *n = *n * 10;
+        *n = *n + **input - '0';
         ++(*input);
     }
+    res.type = NUMBER;
+    res.expr = n;
     return res;
 }
 
 Bop parceBop(char**);
+Uop parceUop(char**);
 
 Expr parceExpr(char** input) {
     //fprintf(stderr, "parceExpr\n");
     Expr expr;
     skipT(input);
-    if (**input >= '0' && **input <= '9') {
+    if ((**input >= '0' && **input <= '9') || **input == '(') {
         expr.type = CONST;
-        expr.expr = parceConst(input);
+        Const* res = (Const*) malloc(sizeof(Const));
+        *res = parceConst(input);
+        expr.expr = res;
     }
     else if (**input == '_') {
         expr.type = BOP;
@@ -102,13 +125,28 @@ Expr parceExpr(char** input) {
         *res = parceBop(input);
         expr.expr = res;
     }
+    else if (**input == '^') {
+        expr.type = UOP;
+        Uop* res = (Uop*) malloc(sizeof(Uop));
+        *res = parceUop(input);
+        expr.expr = res;
+    }
     else {
         expr.type = VAR;
-        char * var = readUntil(input, ' ');
+        char* var = readUntil(input, ' ');
         expr.expr = var;
         addVar(1, var, NULL);
     }
     return expr;
+}
+
+Uop parceUop(char** input) {
+    //fprintf(stderr, "parceBop\n");
+    Uop uop;
+    skipT(input);
+    uop.op = readUntil(input, ' ');
+    uop.left = parceExpr(input);
+    return uop;
 }
 
 Bop parceBop(char** input) {

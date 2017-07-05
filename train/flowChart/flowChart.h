@@ -2,10 +2,19 @@
 typedef int Label;
 
 typedef char* Var;
-typedef int Const;
+typedef int Number;
+struct _Const;
+typedef struct _List {
+    int listLen;
+    struct _Const* list;
+} List;
+typedef struct _Const {
+    enum ConstType {NUMBER, LIST} type;
+    void* expr;
+} Const;
 
 typedef struct _Expr {
-    enum ExprType {CONST, VAR, BOP} type;
+    enum ExprType {CONST, VAR, BOP, UOP} type;
     void* expr;
 } Expr;
 
@@ -14,6 +23,10 @@ typedef struct _Bop {
     Expr left, right;
 } Bop;
 
+typedef struct _Uop {
+    char* op;
+    Expr left;
+} Uop;
 
 typedef Label GoTo;
 typedef Expr Return;
