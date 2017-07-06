@@ -1,4 +1,5 @@
 #include "flowChart_parser.h"
+#include "bracketSer.h"
 #include "serealiser.h"
 #include "flowChart_interpreter.h"
 #include "flowChart_spec.h"

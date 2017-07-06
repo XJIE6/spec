@@ -1,0 +1,273 @@
+read program, input;
+
+1:
+blocks := ^hd ^tl program;
+varNames := ^hd program;
+stack := ();
+curBlock := ^hd blocks;
+goto 5.
+
+5:
+assignments := ^hd ^tl curBlock;
+goto 6.
+
+6:
+if _== assignments () then 10 else 7.
+
+7:
+ass := ^hd assignments;
+assignments := ^tl assignments;
+var := ^hd ass;
+param := ^hd ^tl ass;
+stack := _cons 8 stack;
+goto 18.
+
+8:
+stack := ^tl stack;
+var := ^hd ass;
+param := res;
+nop := 1;
+stack := _cons 9 stack;
+goto 43.
+
+9:
+stack := ^tl stack;
+goto 6.
+
+10:
+jump := ^hd ^tl ^tl curBlock;
+jkind := ^hd jump;
+param := ^hd ^tl jump;
+if _== jkind 0 then 55 else 11.
+
+11:
+if _== jkind 1 then 12 else 16.
+
+12:
+param := ^hd ^tl jump;
+stack := _cons 13 stack;
+goto 18.
+
+13:
+stack := ^tl stack;
+if _== res 0 then 14 else 15.
+
+14:
+param := ^hd ^tl ^tl ^tl jump;
+goto 55.
+
+15:
+param := ^hd ^tl ^tl jump;
+goto 55.
+
+16:
+param := ^hd ^tl jump;
+stack := _cons 17 stack;
+goto 18.
+
+17:
+stack := ^tl stack;
+retrun res.
+
+18:
+if _== ^hd param 0 then 19 else 20.
+
+19:
+res := ^hd ^tl param;
+goto 62.
+
+20:
+if _== ^hd param 1 then 21 else 23.
+
+21:
+var := ^hd ^tl param;
+nop := 0;
+stack := _cons 22 stack;
+goto 43.
+
+22:
+stack := ^tl stack;
+goto 62.
+
+23:
+if _== ^hd param 2 then 24 else 30.
+
+24:
+stack := _cons 25 _cons param stack;
+param := ^hd ^tl ^tl param;
+goto 18.
+
+25:
+param := ^hd ^tl stack;
+stack := ^tl ^tl stack;
+op := ^hd ^tl param;
+if _== op 0 then 26 else 27.
+
+26:
+res := ^hd res;
+goto 62.
+
+27:
+if _== op 1 then 28 else 29.
+
+28:
+res := ^tl res;
+goto 62.
+
+29:
+res := ^print res;
+goto 62.
+
+30:
+stack := _cons 31 _cons param stack;
+param := ^hd ^tl ^tl param;
+goto 18.
+
+31:
+param := ^hd ^tl stack;
+stack := _cons 32 _cons res ^tl stack;
+param := ^hd ^tl ^tl ^tl param;
+goto 18.
+
+32:
+res1 := ^hd ^tl stack;
+param := ^hd ^tl ^tl stack;
+stack := ^tl ^tl ^tl stack;
+op := ^hd ^tl param;
+if _== op 0 then 33 else 34.
+
+33:
+res := _== res1 res;
+goto 62.
+
+34:
+if _== op 1 then 35 else 36.
+
+35:
+res := _* res1 res;
+goto 62.
+
+36:
+if _== op 2 then 37 else 38.
+
+37:
+res := _< res1 res;
+goto 62.
+
+38:
+if _== op 3 then 39 else 40.
+
+39:
+res := _- res1 res;
+goto 62.
+
+40:
+if _== op 4 then 41 else 42.
+
+41:
+res := _+ res1 res;
+goto 62.
+
+42:
+res := _cons res1 res;
+goto 62.
+
+43:
+fail := 0;
+inputrev := ();
+namesrev := ();
+goto 44.
+
+44:
+if _== varNames () then 49 else 45.
+
+45:
+if _== ^hd varNames var then 47 else 46.
+
+46:
+inputrev := _cons ^hd input inputrev;
+namesrev := _cons ^hd varNames namesrev;
+input := ^tl input;
+varNames := ^tl varNames;
+goto 44.
+
+47:
+res := ^hd input;
+if _== nop 0 then 50 else 48.
+
+48:
+input := _cons param ^tl input;
+goto 50.
+
+49:
+fail := 1;
+goto 50.
+
+50:
+if _== namesrev () then 52 else 51.
+
+51:
+input := _cons ^hd inputrev input;
+varNames := _cons ^hd namesrev varNames;
+inputrev := ^tl inputrev;
+namesrev := ^tl namesrev;
+goto 50.
+
+52:
+if _== fail 1 then 53 else 54.
+
+53:
+varNames := _cons var varNames;
+input := _cons param input;
+goto 54.
+
+54:
+goto 62.
+
+55:
+blockrev := ();
+goto 56.
+
+56:
+if _== ^hd ^hd blocks param then 58 else 57.
+
+57:
+blockrev := _cons ^hd blocks blockrev;
+blocks := ^tl blocks;
+goto 56.
+
+58:
+curBlock := ^hd blocks;
+goto 59.
+
+59:
+if _== blockrev () then 61 else 60.
+
+60:
+blocks := _cons ^hd blockrev blocks;
+blockrev := ^tl blockrev;
+goto 59.
+
+61:
+goto 5.
+
+62:
+if _== ^hd stack 8 then 8 else 63.
+
+63:
+if _== ^hd stack 9 then 9 else 64.
+
+64:
+if _== ^hd stack 13 then 13 else 65.
+
+65:
+if _== ^hd stack 17 then 17 else 66.
+
+66:
+if _== ^hd stack 22 then 22 else 67.
+
+67:
+if _== ^hd stack 25 then 25 else 68.
+
+68:
+if _== ^hd stack 31 then 31 else 32.

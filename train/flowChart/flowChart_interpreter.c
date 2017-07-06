@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-int MAX_BUFF_SIZE = 100;
+int MAX_BUFF_SIZE = 100000;
 
 int find(char** arr, int len, char* val) {
 	for (int i = 0; i < len; ++i) {
@@ -144,9 +144,13 @@ Expr interpretUop(Uop b, char** varNames, int len, Const** state) {
 			res = (*((List*) left.expr)).list;
 		}
 		if (!strcmp(b.op, "^tl")) {
-			++((*((List*) left.expr)).list);
-			--((*((List*) left.expr)).listLen);
-			res = &left;
+			res = malloc(sizeof(Const));
+			(*res).type = LIST;
+			List l = *((List*)left.expr);
+			List* new = malloc(sizeof(List));
+			(*new).listLen = l.listLen - 1;
+			(*new).list = &(l.list[1]);
+			(*res).expr = new;
 		}
 		if (!strcmp(b.op, "^print")) {
 			serealiseConst(left);

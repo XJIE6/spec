@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <string.h>
 
-int MAX_VAR_COUT = 100;
-int MAX_LIST_LEN = 100;
+int MAX_VAR_COUT = 10000;
+int MAX_LIST_LEN = 10000;
 
 int addVar(int param, char* var, char*** answer) {
     static char** result;
