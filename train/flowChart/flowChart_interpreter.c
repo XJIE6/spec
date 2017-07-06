@@ -39,8 +39,38 @@ int interpretJump(Jump j, char** varNames, int len, Const** state, Const* ans) {
 	} 
 }
 
+int constCmp(Const c1, Const c2) {
+	if (c1.type == NUMBER) {
+		if(c2.type == NUMBER) {
+			return *((int*)c1.expr) == *((int*)c2.expr);
+		}
+		else {
+			return 0;
+		}
+	}
+	else {
+		if(c2.type == NUMBER) {
+			return 0;
+		}
+		else {
+			List l1 = *((List*) c1.expr);
+			List l2 = *((List*) c2.expr);
+			if (l1.listLen != l2.listLen) {
+				return 0;
+			}
+			int f = 1;
+			for (int i = 0; i < l1.listLen; ++i) {
+				if (!constCmp(l1.list[i], l2.list[i])) {
+					f = 0;
+					break;
+				}
+			}
+			return f;
+		}
+	}
+}
+
 Expr interpretBop(Bop b, char** varNames, int len, Const** state) {
-	//fprintf(stderr, "BOP\n");
 	Expr leftE = interpretExpr(b.left, varNames, len, state);
 	Expr rightE = interpretExpr(b.right, varNames, len, state);
 	Expr ee;
@@ -52,13 +82,19 @@ Expr interpretBop(Bop b, char** varNames, int len, Const** state) {
 		if (!strcmp(b.op, "_==")) {
 			(*res).type = NUMBER;
 			int* ans = malloc(sizeof(int));
-			*ans = *((int*)left.expr) == *((int*)right.expr);
+			*ans = constCmp(left, right);
 			(*res).expr = ans;
 		}
 		if (!strcmp(b.op, "_*")) {
 			(*res).type = NUMBER;
 			int* ans = malloc(sizeof(int));
 			*ans = *((int*)left.expr) * *((int*)right.expr);
+			(*res).expr = ans;
+		}
+		if (!strcmp(b.op, "_<")) {
+			(*res).type = NUMBER;
+			int* ans = malloc(sizeof(int));
+			*ans = *((int*)left.expr) < *((int*)right.expr);
 			(*res).expr = ans;
 		}
 		if (!strcmp(b.op, "_-")) {
@@ -96,7 +132,6 @@ Expr interpretBop(Bop b, char** varNames, int len, Const** state) {
 }
 
 Expr interpretUop(Uop b, char** varNames, int len, Const** state) {
-	//fprintf(stderr, "UOP\n");
 	Expr leftE = interpretExpr(b.left, varNames, len, state);
 	Expr ee;
 	if (leftE.type == CONST) {
@@ -123,7 +158,6 @@ Expr interpretUop(Uop b, char** varNames, int len, Const** state) {
 }
 
 Expr interpretExpr (Expr e, char** varNames, int len, Const** state) {
-	//fprintf(stderr, "EXPR\n");
 	int i;
 	switch (e.type) {
 		case CONST:

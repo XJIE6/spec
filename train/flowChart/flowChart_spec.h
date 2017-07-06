@@ -1,3 +1,3 @@
 #pragma once
 
-Program spec(Program, char**, int, char**, int, int*);
+Program spec(Program, char**, int, char**, int, Const*);

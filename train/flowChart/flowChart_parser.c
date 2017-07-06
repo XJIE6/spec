@@ -96,12 +96,20 @@ Const parceConst(char** input) {
     }
     int* n = malloc(sizeof(int));
     *n = 0;
+    int f = 0;
+    if (**input == '-') {
+        f = 1;
+        skip(input, "-");
+    }
     while (**input >= '0' && **input <= '9') {
         *n = *n * 10;
         *n = *n + **input - '0';
         ++(*input);
     }
     res.type = NUMBER;
+    if (f) {
+        *n *= -1;
+    }
     res.expr = n;
     return res;
 }

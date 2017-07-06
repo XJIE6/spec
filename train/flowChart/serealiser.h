@@ -4,3 +4,5 @@
 void serealise(Program);
 void serealiseConst(Const);
 void serealiseExpr(Expr);
+void serealiseBop(Bop);
+void serealiseUop(Uop);

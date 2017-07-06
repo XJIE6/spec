@@ -9,12 +9,29 @@
 int MAX_PP_COUNT = 100;
 int MAX_BB_COUNT = 100;
 int MAX_ASS_COUNT = 100;
+int magic_number = 71;
 
-Label getLabel(Label label, int* state, int len) {
+int number(Const c) {
+	if (c.type == NUMBER) {
+		return *((int*)c.expr);
+	}
+	List l = *((List*)c.expr);
+	int res = 0;
+	for (int i = 0; i < l.listLen; ++i) {
+		res *= magic_number;
+		res += number(l.list[i]);
+	}
+	if (res < 0) {
+		return -res;
+	}
+	return res;
+}
+
+Label getLabel(Label label, Const* state, int len) {
 	int res = label;
 	for (int i = 0; i < len; ++i) {
-		res *= 71;
-		res += state[i];
+		res *= magic_number;
+		res += number(state[i]);
 	}
 	if (res < 0) {
 		return -res;
@@ -24,16 +41,10 @@ Label getLabel(Label label, int* state, int len) {
 
 typedef struct _pp {
 	Label label;
-	int* state;
+	Const* state;
 } pp;
 
-void add(pp* pending, int* pendingLen, Label label, int* state, int stateLen) {
-	printf("pl %d\n", *pendingLen);
-	printf("%d\n", label);
-	for (int i = 0; i < stateLen; ++i) {
-		printf("%d ", state[i]);
-	}
-	printf("\n");
+void add(pp* pending, int* pendingLen, Label label, Const* state, int stateLen) {
 	int f = 1;
 	for (int i = 0; i < *pendingLen; ++i) {
 		if (pending[i].label == label && !memcmp(pending[i].state, state, sizeof(int) * stateLen)) {
@@ -43,14 +54,14 @@ void add(pp* pending, int* pendingLen, Label label, int* state, int stateLen) {
 	}
 	if (f) {
 		pending[*pendingLen].label = label;
-		pending[*pendingLen].state = malloc (sizeof(int) * stateLen);
-		memcpy(pending[*pendingLen].state, state, sizeof(int) * stateLen);
+		pending[*pendingLen].state = malloc (sizeof(Const) * stateLen);
+		memcpy(pending[*pendingLen].state, state, sizeof(Const) * stateLen);
 		++(*pendingLen);
 	}
 
 }
 
-Program spec(Program p, char** stat, int statLen, char** names, int len, int* state){
+Program spec(Program p, char** stat, int statLen, char** names, int len, Const* state){
 	pp* pending = malloc(sizeof(pp) * MAX_PP_COUNT);
 	BasicBlock* result = malloc(sizeof(BasicBlock) * MAX_BB_COUNT);
 	int lastBB = 0;
@@ -58,24 +69,19 @@ Program spec(Program p, char** stat, int statLen, char** names, int len, int* st
 	Label cur = p.basicBlocks[0].label;
 	add(pending, &pendingLen, cur, state, len);
 	int scaned = 0;
-	//printf("START\n");
 	while (scaned < pendingLen) {
-		//printf("WHILE\n");
 		cur = pending[scaned].label;
-		memcpy(state, pending[scaned].state, sizeof(int) * len);
+		memcpy(state, pending[scaned].state, sizeof(Const) * len);
 		BasicBlock bb = findBlock(p.basicBlocks, p.blockCount, cur);
 		BasicBlock* curbb = &(result[lastBB]);
 		(*curbb).label = getLabel(cur, state, len);
 		(*curbb).assignments = malloc(sizeof(Assignment) * MAX_ASS_COUNT);
 		(*curbb).assignmentCount = 0;
 
-		//printf("PRECOMPUTE\n");
 		compute:
-		//printf("PREFOR\n");
 		for (int i = 0; i < bb.assignmentCount; ++i) {
-			//printf("INFOR\n");
 			if (find(stat, statLen, bb.assignments[i].var) != -1) {
-				state[find(names, len, bb.assignments[i].var)] = *((int*)interpretExpr(bb.assignments[i].expr, names, len, &state).expr);
+				state[find(names, len, bb.assignments[i].var)] = *((Const*)interpretExpr(bb.assignments[i].expr, names, len, &state).expr);
 			}
 			else {
 				Assignment* curass = &((*curbb).assignments[(*curbb).assignmentCount]);
@@ -84,64 +90,28 @@ Program spec(Program p, char** stat, int statLen, char** names, int len, int* st
 				++(*curbb).assignmentCount;
 			}
 		}
-		//printf("AFTERFOR\n");
 		If curIf;
 		Expr eval;
-		//serealiseJump(bb.jump);
 		switch (bb.jump.type) {
 			case (GOTO):
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				for (int i = 0; i < statLen; ++i) {
-					//printf("%s %d\n", p.varNames[i], state[i]);
-				}
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//serealiseBlock(bb);
 				bb = findBlock(p.basicBlocks, p.blockCount, *((int*)bb.jump.jump));
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//serealiseBlock(bb);
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//printf("GOTO\n");
 				goto compute;
 			case (RETURN):
-
-				//printf("RETURN\n");
 				(*curbb).jump.type = RETURN;
 				Return* res = malloc(sizeof(Return));
 				*res = interpretExpr(*((Return*)bb.jump.jump), names, len, &state);
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//serealiseExpr(*res);
 				(*curbb).jump.jump = res;
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//fflush(stdout);
-				//serealiseBlock((*curbb));
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//fflush(stdout);
-				//serealiseBlock(result[lastBB]);
-				//printf("$$$$$$$$$$$$$$$$$$\n");
-				//fflush(stdout);
 				break;
 			case (IF):
 				curIf = *((If*)bb.jump.jump);
 				eval = interpretExpr(curIf.expr, names, len, &state);
 				if (eval.type == CONST) {
-					if(*((int*) eval.expr)){
-						//printf("$$$$$$$$$$$$$$$$$$\n");
-						for (int i = 0; i < statLen; ++i) {
-							//printf("%s %d\n", p.varNames[i], state[i]);
-						}
-						//printf("$$$$$$$$$$$$$$$$$$\n");
-						//serealiseBlock(bb);
+					if(*((int*)(*((Const*)eval.expr)).expr)){
 						bb = findBlock(p.basicBlocks, p.blockCount, curIf.ifTrue);
-						//printf("$$$$$$$$$$$$$$$$$$\n");
-						//serealiseBlock(bb);
-						//printf("$$$$$$$$$$$$$$$$$$\n");
-						//printf("EVALTRUE\n");
 						goto compute;
 					}
 					else {
 						bb = findBlock(p.basicBlocks, p.blockCount, curIf.ifFalse);
-						
-						//printf("EVALFALSE\n");
 						goto compute;
 					}
 				}
@@ -160,8 +130,6 @@ Program spec(Program p, char** stat, int statLen, char** names, int len, int* st
 
 		++lastBB;
 		++scaned;
-
-		//printf("END\n");
 	}
 	printf("%d\n", pendingLen);
 	Program ans;
