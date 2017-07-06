@@ -71,6 +71,7 @@ int constCmp(Const c1, Const c2) {
 }
 
 Expr interpretBop(Bop b, char** varNames, int len, Const** state) {
+	//fprintf(stderr, "BOP\n");
 	Expr leftE = interpretExpr(b.left, varNames, len, state);
 	Expr rightE = interpretExpr(b.right, varNames, len, state);
 	Expr ee;
@@ -132,6 +133,7 @@ Expr interpretBop(Bop b, char** varNames, int len, Const** state) {
 }
 
 Expr interpretUop(Uop b, char** varNames, int len, Const** state) {
+	//fprintf(stderr, "UOP\n");
 	Expr leftE = interpretExpr(b.left, varNames, len, state);
 	Expr ee;
 	if (leftE.type == CONST) {
@@ -146,6 +148,12 @@ Expr interpretUop(Uop b, char** varNames, int len, Const** state) {
 			--((*((List*) left.expr)).listLen);
 			res = &left;
 		}
+		if (!strcmp(b.op, "^print")) {
+			serealiseConst(left);
+			printf("\n");
+			fflush(stdout);
+			res = &left;
+		}
 		ee.expr = res;
 		return ee;
 	}
@@ -158,6 +166,7 @@ Expr interpretUop(Uop b, char** varNames, int len, Const** state) {
 }
 
 Expr interpretExpr (Expr e, char** varNames, int len, Const** state) {
+	//fprintf(stderr, "EXPR\n");
 	int i;
 	switch (e.type) {
 		case CONST:
@@ -188,7 +197,7 @@ void interpretAssignment(Assignment a, char** varNames, int len, Const** state) 
 }
 
 int interpretBlock(BasicBlock b, char** varNames, int len, Const** state, Const* ans) {
-	//fprintf(stderr, "BLOCK\n");
+	//fprintf(stderr, "BLOCK\n%d\n", b.label);
 	for (int i = 0; i < b.assignmentCount; ++i) {
 		interpretAssignment(b.assignments[i], varNames, len, state);
 	}
