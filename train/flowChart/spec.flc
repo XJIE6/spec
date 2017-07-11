@@ -1,0 +1,418 @@
+read program, varNames, state;
+
+1:
+blocks := ^hd ^tl program;
+pending := ();
+pending := _cons _cons ^hd ^hd blocks _cons state () pending;
+marked := ();
+stack := ();
+newProg := ();
+code := ();
+goto 2.
+
+2:
+if _== pending () then 30 else 3.
+
+3:
+cur := ^hd pending;
+pending := ^tl pending;
+param := marked;
+var := cur;
+stack := _cons 4 stack;
+goto 100.
+
+4:
+stack := ^tl stack;
+if _== res 1 then 2 else 5.
+
+5:
+marked := _cons cur marked;
+state := ^hd ^tl cur;
+param := ^hd cur;
+goto 400.
+
+6:
+assignments := ^hd ^tl curBlock;
+goto 7.
+
+7:
+if _== assignments () then 14 else 8.
+
+8:
+ass := ^hd assignments;
+assignments := ^tl assignments;
+param := ^hd ^tl ass;
+stack := _cons 9 stack;
+goto 200.
+
+9:
+stack := ^tl stack;
+simpl := res;
+param := varNames;
+var := ^hd ass;
+stack := _cons 10 stack;
+goto 100.
+
+10:
+stack := ^tl stack;
+if _== res 1 then 11 else 13.
+
+11:
+param := ^hd ^tl simpl;
+nop := 1;
+stack := _cons 12 stack;
+goto 300.
+
+12:
+goto 7.
+
+13:
+code := _cons _cons var _cons simpl () code;
+goto 7.
+
+14:
+jump := ^hd ^tl ^tl curBlock;
+if _== ^hd jump 0 then 15 else 16.
+
+15:
+param := ^hd ^tl jump;
+goto 400.
+
+16:
+if _== ^hd jump 1 then 17 else 27.
+
+17:
+param := ^hd ^tl jump;
+stack := _cons 18 stack;
+goto 200.
+
+18:
+ifTrue := ^hd ^tl ^tl jump;
+ifFalse := ^hd ^tl ^tl ^tl jump;
+if _== ^hd res 0 then 19 else 22.
+
+19:
+if _== ^hd ^tl res 0 then 20 else 21.
+
+20:
+param := ifFalse;
+goto 400.
+
+21:
+param := ifTrue;
+goto 400.
+
+22:
+simpl := res;
+trueP := _cons ifTrue _cons state ();
+falseP := _cons ifFalse _cons state ();
+pending := _cons trueP _cons falseP pending;
+njmp := _cons 1 _cons simpl _cons trueP _cons falseP ();
+goto 23.
+
+23:
+coderev := ();
+goto 24.
+
+24:
+if _== code () then 26 else 25.
+
+25:
+coderev := _cons ^hd code coderev;
+code := ^tl code;
+goto 24.
+
+26:
+blk := _cons cur _cons coderev _cons njmp ();
+newProg := _cons blk newProg;
+goto 2.
+
+27:
+param := ^hd ^tl jump;
+stack := _cons 28 stack;
+goto 200.
+
+28:
+njmp := _cons 2 _cons res ();
+goto 23.
+
+30:
+newProgrev := ();
+goto 31.
+
+31:
+if _== newProg () then 33 else 32.
+
+32:
+newProgrev := _cons ^hd newProg newProgrev;
+newProg := ^tl newProg;
+goto 31.
+
+33:
+return _cons ^hd program _cons newProgrev ().
+
+100:
+if _== param () then 101 else 102.
+
+101:
+res := 0;
+goto 500.
+
+102:
+if _== ^hd param var then 103 else 104.
+
+103:
+res := 1;
+goto 500.
+
+104:
+param := ^tl param;
+goto 100.
+
+200:
+if _== ^hd param 0 then 201 else 202.
+
+201:
+res := param;
+goto 500.
+
+202:
+if _== ^hd param 1 then 203 else 205.
+
+203:
+var := ^hd ^tl param;
+nop := 0;
+stack := _cons 204 stack;
+goto 300.
+
+204:
+if _== fail 1 then 250 else 251.
+
+250:
+stack := ^tl stack;
+res := _cons 1 _cons var ();
+goto 500.
+
+251:
+stack := ^tl stack;
+res := _cons 0 _cons res ();
+goto 500.
+
+205:
+if _== ^hd param 2 then 206 else 214.
+
+206:
+stack := _cons 207 _cons param stack;
+param := ^hd ^tl ^tl param;
+goto 200.
+
+207:
+param := ^hd ^tl stack;
+stack := ^tl ^tl stack;
+op := ^hd ^tl param;
+if _== ^hd res 0 then 209 else 208.
+
+208:
+res := _cons 2 _cons op _cons res ();
+goto 500.
+
+209:
+if _== op 0 then 210 else 211.
+
+210:
+res := ^hd ^hd ^tl res;
+res := _cons 0 _cons res ();
+goto 500.
+
+211:
+if _== op 1 then 212 else 213.
+
+212:
+res := ^tl ^hd ^tl res;
+res := _cons 0 _cons res ();
+goto 500.
+
+213:
+res := _cons 0 _cons res ();
+goto 500.
+
+214:
+stack := _cons 215 _cons param stack;
+param := ^hd ^tl ^tl param;
+goto 200.
+
+215:
+param := ^hd ^tl stack;
+stack := _cons 216 _cons res ^tl stack;
+param := ^hd ^tl ^tl ^tl param;
+goto 200.
+
+216:
+res1 := ^hd ^tl stack;
+param := ^hd ^tl ^tl stack;
+stack := ^tl ^tl ^tl stack;
+op := ^hd ^tl param;
+if _== ^hd res1 0 then 217 else 218.
+
+217:
+if _== ^hd res 0 then 219 else 218.
+
+218:
+res := _cons 3 _cons op _cons res1 _cons res ();
+goto 500.
+
+219:
+res1 := ^hd ^tl res1;
+res := ^hd ^tl res;
+if _== op 0 then 220 else 221.
+
+220:
+res := _== res1 res;
+res := _cons 0 _cons res ();
+goto 500.
+
+221:
+if _== op 1 then 222 else 223.
+
+222:
+res := _* res1 res;
+res := _cons 0 _cons res ();
+goto 500.
+
+223:
+if _== op 2 then 224 else 225.
+
+224:
+res := _< res1 res;
+res := _cons 0 _cons res ();
+goto 500.
+
+225:
+if _== op 3 then 226 else 227.
+
+226:
+res := _- res1 res;
+res := _cons 0 _cons res ();
+goto 500.
+
+227:
+if _== op 4 then 228 else 229.
+
+228:
+res := _+ res1 res;
+res := _cons 0 _cons res ();
+goto 500.
+
+229:
+res := _cons res1 res;
+res := _cons 0 _cons res ();
+goto 500.
+
+300:
+fail := 0;
+staterev := ();
+namesrev := ();
+goto 301.
+
+301:
+if _== varNames () then 306 else 302.
+
+302:
+if _== ^hd varNames var then 304 else 303.
+
+303:
+staterev := _cons ^hd state staterev;
+namesrev := _cons ^hd varNames namesrev;
+state := ^tl state;
+varNames := ^tl varNames;
+goto 301.
+
+304:
+res := ^hd state;
+if _== nop 0 then 307 else 305.
+
+305:
+state := _cons param ^tl state;
+goto 307.
+
+306:
+fail := 1;
+goto 307.
+
+307:
+if _== namesrev () then 309 else 308.
+
+308:
+state := _cons ^hd staterev state;
+varNames := _cons ^hd namesrev varNames;
+staterev := ^tl staterev;
+namesrev := ^tl namesrev;
+goto 307.
+
+309:
+if _== fail 1 then 310 else 312.
+
+310:
+if _== nop 0 then 312 else 311.
+
+311:
+varNames := _cons var varNames;
+state := _cons param state;
+goto 312.
+
+312:
+goto 500.
+
+400:
+blockrev := ();
+goto 401.
+
+401:
+if _== ^hd ^hd blocks param then 403 else 402.
+
+402:
+blockrev := _cons ^hd blocks blockrev;
+blocks := ^tl blocks;
+goto 401.
+
+403:
+curBlock := ^hd blocks;
+goto 404.
+
+404:
+if _== blockrev () then 406 else 405.
+
+405:
+blocks := _cons ^hd blockrev blocks;
+blockrev := ^tl blockrev;
+goto 404.
+
+406:
+goto 6.
+
+500:
+if _== ^hd stack 4 then 4 else 501.
+
+501:
+if _== ^hd stack 204 then 204 else 502.
+
+502:
+if _== ^hd stack 207 then 207 else 503.
+
+503:
+if _== ^hd stack 215 then 215 else 504.
+
+504:
+if _== ^hd stack 216 then 216 else 505.
+
+505:
+if _== ^hd stack 9 then 9 else 506.
+
+506:
+if _== ^hd stack 10 then 10 else 507.
+
+507:
+if _== ^hd stack 12 then 12 else 508.
+
+508:
+if _== ^hd stack 18 then 18 else 28.

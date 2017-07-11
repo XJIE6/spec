@@ -1,6 +1,7 @@
 read n;
 
 1:
+pr := ^print n;
 a := n;
 stack := ();
 goto 2.
@@ -9,6 +10,7 @@ goto 2.
 if _== a () then 20 else 3.
 
 3:
+pr := ^print a;
 x := ^hd a;
 a := ^tl a;
 b := ();

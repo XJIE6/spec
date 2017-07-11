@@ -42,11 +42,10 @@ void serealiseConst (Const c);
 
 void serealiseList (List l) {
 	printf("(");
-	for (int i = 0; i < l.listLen; ++i) {
-		if (i != 0) {
-			printf(" ");
-		}
-		serealiseConst(l.list[i]);
+	while ((int)l) {
+		printf(" ");
+		serealiseConst(*((*l).val));
+		l = (*l).next;
 	}
 	printf(") ");
 }

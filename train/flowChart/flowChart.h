@@ -4,10 +4,11 @@ typedef int Label;
 typedef char* Var;
 typedef int Number;
 struct _Const;
-typedef struct _List {
-    int listLen;
-    struct _Const* list;
-} List;
+typedef struct _Node {
+    struct _Node* next;
+    struct _Const* val;
+} Node;
+typedef Node* List;
 typedef struct _Const {
     enum ConstType {NUMBER, LIST} type;
     void* expr;

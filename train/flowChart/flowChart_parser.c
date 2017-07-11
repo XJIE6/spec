@@ -5,7 +5,7 @@
 #include <string.h>
 
 int MAX_VAR_COUT = 10000;
-int MAX_LIST_LEN = 10000;
+int MAX_LIST_LEN = 100000;
 
 int addVar(int param, char* var, char*** answer) {
     static char** result;
@@ -73,25 +73,29 @@ int count(char* source, char c) {
     }
     return res;
 }
-
-Const parceConst(char** input) {
-    //fprintf(stderr, "parceConst\n");
+int br = 0;
+Const* parceConst(char** input) {
+    br++;
+    if (br%10000 == 0) {
+        fprintf(stderr, "%d \n", strlen(*input));
+    }
     skipT(input);
-    Const res;
+    Const* res = malloc(sizeof(Const));
     if (**input == '(') {
-        res.type = LIST;
+        (*res).type = LIST;
         List* l =  malloc(sizeof(List));
-        (*l).list = malloc(sizeof(Const) * MAX_LIST_LEN);
+        *l = NULL;
         int i = 0;
         skip(input, "(");
+        Node** cur = l;
         while (**input != ')') {
-            (*l).list[i] = parceConst(input);
-            ++i;
+            (*cur) = malloc(sizeof(Node));
+            (**cur).val = parceConst(input);
+            cur = &((**cur).next);
             skipT(input);
         }
         skip(input, ")");
-        (*l).listLen = i;
-        res.expr = l;
+        (*res).expr = l;
         return res;
     }
     int* n = malloc(sizeof(int));
@@ -106,11 +110,11 @@ Const parceConst(char** input) {
         *n = *n + **input - '0';
         ++(*input);
     }
-    res.type = NUMBER;
+    (*res).type = NUMBER;
     if (f) {
         *n *= -1;
     }
-    res.expr = n;
+    (*res).expr = n;
     return res;
 }
 
@@ -123,8 +127,8 @@ Expr parceExpr(char** input) {
     skipT(input);
     if ((**input >= '0' && **input <= '9') || **input == '(') {
         expr.type = CONST;
-        Const* res = (Const*) malloc(sizeof(Const));
-        *res = parceConst(input);
+        Const* res;
+        res = parceConst(input);
         expr.expr = res;
     }
     else if (**input == '_') {

@@ -1,0 +1,130 @@
+read inprogram;
+
+1:
+lbl := 1;
+hasNumber := ();
+number := ();
+blocks := ^hd ^tl inprogram;
+stack := ();
+program := ();
+goto 50.
+
+50:
+if _== blocks () then 70 else 2.
+
+2:
+curBlock := ^hd blocks;
+blocks := ^tl blocks;
+param := ^hd curBlock;
+stack := _cons 3 stack;
+goto 100.
+
+3:
+stack := ^tl stack;
+label := res;
+jmp := ^hd ^tl ^tl curBlock;
+if _== ^hd jmp 0 then 4 else 6.
+
+4:
+param := ^hd ^tl jmp;
+stack := _cons 5 stack;
+goto 100.
+
+5:
+stack := ^tl stack;
+jmp := _cons 0 _cons res ();
+goto 10.
+
+6:
+if _== ^hd jmp 1 then 7 else 10.
+
+7:
+param := ^hd ^tl ^tl jmp;
+stack := _cons 8 stack;
+goto 100.
+
+8:
+stack := ^tl stack;
+l1 := res;
+param := ^hd ^tl ^tl ^tl jmp;
+stack := _cons 9 stack;
+goto 100.
+
+9:
+stack := ^tl stack;
+jmp := _cons 1 _cons ^hd ^tl jmp _cons l1 _cons res ();
+goto 10.
+
+10:
+newBlock := _cons label _cons ^hd ^tl curBlock _cons jmp ();
+program := _cons newBlock program;
+goto 50.
+
+70:
+programrev := ();
+goto 71.
+
+71:
+if _== program () then 73 else 72.
+
+72:
+programrev := _cons ^hd program programrev;
+program := ^tl program;
+goto 71.
+
+73:
+return _cons ^hd inprogram _cons programrev ().
+
+100:
+hasNumberrev := ();
+numberrev := ();
+goto 101.
+
+101:
+if _== hasNumber () then 105 else 102.
+
+102:
+if _== ^hd hasNumber param then 104 else 103.
+
+103:
+hasNumberrev := _cons ^hd hasNumber hasNumberrev;
+numberrev := _cons ^hd number numberrev;
+hasNumber := ^tl hasNumber;
+number := ^tl number;
+goto 101.
+
+104:
+res := ^hd number;
+goto 106.
+
+105:
+hasNumber := _cons param ();
+number := _cons lbl ();
+res := lbl;
+lbl := _+ lbl 1;
+goto 106.
+
+106:
+if _== hasNumberrev () then 108 else 107.
+
+107:
+hasNumber := _cons ^hd hasNumberrev hasNumber;
+number := _cons ^hd numberrev number;
+hasNumberrev := ^tl hasNumberrev;
+numberrev := ^tl numberrev;
+goto 106.
+
+108:
+goto 500.
+
+500:
+if _== ^hd stack 3 then 3 else 501.
+
+501:
+if _== ^hd stack 5 then 5 else 502.
+
+502:
+if _== ^hd stack 8 then 8 else 9.
+
+
+
