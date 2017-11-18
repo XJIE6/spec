@@ -2,7 +2,6 @@
 #include <limits.h>
 #include <curses.h>
 #include "spec.h"
-#include "mov.h"
 #include "state.h"
 
 unsigned char REX;
