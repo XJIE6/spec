@@ -15,7 +15,6 @@ int call_kmp(char* p, char* d, char* free1, char* free2) {
 }
 
 int kmp2(char* p, char* d, char* pp, char* f, char* ff, char* neg, char* f0, char* neg0) {
-	return p[0];
 	//fprintf(stderr, "%s %s %s %s %s %s\n", p, d, pp, f, ff, neg);
 	if (p[0] == 0) {
 		//fprintf(stderr, "1\n");

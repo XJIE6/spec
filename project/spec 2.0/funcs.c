@@ -65,13 +65,16 @@ void eval_8b(char cmd);
 void eval_0f(char cmd) {
 	int cur = get_char();
 	if (cur >= 0x80 && cur <= 0x8f) {
-		jc(cur);
+		jc(cur, 0);
 	}
 	else if(cur == 0xaf) {
 		imul_af(cur);
 	}
 	else if(cur == 0xbe) {
-		eval_8b(cur);
+		eval_be(cur);
+	}	
+	else if(cur == 0xb6) {
+		eval_b6(cur);
 	}
 	else { 
 		fprintf(stderr, "%#04x\n", cur);
@@ -249,6 +252,15 @@ void eval_83(char cmd) {
 	}
 }
 
+void eval_85(char cmd) {
+	if (REXW()) {
+		test_85_64(cmd);
+	}
+	else {
+		test_85_32(cmd);
+	}
+}
+
 void eval_89(char cmd) {
 	if (REXW()) {
 		mov_89_64(cmd);
@@ -297,6 +309,24 @@ void eval_b8(char cmd) {
 	}
 }
 
+void eval_be(char cmd) {
+	if (REXW()) {
+		mov_be_64(cmd);
+	}
+	else {
+		mov_be_32(cmd);
+	}
+}
+
+void eval_b6(char cmd) {
+	if (REXW()) {
+		mov_b6_64(cmd);
+	}
+	else {
+		mov_b6_32(cmd);
+	}
+}
+
 void eval_c7(char cmd) {
 	if (REXW()) {
 		mov_c7_64(cmd);
@@ -325,6 +355,10 @@ void eval_ff(char cmd) {
 		case 7:
 		break;
 	}
+}
+
+void jc_sh(char cmd) {
+	jc(cmd + 0x10, 1);
 }
 
 void init(void *(**a)()) {
@@ -373,10 +407,29 @@ void init(void *(**a)()) {
 	a[0x68] = eval_68;
 	a[0x6a] = push_68_8;
 
+	a[0x70] = jc_sh;
+	a[0x71] = jc_sh;
+	a[0x72] = jc_sh;
+	a[0x73] = jc_sh;
+	a[0x74] = jc_sh;
+	a[0x75] = jc_sh;
+	a[0x76] = jc_sh;
+	a[0x77] = jc_sh;
+	a[0x78] = jc_sh;
+	a[0x79] = jc_sh;
+	a[0x7a] = jc_sh;
+	a[0x7b] = jc_sh;
+	a[0x7c] = jc_sh;
+	a[0x7d] = jc_sh;
+	a[0x7e] = jc_sh;
+	a[0x7f] = jc_sh;
+
 	a[0x80] = eval_80;
 	a[0x81] = eval_81;
 
 	a[0x83] = eval_83;
+	a[0x84] = test_85_8;
+	a[0x85] = eval_85;
 
 	a[0x88] = mov_89_8;
 	a[0x89] = eval_89;
@@ -408,6 +461,8 @@ void init(void *(**a)()) {
 
 	a[0xc6] = mov_c7_8;
 	a[0xc7] = eval_c7;
+
+	a[0xc9] = leave_c9;
 
 	a[0xe8] = call_e8;
 	a[0xe9] = jmp_e9;

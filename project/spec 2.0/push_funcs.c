@@ -32,7 +32,7 @@ void push_50(unsigned char cmd) {
 	if (is_dynamic) {
 		fprintf(stderr, "push%d\n", cmd);
 	}
-	push();
+	push_64();
 }
 
 void push_ff(unsigned char cmd) {
@@ -41,7 +41,7 @@ void push_ff(unsigned char cmd) {
 	if (is_dynamic) {
 		fprintf(stderr, "push_ff\n");
 	}
-	push();
+	push_64();
 }
 
 void push_68(unsigned char cmd) {

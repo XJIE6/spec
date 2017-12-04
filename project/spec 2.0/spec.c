@@ -28,7 +28,7 @@ const int MAX_STACK_SIZE = 10000;
 // #define RDX regs[2]
 // #define RBX regs[3]
 #define RSP st->regs[4]
-// #define RBP regs[5]
+#define RBP st->regs[5]
 // #define RSI regs[6]
 // #define RDI regs[7]
 
@@ -354,7 +354,7 @@ void print_state() {
 	for (int i = 0; i < 8; ++i) {
 		fprintf(stderr, "%d) val: %lld, mem: %d, dyn: %d\n", i, st->regs[i], st->info_regs[i].mem, st->info_regs[i].is_dynamic);
 	}
-	for (int i = 0; i < 60; i += 4) {
+	for (int i = 0; i < 100; i += 4) {
 		fprintf(stderr, "%d) val: %lld, mem: %d, dyn: %d\n", i, (long long)st->mem[0][-i], (int)st->info_mem[0][-i].mem, (int)st->info_mem[0][-i].is_dynamic);
 	}
 }
@@ -391,6 +391,7 @@ state* que;
 #define BIT64
 #include "spec_funcs.c"
 #undef BIT64
+int i = 0;
 
 int spec(state* _st) {
 	int xxx = 0;
@@ -427,9 +428,11 @@ int spec(state* _st) {
 			// for (int i = 0; i < 10; ++i) {
 			// 	fprintf(stderr, "m %d %d\n", i, st->mem[0][1000 - i]);
 			// }
-			fprintf(stderr, "cmd %#04x\n", cur);
-			//fprintf(stderr, "RIP = val: %lld\n", st->info_regs[16].is_dynamic);
+			fprintf(stderr, "%d cmd %#04x\n", i, cur);
+			i++;
+			fprintf(stderr, "RIP = val: %lld\n", st->regs[16]);
 			print_state();
+			fprintf(stderr, "666# %d   %d\n", RSP, RBP);
 			cmd[cur](cur);
 			if (st->next != NULL) {
 				st->next->next = que;

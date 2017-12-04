@@ -4,6 +4,7 @@
 #define cmp_83 cmp_83_8
 #define cmp_39 cmp_39_8
 #define cmp_3b cmp_3b_8
+#define test_85 test_85_8
 #define parce_reg_mem parce_reg_mem_8
 #define assign assign_8
 #define eval eval_8
@@ -20,6 +21,7 @@
 #define cmp_83 cmp_83_32
 #define cmp_39 cmp_39_32
 #define cmp_3b cmp_3b_32
+#define test_85 test_85_32
 #define parce_reg_mem parce_reg_mem_32
 #define assign assign_32
 #define eval eval_32
@@ -36,6 +38,7 @@
 #define cmp_83 cmp_83_64
 #define cmp_39 cmp_39_64
 #define cmp_3b cmp_3b_64
+#define test_85 test_85_64
 #define parce_reg_mem parce_reg_mem_64
 #define assign assign_64
 #define eval eval_64
@@ -132,5 +135,40 @@ void cmp_3b(unsigned char cmd) {
 		fprintf(stderr, " ");
 		print(&p1);
 		fprintf(stderr, "\n");
+	}
+}
+
+void test_85(unsigned char cmd) {
+	parce_reg_mem();
+	eval(&p1);
+	long long res = v.base;
+	fprintf(stderr, "test1 %d\n", v.base);
+	if(is_dynamic) {
+		st->info_flags.is_dynamic = 1;
+		fprintf(stderr, "test \n");
+		return;
+	}
+	eval(&p2);
+	fprintf(stderr, "test2 %d\n", v.base);
+	v.base &= res;
+	if (is_dynamic) {
+		st->info_flags.is_dynamic = 1;
+		fprintf(stderr, "test \n");
+		return;
+	}
+	fprintf(stderr, "test3 %d\n", v.base);
+	st->flags[0] = 0;
+	st->flags[11] = 0;
+	if (v.base) {
+		st->flags[6] = 0;
+	}
+	else {
+		st->flags[6] = 1;
+	}
+	if (v.base < 0) {
+		st->flags[7] = 1;
+	}
+	else {
+		st->flags[7] = 0;
 	}
 }

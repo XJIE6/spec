@@ -2,6 +2,8 @@
 #define mov_89 mov_89_8
 #define mov_8b mov_8b_8
 #define mov_b8 mov_b8_8
+#define mov_be mov_be_8
+#define mov_b6 mov_b6_8
 #define mov_c7 mov_c7_8
 #define parce_reg_mem parce_reg_mem_8
 #define assign assign_8
@@ -16,6 +18,8 @@
 #define mov_89 mov_89_32
 #define mov_8b mov_8b_32
 #define mov_b8 mov_b8_32
+#define mov_be mov_be_32
+#define mov_b6 mov_b6_32
 #define mov_c7 mov_c7_32
 #define parce_reg_mem parce_reg_mem_32
 #define assign assign_32
@@ -30,6 +34,8 @@
 #define mov_89 mov_89_64
 #define mov_8b mov_8b_64
 #define mov_b8 mov_b8_64
+#define mov_be mov_be_64
+#define mov_b6 mov_b6_64
 #define mov_c7 mov_c7_64
 #define parce_reg_mem parce_reg_mem_64
 #define assign assign_64
@@ -89,4 +95,37 @@ void mov_c7(unsigned char cmd) {
 	v.mem = -1;
 	is_dynamic = 0;
 	assign(&p2);
+}
+
+void mov_be(unsigned char cmd) {
+	parce_reg_mem();
+	print_params();
+	eval(&p2);
+	print_value();
+	if (is_dynamic) {
+		prefix(&p2);
+		fprintf(stderr, "movbe ");
+		print(&p2, 1);
+		fprintf(stderr, " ");
+		print(&p1, 0);
+		fprintf(stderr, "\n");
+	}
+	assign(&p1);
+}
+
+void mov_b6(unsigned char cmd) {
+	parce_reg_mem();
+	print_params();
+	eval(&p2);
+	v.base %= 256;
+	print_value();
+	if (is_dynamic) {
+		prefix(&p2);
+		fprintf(stderr, "movb6 ");
+		print(&p2, 1);
+		fprintf(stderr, " ");
+		print(&p1, 0);
+		fprintf(stderr, "\n");
+	}
+	assign(&p1);
 }

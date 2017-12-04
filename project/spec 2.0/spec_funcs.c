@@ -115,7 +115,7 @@ void push() {
 }
 
 void pop() {
-	if (RSP == 0) {
+	if (RSP >= 0) {
 		is_end = 1;
 		return;
 	}
