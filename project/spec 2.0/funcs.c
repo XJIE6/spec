@@ -60,6 +60,23 @@ void eval_05(char cmd) {
 		add_05_32(cmd);
 	}
 }
+void eval_be(char cmd) {
+	if (REXW()) {
+		mov_be_64(cmd);
+	}
+	else {
+		mov_be_32(cmd);
+	}
+}
+
+void eval_b6(char cmd) {
+	if (REXW()) {
+		mov_b6_64(cmd);
+	}
+	else {
+		mov_b6_32(cmd);
+	}
+}
 
 void eval_8b(char cmd);
 void eval_0f(char cmd) {
@@ -316,24 +333,6 @@ void eval_b8(char cmd) {
 	}
 	else {
 		mov_b8_32(cmd);
-	}
-}
-
-void eval_be(char cmd) {
-	if (REXW()) {
-		mov_be_64(cmd);
-	}
-	else {
-		mov_be_32(cmd);
-	}
-}
-
-void eval_b6(char cmd) {
-	if (REXW()) {
-		mov_b6_64(cmd);
-	}
-	else {
-		mov_b6_32(cmd);
 	}
 }
 
