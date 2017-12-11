@@ -312,6 +312,11 @@ void eval(param* p) {
 		is_dynamic = st->info_regs[p->reg1].is_dynamic;
 		return;
 	}
+	char f = 0;
+	if (p->scale < 0) {
+		p->scale += 50;
+		f = 1; 
+	}
 	value cur;
 	if (p->scale != 0 && st->info_regs[p->reg2].mem != -1) {
 		fprintf(stderr, "ERROR eval 34\n");
@@ -336,13 +341,18 @@ void eval(param* p) {
 		is_dynamic = 0;
 		return;
 	}
-	fprintf(stderr, "%lld %d\n", cur.base, cur.mem);
+	if (f) {
+		v.base = cur.base;
+		v.mem = cur.mem;
+		return;
+	}
+	//fprintf(stderr, "%lld %d % d %d\n", cur.base, cur.mem, st->mem[cur.mem][cur.base], *((type*)(st->mem[cur.mem] + cur.base)));
 	v.base = *((type*)(st->mem[cur.mem] + cur.base));
 	//fprintf(stderr, "ERROR eval 34\n");
 	v.mem = st->info_mem[cur.mem][cur.base].mem;
 	//fprintf(stderr, "ERROR eval 34\n");
 	is_dynamic = st->info_mem[cur.mem][cur.base].is_dynamic;
-	fprintf(stderr, "%lld %d\n", v.base, v.mem);
+	//fprintf(stderr, "%lld %d\n", v.base, v.mem);
 }
 
 void sib() {

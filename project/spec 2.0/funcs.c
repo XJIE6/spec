@@ -64,6 +64,7 @@ void eval_05(char cmd) {
 void eval_8b(char cmd);
 void eval_0f(char cmd) {
 	int cur = get_char();
+	fprintf(stderr, "real %#04x\n", cur);
 	if (cur >= 0x80 && cur <= 0x8f) {
 		jc(cur, 0);
 	}
@@ -279,6 +280,15 @@ void eval_8b(char cmd) {
 	}
 }
 
+void eval_8d(char cmd) {
+	if (REXW()) {
+		lea_8d_64(cmd);
+	}
+	else {
+		lea_8d_32(cmd);
+	}
+}
+
 void eval_8f(char cmd) {
 	char f = read_reg();
 	switch(f) {
@@ -437,6 +447,8 @@ void init(void *(**a)()) {
 	a[0x8a] = mov_8b_8;
 	a[0x8b] = eval_8b;
 
+	a[0x8d] = eval_8d;
+
 	a[0x8f] = eval_8f;
 
 	a[0xb0] = mov_b8_8;
@@ -466,6 +478,8 @@ void init(void *(**a)()) {
 
 	a[0xe8] = call_e8;
 	a[0xe9] = jmp_e9;
+
+	a[0xeb] = jmp_eb;
 
 
 	a[0xff] = eval_ff;

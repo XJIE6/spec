@@ -5,6 +5,7 @@
 #define mov_be mov_be_8
 #define mov_b6 mov_b6_8
 #define mov_c7 mov_c7_8
+#define lea_8d lea_8d_8
 #define parce_reg_mem parce_reg_mem_8
 #define assign assign_8
 #define eval eval_8
@@ -21,6 +22,7 @@
 #define mov_be mov_be_32
 #define mov_b6 mov_b6_32
 #define mov_c7 mov_c7_32
+#define lea_8d lea_8d_32
 #define parce_reg_mem parce_reg_mem_32
 #define assign assign_32
 #define eval eval_32
@@ -37,6 +39,7 @@
 #define mov_be mov_be_64
 #define mov_b6 mov_b6_64
 #define mov_c7 mov_c7_64
+#define lea_8d lea_8d_64
 #define parce_reg_mem parce_reg_mem_64
 #define assign assign_64
 #define eval eval_64
@@ -122,6 +125,22 @@ void mov_b6(unsigned char cmd) {
 	if (is_dynamic) {
 		prefix(&p2);
 		fprintf(stderr, "movb6 ");
+		print(&p2, 1);
+		fprintf(stderr, " ");
+		print(&p1, 0);
+		fprintf(stderr, "\n");
+	}
+	assign(&p1);
+}
+void lea_8d(unsigned char cmd) {
+	parce_reg_mem();
+	p2.scale -= 50;
+	print_params();
+	eval(&p2);
+	print_value();
+	if (is_dynamic) {
+		prefix(&p2);
+		fprintf(stderr, "lea_8d ");
 		print(&p2, 1);
 		fprintf(stderr, " ");
 		print(&p1, 0);

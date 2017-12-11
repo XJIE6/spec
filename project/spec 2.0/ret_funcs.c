@@ -18,9 +18,7 @@
 #endif
 
 void ret_c3(unsigned char cmd) {
-	fprintf(stderr, "START\n");
 	pop_64();
-	fprintf(stderr, "POPED\n");
 	if (is_end) {
 		p1.reg1 = 0;//rax
 		p1.reg2 = -1;
@@ -30,7 +28,7 @@ void ret_c3(unsigned char cmd) {
 		fprintf(stderr, "END\n");
 		return;
 	}
-	fprintf(stderr, "NOIF\n");
+	fprintf(stderr, "RET VALUE %d %d\n", st->regs[4], st->regs[5]);
 	p1.reg1 = 16; //rip
 	p1.reg2 = -1;
 	p1.scale = -1;

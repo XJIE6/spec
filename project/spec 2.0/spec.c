@@ -8,7 +8,7 @@ unsigned char REX;
 state* st;
 
 const int MAX_MEM_SIZE = 10;
-const int MAX_STACK_SIZE = 10000;
+const int MAX_STACK_SIZE = 1000000;
 
 #define RIP st->regs[16]
 
@@ -63,67 +63,54 @@ void calc_hash(state* cur) {
 	int res = 0;
 
 	for (int i = 0; i < 16; ++i) {
-		res *= mul;
-		res %= mod;
-		res += cur->regs[i] % mod;
-		res %= mod;
+		if (!cur->info_regs[i].is_dynamic) {
+			res *= mul;
+			res %= mod;
+			res += cur->regs[i] % mod;
+			res %= mod;
 
-		res *= mul;
-		res %= mod;
-		res += cur->info_regs[i].mem % mod;
-		res %= mod;
-
-		res *= mul;
-		res %= mod;
-		res += cur->info_regs[i].is_dynamic % mod;
-		res %= mod;
+			res *= mul;
+			res %= mod;
+			res += cur->info_regs[i].mem % mod;
+			res %= mod;
+		}
 	}
-
-	for (int i = 0; i < 64; ++i) {
-		res *= mul;
-		res %= mod;
-		res += cur->flags[i] % mod;
-		res %= mod;
+	if (!cur->info_flags.is_dynamic) {
+		for (int i = 0; i < 64; ++i) {
+			res *= mul;
+			res %= mod;
+			res += cur->flags[i] % mod;
+			res %= mod;
+		}
 	}
-
-	res *= mul;
-	res %= mod;
-	res += cur->info_flags.is_dynamic % mod;
-	res %= mod;
 
 	for (int j = -cur->mem_mem_len[0]; j < 0; ++j) {
-		res *= mul;
-		res %= mod;
-		res += cur->mem[0][j] % mod;
-		res %= mod;
+		if (!cur->info_mem[0][j].is_dynamic) {
+			res *= mul;
+			res %= mod;
+			res += cur->mem[0][j] % mod;
+			res %= mod;
 
-		res *= mul;
-		res %= mod;
-		res += cur->info_mem[0][j].mem % mod;
-		res %= mod;
-
-		res *= mul;
-		res %= mod;
-		res += cur->info_mem[0][j].is_dynamic % mod;
-		res %= mod;
+			res *= mul;
+			res %= mod;
+			res += cur->info_mem[0][j].mem % mod;
+			res %= mod;
+		}
 	}
 
 	for (int i = 1; i < cur->mem_len; ++i) {
 		for (int j = 0; j < cur->mem_mem_len[i]; ++j) {
-			res *= mul;
-			res %= mod;
-			res += cur->mem[i][j] % mod;
-			res %= mod;
+			if (!cur->info_mem[i][j].is_dynamic) {
+				res *= mul;
+				res %= mod;
+				res += cur->mem[i][j] % mod;
+				res %= mod;
 
-			res *= mul;
-			res %= mod;
-			res += cur->info_mem[i][j].mem % mod;
-			res %= mod;
-
-			res *= mul;
-			res %= mod;
-			res += cur->info_mem[i][j].is_dynamic % mod;
-			res %= mod;
+				res *= mul;
+				res %= mod;
+				res += cur->info_mem[i][j].mem % mod;
+				res %= mod;
+			}
 		}
 	}
 	cur->hash = res;
@@ -350,21 +337,24 @@ void set_f() {
 }
 
 void print_state() {
+	return;
 	fprintf(stderr, "RIP = val: %lld\n", st->regs[16]);
 	for (int i = 0; i < 8; ++i) {
 		fprintf(stderr, "%d) val: %lld, mem: %d, dyn: %d\n", i, st->regs[i], st->info_regs[i].mem, st->info_regs[i].is_dynamic);
 	}
-	for (int i = 0; i < 100; i += 4) {
+	for (int i = 0; i < 250; i += 4) {
 		fprintf(stderr, "%d) val: %lld, mem: %d, dyn: %d\n", i, (long long)st->mem[0][-i], (int)st->info_mem[0][-i].mem, (int)st->info_mem[0][-i].is_dynamic);
 	}
 }
 
 void print_params() {
+	return;
 	fprintf(stderr, "p1: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p1.reg1, (int) p1.reg2, (long long) p1.base, (int) p1.scale);
 	fprintf(stderr, "p2: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p2.reg1, (int) p2.reg2, (long long) p2.base, (int) p2.scale);	
 }
 
 void print_value() {
+	return;
 	fprintf(stderr, "v: base = %lld, mem = %d, is_dynamic = %d\n", (long long) v.base, (int) v.mem, (int) is_dynamic);		
 }
 
@@ -412,7 +402,7 @@ int spec(state* _st) {
 		}
 		//getchar();
 		use(st->hash);
-		fprintf(stderr, "Start block %d\n", st->hash % u_len);
+		fprintf(stderr, "\n\nStart block %d\n", st->hash % u_len);
 		is_end = 0;
 		while(1) {
 			REX = 0;
@@ -428,11 +418,10 @@ int spec(state* _st) {
 			// for (int i = 0; i < 10; ++i) {
 			// 	fprintf(stderr, "m %d %d\n", i, st->mem[0][1000 - i]);
 			// }
-			fprintf(stderr, "%d cmd %#04x\n", i, cur);
+			//fprintf(stderr, "%d cmd %#04x\n", i, cur);
 			i++;
-			fprintf(stderr, "RIP = val: %lld\n", st->regs[16]);
+			//fprintf(stderr, "RIP = val: %lld\n", st->regs[16]);
 			print_state();
-			fprintf(stderr, "666# %d   %d\n", RSP, RBP);
 			cmd[cur](cur);
 			if (st->next != NULL) {
 				st->next->next = que;

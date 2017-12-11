@@ -131,14 +131,13 @@ void run_kmp() {
 void run_kmp2() {
 	state* st = new_state();
 
-	int len1 = 7;
+	int len1 = 1;
 	int n = 100;
 
 	st->mem_len = 4;
 
 	st->info_mem[1] = malloc(sizeof(info) * len1);
 	st->mem[1] = malloc(len1);
-
 
 	st->info_mem[2] = malloc(sizeof(info) * n);
 	st->mem[2] = malloc(n);
@@ -159,19 +158,22 @@ void run_kmp2() {
 	st->regs[1] = n / 2;
 
 	for (int i = 0; i < len1; ++i) {
+		st->mem[1][i] = 0;
 		st->info_mem[1][i].mem = -1;
 		st->info_mem[1][i].is_dynamic = 0;
 	}
 	for (int i = 0; i < n; ++i) {
+		st->mem[2][i] = 0;
 		st->info_mem[2][i].mem = -1;
 		st->info_mem[2][i].is_dynamic = 0;
 	}	
 	for (int i = 0; i < n; ++i) {
+		st->mem[3][i] = 0;
 		st->info_mem[3][i].mem = -1;
 		st->info_mem[3][i].is_dynamic = 0;
 	}
 
-	strcpy(st->mem[1], "aba");
+	strcpy(st->mem[1], "a");
 
 	calc_hash(st);
 

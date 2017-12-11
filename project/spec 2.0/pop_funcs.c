@@ -27,7 +27,7 @@
 #endif
 
 void pop_58(unsigned char cmd) {
-	pop();
+	pop_64();
 	p1.reg1 = cmd - 0x58 + (REXR() << 3);
 	p1.reg2 = -1;
 	p1.base = 0;

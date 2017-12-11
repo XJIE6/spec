@@ -31,6 +31,7 @@ void dy_jump(int to) {
 }
 
 void jc(unsigned char cmd, char sh) {
+	fprintf(stderr, "TRY JUMP\n");
 	fprintf(stderr, "fff %#04x to %d\n", cmd, sh);
 	int cur = 0;
 	if (sh) {
@@ -71,13 +72,9 @@ void jc(unsigned char cmd, char sh) {
 			}
 			break;
 		case 0x85:
-			fprintf(stderr, "%d\n", ZF);
-				
 			if (!ZF) {
-				fprintf(stderr, "FI\n");
 				jump(cur);
 			}
-			fprintf(stderr, "BI\n");
 			break;
 		case 0x86:
 			if (CF || ZF) {
@@ -131,6 +128,11 @@ void jmp_e9(unsigned char cmd) {
 	jump(cur);
 }
 
+void jmp_eb(unsigned char cmd) {
+	int cur = int_8();
+	jump(cur);
+}
+
 void movsxd_63(unsigned char cmd) {
 	parce_reg_mem();
 	eval(&p2);
@@ -171,7 +173,9 @@ void call_e8(unsigned char cmd) {
 		++(st->mem_len);
 		return;
 	}
-	push_64();	
+	fprintf(stderr, "CALL VALUE %d %d\n", st->regs[4], st->regs[5]);
+	print_value();
+	push_64();
 	eval(&p2);
 	v.base += cur;
 	assign(&p2);

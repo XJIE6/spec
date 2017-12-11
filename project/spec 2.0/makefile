@@ -9,3 +9,7 @@ main: main.o $(OBJ)
 
 clean:
 	rm -f *.o main
+
+
+#4) val: -304, mem: 0, dyn: 0
+#5) val: -232, mem: 0, dyn: 0

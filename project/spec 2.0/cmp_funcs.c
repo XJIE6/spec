@@ -142,21 +142,18 @@ void test_85(unsigned char cmd) {
 	parce_reg_mem();
 	eval(&p1);
 	long long res = v.base;
-	fprintf(stderr, "test1 %d\n", v.base);
 	if(is_dynamic) {
 		st->info_flags.is_dynamic = 1;
 		fprintf(stderr, "test \n");
 		return;
 	}
 	eval(&p2);
-	fprintf(stderr, "test2 %d\n", v.base);
 	v.base &= res;
 	if (is_dynamic) {
 		st->info_flags.is_dynamic = 1;
 		fprintf(stderr, "test \n");
 		return;
 	}
-	fprintf(stderr, "test3 %d\n", v.base);
 	st->flags[0] = 0;
 	st->flags[11] = 0;
 	if (v.base) {
@@ -171,4 +168,5 @@ void test_85(unsigned char cmd) {
 	else {
 		st->flags[7] = 0;
 	}
+	st->info_flags.is_dynamic = 0;
 }
