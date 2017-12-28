@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <limits.h>
-#include <curses.h>
+//#include <curses.h>
 #include "spec.h"
 #include "state.h"
 
@@ -333,7 +333,7 @@ param p1, p2;
 char f;
 
 void set_f() {
-	f = true;
+	f = 1;
 }
 
 void print_state() {
