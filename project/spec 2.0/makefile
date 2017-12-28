@@ -1,5 +1,5 @@
 DEPS = spec.h
-OBJ = spec.o sort.o pow.o dict.o kmp.o kmp2.o funcs.o my_malloc.c eratosphen.c
+OBJ = spec.o sort.o pow.o dict.o kmp.o kmp2.o kmp3.o funcs.o my_malloc.c eratosphen.c
 
 main: main.o $(OBJ)
 	gcc -W -o $@ $^

@@ -32,7 +32,7 @@ void dy_jump(int to) {
 
 void jc(unsigned char cmd, char sh) {
 	fprintf(stderr, "TRY JUMP\n");
-	fprintf(stderr, "fff %#04x to %d\n", cmd, sh);
+	//fprintf(stderr, "fff %#04x to %d\n", cmd, sh);
 	int cur = 0;
 	if (sh) {
 		cur = int_8();
@@ -173,8 +173,8 @@ void call_e8(unsigned char cmd) {
 		++(st->mem_len);
 		return;
 	}
-	fprintf(stderr, "CALL VALUE %d %d\n", st->regs[4], st->regs[5]);
-	print_value();
+	//fprintf(stderr, "CALL VALUE %d %d\n", st->regs[4], st->regs[5]);
+	//print_value();
 	push_64();
 	eval(&p2);
 	v.base += cur;

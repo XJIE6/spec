@@ -4,6 +4,7 @@ void dict(int len, int* a, int* b, int c);
 void kmp(int len1, char* s1, int len2, char* s2);
 char* eratosphen(int a);
 int call_kmp(char* p, char* d, char* free1, char* free2);
+int call_kmp3(char* p, char* d, char* free1, char* free2);
 state* new_state();
 
 void run_sort(int n) {
@@ -149,7 +150,7 @@ void run_kmp2() {
 	st->mem_mem_len[2] = n;
 	st->mem_mem_len[3] = n;
 
-	st->regs[16] = &call_kmp;
+	st->regs[16] = &call_kmp3;
 	st->info_regs[7].mem = 1;
 	st->info_regs[6].is_dynamic = 1;
 	st->info_regs[2].mem = 2;

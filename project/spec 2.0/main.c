@@ -6,6 +6,8 @@
 
 #include "run_config.c"
 
+//#include "kmp3.c"
+
 int main() {
 	// int n = 30000;
 	// int res[n];
@@ -29,13 +31,14 @@ int main() {
 	//run_dict();
 	//run_prime(1000);
 	//run_kmp();
+	//run_kmp2();
 	run_kmp2();
-	// const char* s = "abaabab";
-	// const char* S = "aababaabaaaa";
+	// const char* s = "aba";
+	// const char* S = "aabbabbaabaaaa";
 	// int n = 100;
 	// int m = n / 2;
 	// char a[n], b[n];
 	// a[m] = 0;
 	// b[m] = 0;
-	// fprintf(stderr, "%d\n", kmp2(s, S, s, a + m, a + m, b + m, a + m, b + m));
+	// fprintf(stderr, "%d\n", call_kmp3(s, S, a + m, b + m));
 }

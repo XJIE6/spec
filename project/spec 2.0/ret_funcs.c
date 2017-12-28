@@ -25,10 +25,10 @@ void ret_c3(unsigned char cmd) {
 		p1.scale = -1;
 		p1.base = 0;
 		prefix(&p1);
-		fprintf(stderr, "END\n");
+		fprintf(stderr, "ret\n");
 		return;
 	}
-	fprintf(stderr, "RET VALUE %d %d\n", st->regs[4], st->regs[5]);
+	//fprintf(stderr, "RET VALUE %d %d\n", st->regs[4], st->regs[5]);
 	p1.reg1 = 16; //rip
 	p1.reg2 = -1;
 	p1.scale = -1;

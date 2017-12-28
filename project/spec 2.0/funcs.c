@@ -81,7 +81,7 @@ void eval_b6(char cmd) {
 void eval_8b(char cmd);
 void eval_0f(char cmd) {
 	int cur = get_char();
-	fprintf(stderr, "real %#04x\n", cur);
+	//fprintf(stderr, "real %#04x\n", cur);
 	if (cur >= 0x80 && cur <= 0x8f) {
 		jc(cur, 0);
 	}
