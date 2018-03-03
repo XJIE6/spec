@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "test.h"
 #include "spec.h"
 #include "state.h"
 
-#include "run_config.c"
+#include "test_programs/run_config.c"
 
 //#include "kmp3.c"
 

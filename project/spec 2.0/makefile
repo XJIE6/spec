@@ -1,5 +1,5 @@
 DEPS = spec.h
-OBJ = spec.o sort.o pow.o dict.o kmp.o kmp2.o kmp3.o funcs.o my_malloc.c eratosphen.c
+OBJ = spec.o test_programs/sort.o test_programs/pow.o test_programs/dict.o test_programs/kmp.o test_programs/kmp2.o test_programs/kmp3.o x86_funcs/funcs.o my_malloc.c test_programs/eratosphen.c
 
 main: main.o $(OBJ)
 	gcc -W -o $@ $^
@@ -9,7 +9,3 @@ main: main.o $(OBJ)
 
 clean:
 	rm -f *.o main
-
-
-#4) val: -304, mem: 0, dyn: 0
-#5) val: -232, mem: 0, dyn: 0
