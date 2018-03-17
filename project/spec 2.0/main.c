@@ -25,13 +25,13 @@ int main() {
 	// 	fprintf(stderr, "%d ", res[i]);
 	// }
 
-	//run_pow(3, 5);
+	run_pow(3, 5);
 	//run_sort(300);
 	//run_dict();
 	//run_prime(1000);
 	//run_kmp();
 	//run_kmp2();
-	run_kmp2();
+	//run_kmp2();
 	// const char* s = "aba";
 	// const char* S = "aabbabbaabaaaa";
 	// int n = 100;

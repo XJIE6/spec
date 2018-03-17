@@ -8,4 +8,4 @@ main: main.o $(OBJ)
 	gcc -c -W -o $@ $<
 
 clean:
-	rm -f *.o main
+	rm -f *.o test_programs/*.o x86_funcs/*.o main

@@ -335,17 +335,18 @@ void eval(param* p) {
 			cur.mem = st->info_regs[p->reg2].mem;
 		}
 	}
+	if (f) {
+		v.base = cur.base;
+		v.mem = cur.mem;
+		return;
+	}
 	if (cur.mem == -1) {
 		v.base = *((type*)cur.base);
 		v.mem = -1;
 		is_dynamic = 0;
 		return;
 	}
-	if (f) {
-		v.base = cur.base;
-		v.mem = cur.mem;
-		return;
-	}
+	
 	//fprintf(stderr, "%lld %d % d %d\n", cur.base, cur.mem, st->mem[cur.mem][cur.base], *((type*)(st->mem[cur.mem] + cur.base)));
 	v.base = *((type*)(st->mem[cur.mem] + cur.base));
 	//fprintf(stderr, "ERROR eval 34\n");

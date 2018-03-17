@@ -418,7 +418,7 @@ int spec(state* _st) {
 			// for (int i = 0; i < 10; ++i) {
 			// 	fprintf(stderr, "m %d %d\n", i, st->mem[0][1000 - i]);
 			// }
-			fprintf(stderr, "%d cmd %#04x\n", i, cur);
+			//fprintf(stderr, "%d cmd %#04x\n", i, cur);
 			i++;
 			//fprintf(stderr, "RIP = val: %lld\n", st->regs[16]);
 			print_state();
