@@ -62,6 +62,12 @@ void mov_89(unsigned char cmd) {
 		fprintf(stderr, " ");
 		print(&p2, 0);
 		fprintf(stderr, "\n");
+
+
+		write_byte(0x89);
+		write_params();
+
+
 	}
 	assign(&p2);
 }
@@ -78,6 +84,12 @@ void mov_8b(unsigned char cmd) {
 		fprintf(stderr, " ");
 		print(&p1, 0);
 		fprintf(stderr, "\n");
+
+
+		write_byte(0x8b);
+		write_params();
+		
+
 	}
 	assign(&p1);
 }

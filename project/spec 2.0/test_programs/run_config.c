@@ -1,3 +1,5 @@
+
+#include <sys/mman.h>
 void sort(int len, int* a);
 int my_pow(int a, int b);
 void dict(int len, int* a, int* b, int c);
@@ -47,9 +49,25 @@ void run_pow(int a, int b) {
 
 	calc_hash(st);
 
-	spec(st);
+	int (*f)(int, int) = spec(st);
+	//unsigned char * f = spec(st);
 
+	fprintf(stderr, "WOW\n");
 	fprintf(stderr, "%d\n", st->regs[0]);
+	int res = f(2, b);
+	fprintf(stderr, "WOW\n");
+	fprintf(stderr, "%d\n", res);
+	fprintf(stderr, "WOW\n");
+	res = f(3, b);
+	fprintf(stderr, "WOW\n");
+	fprintf(stderr, "%d\n", res);
+	res = f(4, b);
+	fprintf(stderr, "WOW\n");
+	fprintf(stderr, "%d\n", res);
+	// for (int i = 0; i < 100; ++i) {
+	// 	fprintf(stderr, "%02X ", *f);
+	// 	f++;
+	// }
 }
 
 void run_dict() {

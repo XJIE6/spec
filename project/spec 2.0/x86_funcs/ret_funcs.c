@@ -26,6 +26,9 @@ void ret_c3(unsigned char cmd) {
 		p1.base = 0;
 		prefix(&p1);
 		fprintf(stderr, "ret\n");
+
+		write_byte(0xc3);
+
 		return;
 	}
 	//fprintf(stderr, "RET VALUE %d %d\n", st->regs[4], st->regs[5]);

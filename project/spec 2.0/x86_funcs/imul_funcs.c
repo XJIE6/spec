@@ -39,13 +39,20 @@ void imul_af(unsigned char cmd) {
 	eval(&p1);
 	v.base *= cur.base;
 	is_dynamic = is_dynamic || dyn;
-		if (is_dynamic) {
+	if (is_dynamic) {
 		prefix(&p1);
 		fprintf(stderr, "imul_af ");
 		print(&p2, 1);
 		fprintf(stderr, " ");
 		print(&p1, 0);
 		fprintf(stderr, "\n");
+
+
+		write_byte(0x0f);
+		write_byte(0xaf);
+		write_params();
+
+
 	}
 	assign(&p1);
 }

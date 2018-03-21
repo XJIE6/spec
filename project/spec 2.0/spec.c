@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <limits.h>
+#include <sys/mman.h>
+#include <errno.h>
 //#include <curses.h>
 #include "spec.h"
 #include "state.h"
 
 unsigned char REX;
 state* st;
+char* res;
+char* last; 
 
 const int MAX_MEM_SIZE = 10;
 const int MAX_STACK_SIZE = 1000000;
@@ -358,6 +362,65 @@ void print_value() {
 	fprintf(stderr, "v: base = %lld, mem = %d, is_dynamic = %d\n", (long long) v.base, (int) v.mem, (int) is_dynamic);		
 }
 
+void write_byte(char byte) {
+	*last = byte;
+	//fprintf(stderr, "write_byte %02X\n", *last);
+	last++;
+}
+
+void write_int(int value) {
+	*((int *)last) = value;
+	//fprintf(stderr, "write_byte %02X\n", *last);
+	last += 4;
+}
+
+void write_params() {
+	if (p1.reg2 != -1 || p1.scale != -1 || p1.base != 0) {
+		fprintf(stderr, "ERROR print_params wrong p1\n");
+		is_end = 1;
+		return;
+	}
+	if ((p2.scale != 0 && p1.scale != -1) || p2.reg2 != -1) {
+		fprintf(stderr, "ERROR print_params wrong p2\n");
+		is_end = 1;
+		return;
+	}
+	//fprintf(stderr, "p1: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p1.reg1, (int) p1.reg2, (long long) p1.base, (int) p1.scale);
+	//fprintf(stderr, "p2: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p2.reg1, (int) p2.reg2, (long long) p2.base, (int) p2.scale);	
+
+	if (p2.scale == 0) {
+		if (p2.base == 0) {
+			*last = (p1.reg1 << 3) + p2.reg1;
+			//fprintf(stderr, "param1 %02X\n", *last);
+			last++;
+			return;
+		}
+		else if (p2.base < (1 << 8) && p2.base > -(1 << 8)) {
+			*last = (1 << 6) + (p1.reg1 << 3) + p2.reg1;
+			//fprintf(stderr, "param1 %02X\n", *last);
+			last++;
+			*last = p2.base;
+			//fprintf(stderr, "param2 %02X\n", *last);
+			last++;
+			return;
+		}
+		else {
+			*last = (2 << 6) + (p1.reg1 << 3) + p2.reg1;
+			//fprintf(stderr, "param1 %02X\n", *last);
+			last++;
+			*((int*)last) = p2.base;
+			//fprintf(stderr, "param2 %02X\n", *last);
+			last += 4;
+		}
+	}
+	if (p2.scale == -1) {
+		*last = (3 << 6) + (p1.reg1 << 3) + p2.reg1;
+		//fprintf(stderr, "param1 %02X\n", *last);
+		last++;
+	}
+
+}
+
 int u_len = 1000000;
 char u[1000000];
 
@@ -383,7 +446,15 @@ state* que;
 #undef BIT64
 int i = 0;
 
-int spec(state* _st) {
+char* spec(state* _st) {
+	res = mmap(NULL, 4096, PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
+	//res = malloc(1000);
+	fprintf(stderr, "res = %d\n", (int) res);
+	if (res == -1) {
+		fprintf(stderr, "%d", errno);
+		return 0;
+	}
+	last = res;
 	int xxx = 0;
 	for (int i = 0; i < u_len; ++i) {
 		u[i] = 0;
@@ -434,5 +505,5 @@ int spec(state* _st) {
 		}
 	}
 	fprintf(stderr, "USED: %d\n", xxx);
-	return 0;
+	return res;
 }

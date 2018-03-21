@@ -21,7 +21,10 @@ extern char is_end;
 
 extern state* st;
 
-int spec(state* _st);
+extern char* res;
+extern char* last; 
+
+char* spec(state* _st);
 void assign_8(param* p);
 void assign_32(param* p);
 void assign_64(param* p);
