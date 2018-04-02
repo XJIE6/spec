@@ -1,0 +1,168 @@
+%% Простая презентация с примером включения программного кода и
+%% пошаговых спецэффектов
+\documentclass{beamer}
+\usepackage{fontspec}
+\usepackage{xunicode}
+\usepackage{xltxtra}
+\usepackage{xecyr}
+\usepackage{hyperref}
+\usepackage{ stmaryrd }
+\usepackage{tikz}
+\setmainfont[Mapping=tex-text]{DejaVu Serif}
+\setsansfont[Mapping=tex-text]{DejaVu Sans}
+\setmonofont[Mapping=tex-text]{DejaVu Sans Mono}
+\usepackage{polyglossia}
+\setdefaultlanguage{russian}
+\usepackage{graphicx}
+\usepackage{listings}
+\lstdefinestyle{mycode}{
+  belowcaptionskip=1\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\footnotesize\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{red},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\tiny\color{gray},
+}
+\lstset{escapechar=@,style=mycode}
+
+\begin{document}
+\title{Самоприменимый специализатор для машинного кода}
+\subtitle{предварительные результаты}
+\author{Юрий Кравченко\\{\footnotesize\textcolor{gray}{руководитель Березун Даниил Андреевич}}}
+\institute{СПбАУ}
+\frame{\titlepage}
+
+\begin{frame}\frametitle{Специализатор}
+\begin{block}{Обозначения}
+$\llbracket p \rrbracket_L [a_1, a_2, \dots, a_n] = b$
+\end{block}
+\pause
+\begin{block}{Определение}
+Программу $spec$ назовём специализатором, если\\
+$\llbracket p \rrbracket_{L_1} [d_1, d_2] = d_3$\\
+$\llbracket spec \rrbracket_{L_2} [p, d_1] = q$\\
+$\llbracket q \rrbracket_{L_1} [d_2] = d_3$\\
+\end{block}
+\end{frame}
+
+\begin{frame}\frametitle{Третья проеция Футамуры}
+\begin{block}{Утверждение}
+$\llbracket spec \rrbracket_L [spec, spec] = compgen$ \\
+$\llbracket compgen \rrbracket_L [interpreter] = compiler$\\
+\end{block}
+
+\end{frame}
+
+
+\begin{frame}\frametitle{В чём подвох?}
+\begin{itemize}
+    \item<2-> {Тривиальный spec}
+    \item<3-> {Неразрешимость}
+    \item<4-> {Сложно реализовать}
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Идея}
+\begin{itemize}
+    \item<2-> {Специализатор для машинного кода}
+    \item<3-> {Специализатор на СИ}
+    \item<4-> {По аналогии со специализатором для Flow Chart}
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Процесс разработки}
+\begin{itemize}
+    \item<2->  {Несколько версий архитектуры}
+    \item<3-> {Поэтапная разработка}
+    \item<4-> {Реализованы самые популярные операторы}
+\end{itemize}
+\end{frame}
+
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Интерпретация}
+\begin{lstlisting}
+void sort(int len, int* a) {
+    for (int i = 0; i < len; ++i) {
+        for (int j = i + 1; j < len; ++j) {
+            if (a[i] > a[j]) {
+                int k = a[i];
+                a[i] = a[j];
+                a[j] = k;
+            }
+        }
+    }
+}
+\end{lstlisting}
+\end{frame}
+
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Работа с памятью}
+\begin{lstlisting}
+char* eratosphen(int n) {
+    char* a = my_malloc(n);
+    for (int i = 0; i < n; ++i) {
+        a[i] = 1;
+    }
+    a[0] = 0;
+    a[1] = 0;
+    for (int i = 2; i < n; ++i) {
+        if (a[i]) {
+            for (int j = i * i; j < n; j += i) {
+                a[j] = 0;
+            }
+        }
+    }
+    return a;
+}
+\end{lstlisting}
+\end{frame}
+
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Простая специализация}
+\begin{lstlisting}
+int dict(int len, int* a, int* b, int c) {
+    for (int i = 0; i < len; ++i) {
+        if (a[i] == c) {
+            if (b[i] == 0) {
+                return 1;
+            }
+            else {
+                return 2;
+            }
+        }
+    }
+    return 3;
+}
+\end{lstlisting}
+\end{frame}
+
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Полный цикл обработки}
+\begin{lstlisting}
+int pow(int a, int b) {
+    if (b == 0) {
+        return 1;
+    }
+    return my_pow(a, b - 1) * a;
+}
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}\frametitle{KMP тест}
+\begin{tikzpicture}
+\LARGE
+\node [anchor=west] at (.1, 2.5) {Coming soon};
+\draw [fill=gray] (0,0) rectangle (10, 2);
+\draw [fill={rgb:red,1;green,2;blue,3}] (0,0) rectangle (9, 2);
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}\frametitle{Конец}
+https://github.com/XJIE6/spec
+\end{frame}
+\end{document}
