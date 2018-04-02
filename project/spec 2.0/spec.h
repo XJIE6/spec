@@ -3,15 +3,15 @@
 #pragma once
 
 typedef struct _param {
-	char reg1;
-	char reg2;
-	long long base;
-	char scale;
+    char reg1;
+    char reg2;
+    long long base;
+    char scale;
 } param;
 
 typedef struct _value {
-	long long base;
-	char mem;
+    long long base;
+    char mem;
 } value;
 
 extern unsigned char is_dynamic;

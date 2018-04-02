@@ -42,103 +42,103 @@
 #endif
 
 void sub_2d(unsigned char cmd) {
-	p1.reg1 = 0;
-	p1.reg2 = -1;
-	p1.base = 0;
-	p1.scale = -1;
-	eval(&p1);
-	v.base -= int_s();
-	if (is_dynamic) {
-		fprintf(stderr, "sub2d\n");
-	}
-	assign(&p1);
+    p1.reg1 = 0;
+    p1.reg2 = -1;
+    p1.base = 0;
+    p1.scale = -1;
+    eval(&p1);
+    v.base -= int_s();
+    if (is_dynamic) {
+        fprintf(stderr, "sub2d\n");
+    }
+    assign(&p1);
 }
 
 void sub_81(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p2);
-	v.base -= int_s();
-	if (is_dynamic) {
-		fprintf(stderr, "sub81\n");
-	}
-	assign(&p2);
+    parce_reg_mem();
+    eval(&p2);
+    v.base -= int_s();
+    if (is_dynamic) {
+        fprintf(stderr, "sub81\n");
+    }
+    assign(&p2);
 }
 
 void sub_83(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p2);
-	int d = int_8S();
-	v.base -= d;
-	if (is_dynamic) {
-		fprintf(stderr, "sub83\n");
-	}
-	assign(&p2);
+    parce_reg_mem();
+    eval(&p2);
+    int d = int_8S();
+    v.base -= d;
+    if (is_dynamic) {
+        fprintf(stderr, "sub83\n");
+    }
+    assign(&p2);
 }
 
 void sub_29(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p2);
-	value cur;
-	cur.base = v.base;
-	cur.mem = v.mem;
-	if (is_dynamic) {
-		prefix(&p1);
-		fprintf(stderr, "sub29 ");
-		print(&p2);
-		fprintf(stderr, " ");
-		print(&p1);
-		fprintf(stderr, "\n");
-	}
-	eval(&p1);
-	v.base -= cur.base;
-	if (v.mem == -1) {
-		v.mem = cur.mem;
-	}
-	else if (cur.mem != -1) {
-		fprintf(stderr, "ERROR 1236\n");
-		return;
-	}
-	if (is_dynamic) {
-		prefix(&p1);
-		fprintf(stderr, "sub29 ");
-		print(&p2);
-		fprintf(stderr, " ");
-		print(&p1);
-		fprintf(stderr, "\n");
-	}
-	assign(&p2);
+    parce_reg_mem();
+    eval(&p2);
+    value cur;
+    cur.base = v.base;
+    cur.mem = v.mem;
+    if (is_dynamic) {
+        prefix(&p1);
+        fprintf(stderr, "sub29 ");
+        print(&p2);
+        fprintf(stderr, " ");
+        print(&p1);
+        fprintf(stderr, "\n");
+    }
+    eval(&p1);
+    v.base -= cur.base;
+    if (v.mem == -1) {
+        v.mem = cur.mem;
+    }
+    else if (cur.mem != -1) {
+        fprintf(stderr, "ERROR 1236\n");
+        return;
+    }
+    if (is_dynamic) {
+        prefix(&p1);
+        fprintf(stderr, "sub29 ");
+        print(&p2);
+        fprintf(stderr, " ");
+        print(&p1);
+        fprintf(stderr, "\n");
+    }
+    assign(&p2);
 }
 
 void sub_2b(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p2);
-	value cur;
-	cur.base = v.base;
-	cur.mem = v.mem;
-	if (is_dynamic) {
-		prefix(&p1);
-		fprintf(stderr, "sub2b ");
-		print(&p2);
-		fprintf(stderr, " ");
-		print(&p1);
-		fprintf(stderr, "\n");
-	}
-	eval(&p1);
-	v.base -= cur.base;
-	if (v.mem == -1) {
-		v.mem = cur.mem;
-	}
-	else if (cur.mem != -1) {
-		fprintf(stderr, "ERROR 11\n");
-		return;
-	}
-	if (is_dynamic) {
-		prefix(&p1);
-		fprintf(stderr, "sub2b ");
-		print(&p2);
-		fprintf(stderr, " ");
-		print(&p1);
-		fprintf(stderr, "\n");
-	}
-	assign(&p1);
+    parce_reg_mem();
+    eval(&p2);
+    value cur;
+    cur.base = v.base;
+    cur.mem = v.mem;
+    if (is_dynamic) {
+        prefix(&p1);
+        fprintf(stderr, "sub2b ");
+        print(&p2);
+        fprintf(stderr, " ");
+        print(&p1);
+        fprintf(stderr, "\n");
+    }
+    eval(&p1);
+    v.base -= cur.base;
+    if (v.mem == -1) {
+        v.mem = cur.mem;
+    }
+    else if (cur.mem != -1) {
+        fprintf(stderr, "ERROR 11\n");
+        return;
+    }
+    if (is_dynamic) {
+        prefix(&p1);
+        fprintf(stderr, "sub2b ");
+        print(&p2);
+        fprintf(stderr, " ");
+        print(&p1);
+        fprintf(stderr, "\n");
+    }
+    assign(&p1);
 }

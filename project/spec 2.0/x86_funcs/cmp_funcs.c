@@ -51,122 +51,125 @@
 #endif
 
 void cmp_3d(unsigned char cmd) {
-	p1.reg1 = 0;
-	p1.reg2 = -1;
-	p1.base = 0;
-	p1.scale = -1;
-	int a = int_u();
-	v.base = a;
-	v.mem = -1;
-	is_dynamic = 0;
-	cmp();
-	if (is_dynamic) {
-		fprintf(stderr, "cmp_3d rax %d\n", a);
-	}
+    p1.reg1 = 0;
+    p1.reg2 = -1;
+    p1.base = 0;
+    p1.scale = -1;
+    int a = int_u();
+    v.base = a;
+    v.mem = -1;
+    is_dynamic = 0;
+    cmp();
+    if (is_dynamic) {
+        fprintf(stderr, "cmp_3d rax %d\n", a);
+    }
 }
 
 void cmp_81(unsigned char cmd) {
-	parce_reg_mem();
-	p1 = p2;
-	int a = int_s();
-	v.base = a;
-	v.mem = -1;
-	is_dynamic = 0;
-	cmp();
-	if (is_dynamic) {
-		fprintf(stderr, "cmp81 ");
-		print(&p2);
-		fprintf(stderr, " %d\n", a);
-	}
+    parce_reg_mem();
+    p1 = p2;
+    int a = int_s();
+    v.base = a;
+    v.mem = -1;
+    is_dynamic = 0;
+    cmp();
+    if (is_dynamic) {
+        fprintf(stderr, "cmp81 ");
+        print(&p2);
+        fprintf(stderr, " %d\n", a);
+    }
 }
 
 void cmp_83(unsigned char cmd) {
-	parce_reg_mem();
-	p1 = p2;
-	int a = int_8S();
-	v.base = a;
-	v.mem = -1;
-	is_dynamic = 0;
-	cmp();
-	if (is_dynamic) {
-		fprintf(stderr, "cmp83 ");
-		print(&p2);
-		fprintf(stderr, " %d\n", a);
-	}
+    parce_reg_mem();
+    p1 = p2;
+    int a = int_8S();
+    v.base = a;
+    v.mem = -1;
+    is_dynamic = 0;
+    cmp();
+    if (is_dynamic) {
+        fprintf(stderr, "cmp83 ");
+        print(&p2);
+        fprintf(stderr, " %d\n", a);
+    }
 }
 
 void cmp_39(unsigned char cmd) {
-	parce_reg_mem();
-	//print_params();
-	eval(&p1);
-	//print_value();
-	if (is_dynamic) {
-		fprintf(stderr, "cmp39 ");
-		print(&p2, 1);
-		fprintf(stderr, " ");
-		print(&p1, 1);
-		fprintf(stderr, "\n");
-	}
-	p1 = p2;
-	cmp();
-	if (is_dynamic) {
-		fprintf(stderr, "cmp39 ");
-		print(&p2, 1);
-		fprintf(stderr, " ");
-		print(&p1, 1);
-		fprintf(stderr, "\n");
-	}
+    parce_reg_mem();
+    //print_params();
+    eval(&p1);
+    //print_value();
+    if (is_dynamic) {
+        fprintf(stderr, "cmp39 ");
+        print(&p2, 1);
+        fprintf(stderr, " ");
+        print(&p1, 1);
+        fprintf(stderr, "\n");
+    }
+    p1 = p2;
+    cmp();
+    if (is_dynamic) {
+        fprintf(stderr, "cmp39 ");
+        print(&p2, 1);
+        fprintf(stderr, " ");
+        print(&p1, 1);
+        fprintf(stderr, "\n");
+    }
 }
 
 void cmp_3b(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p2);
-	if (is_dynamic) {
-		fprintf(stderr, "cmp3b ");
-		print(&p2);
-		fprintf(stderr, " ");
-		print(&p1);
-		fprintf(stderr, "\n");
-	}
-	cmp();
-	if (is_dynamic) {
-		fprintf(stderr, "cmp3b ");
-		print(&p2);
-		fprintf(stderr, " ");
-		print(&p1);
-		fprintf(stderr, "\n");
-	}
+    parce_reg_mem();
+    eval(&p2);
+    if (is_dynamic) {
+        fprintf(stderr, "cmp3b ");
+        print(&p2);
+        fprintf(stderr, " ");
+        print(&p1);
+        fprintf(stderr, "\n");
+    }
+    cmp();
+    if (is_dynamic) {
+        fprintf(stderr, "cmp3b ");
+        print(&p2);
+        fprintf(stderr, " ");
+        print(&p1);
+        fprintf(stderr, "\n");
+    }
 }
 
 void test_85(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p1);
-	long long res = v.base;
-	if(is_dynamic) {
-		st->info_flags.is_dynamic = 1;
-		fprintf(stderr, "test \n");
-		return;
-	}
-	eval(&p2);
-	v.base &= res;
-	if (is_dynamic) {
-		st->info_flags.is_dynamic = 1;
-		fprintf(stderr, "test \n");
-		return;
-	}
-	st->flags[0] = 0;
-	st->flags[11] = 0;
-	if (v.base) {
-		st->flags[6] = 0;
-	}
-	else {
-		st->flags[6] = 1;
-	}
-	if (v.base < 0) {
-		st->flags[7] = 1;
-	}
-	else {
-		st->flags[7] = 0;
-	}
-	st->info_flags.is_dynamic = 0;
+    parce_reg_mem();
+    print_params();
+    eval(&p1);
+    print_value();
+    long long res = v.base;
+    if(is_dynamic) {
+        st->info_flags.is_dynamic = 1;
+        fprintf(stderr, "test \n");
+        return;
+    }
+    eval(&p2);
+    print_value();
+    v.base &= res;
+    if (is_dynamic) {
+        st->info_flags.is_dynamic = 1;
+        fprintf(stderr, "test \n");
+        return;
+    }
+    st->flags[0] = 0;
+    st->flags[11] = 0;
+    if (v.base) {
+        st->flags[6] = 0;
+    }
+    else {
+        st->flags[6] = 1;
+    }
+    if (v.base < 0) {
+        st->flags[7] = 1;
+    }
+    else {
+        st->flags[7] = 0;
+    }
+    st->info_flags.is_dynamic = 0;
 }

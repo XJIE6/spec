@@ -24,28 +24,28 @@
 #endif
 
 void push_50(unsigned char cmd) {
-	p1.reg1 = cmd - 0x50 + (REXR() << 3);
-	p1.reg2 = -1;
-	p1.base = 0;
-	p1.scale = -1;
-	eval(&p1);
-	if (is_dynamic) {
-		fprintf(stderr, "push%d\n", cmd);
-	}
-	push_64();
+    p1.reg1 = cmd - 0x50 + (REXR() << 3);
+    p1.reg2 = -1;
+    p1.base = 0;
+    p1.scale = -1;
+    eval(&p1);
+    if (is_dynamic) {
+        fprintf(stderr, "push%d\n", cmd);
+    }
+    push_64();
 }
 
 void push_ff(unsigned char cmd) {
-	parce_reg_mem();
-	eval(&p2);
-	if (is_dynamic) {
-		fprintf(stderr, "push_ff\n");
-	}
-	push_64();
+    parce_reg_mem();
+    eval(&p2);
+    if (is_dynamic) {
+        fprintf(stderr, "push_ff\n");
+    }
+    push_64();
 }
 
 void push_68(unsigned char cmd) {
-	v.base = int_cur();
-	v.mem = -1;
-	push();
+    v.base = int_cur();
+    v.mem = -1;
+    push();
 }
