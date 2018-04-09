@@ -1,0 +1,29 @@
+
+Start block -633763
+mov89 %rsi  -88(0) 
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to 565830
+premov 0 , %rax 
+ret
+
+Start block 565830
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 925494
+add83
+premov 1 , %rax 
+ret
+
+Start block 925494
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to 565830
+premov 0 , %rax 
+ret
+USED
+USED: 1

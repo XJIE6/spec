@@ -1,0 +1,287 @@
+
+Start block -76799
+mov89 %rsi  -88(0) 
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -112944
+premov 0 , %rax 
+ret
+
+Start block -112944
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 246720
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -123215
+premov 0 , %rax 
+ret
+
+Start block -123215
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 98  %rax 
+cjump 0x85 to 187939
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -301771
+premov 0 , %rax 
+ret
+
+Start block -301771
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 57893
+add83
+premov 1 , %rax 
+ret
+
+Start block 57893
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -561934
+premov 0 , %rax 
+ret
+
+Start block -561934
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 797733
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -346147
+premov 0 , %rax 
+ret
+
+Start block -346147
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 98  %rax 
+cjump 0x85 to 965010
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -534274
+premov 0 , %rax 
+ret
+
+Start block -534274
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 825393
+add83
+premov 1 , %rax 
+ret
+
+Start block 825393
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -561934
+premov 0 , %rax 
+ret
+USED
+
+Start block 965010
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 805672
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -750607
+premov 0 , %rax 
+ret
+
+Start block -750607
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 98  %rax 
+cjump 0x85 to 560550
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -938734
+premov 0 , %rax 
+ret
+
+Start block -938734
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 420933
+add83
+premov 1 , %rax 
+ret
+
+Start block 420933
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -561934
+premov 0 , %rax 
+ret
+USED
+
+Start block 560550
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 805672
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -750607
+premov 0 , %rax 
+ret
+USED
+
+Start block 805672
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -576590
+premov 0 , %rax 
+ret
+
+Start block -576590
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 783077
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -750607
+premov 0 , %rax 
+ret
+USED
+
+Start block 783077
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -576590
+premov 0 , %rax 
+ret
+USED
+USED
+
+Start block 797733
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -561934
+premov 0 , %rax 
+ret
+USED
+
+Start block 187939
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 796101
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -760178
+premov 0 , %rax 
+ret
+
+Start block -760178
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 98  %rax 
+cjump 0x85 to 550979
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -938734
+premov 0 , %rax 
+ret
+USED
+
+Start block 550979
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 796101
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -760178
+premov 0 , %rax 
+ret
+USED
+
+Start block 796101
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -586161
+premov 0 , %rax 
+ret
+
+Start block -586161
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+cmp39 97  %rax 
+cjump 0x85 to 773506
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -760178
+premov 0 , %rax 
+ret
+USED
+
+Start block 773506
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -586161
+premov 0 , %rax 
+ret
+USED
+USED
+
+Start block 246720
+add83
+mov8b -88(0)  %rax 
+movb6 0(rax)  %rax 
+test 
+cjump 0x85 to -112944
+premov 0 , %rax 
+ret
+USED
+USED: 13
