@@ -150,7 +150,7 @@ void run_kmp() {
 void run_kmp2() {
     state* st = new_state();
 
-    int len1 = 3;
+    int len1 = 8;
     int n = 100;
 
     st->mem_len = 4;
@@ -192,7 +192,7 @@ void run_kmp2() {
         st->info_mem[3][i].is_dynamic = 0;
     }
 
-    strcpy(st->mem[1], "aba");
+    strcpy(st->mem[1], "aaaaa");
 
     calc_hash(st);
 

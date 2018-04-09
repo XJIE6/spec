@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-int member3(char c, char* s) {
-    while (s[0] != 0) {
+int member3(char c, char* s, char* f) {
+    while (s != f) {
         if (c == s[0]) {
             return 1;
         }
@@ -21,43 +21,41 @@ int call_kmp3(char* p, char* d, char* free1, char* free2) {
         if (p[0] == 0) {
             return 1;
         }
-        else if (f[0] == 0) {
-            if (neg[0] != 0 && member3(p[0], neg)) {
-                if (ff[0] == 0) {
+        else if (f == f0) {
+            if (member3(p[0], neg, neg0)) {
+                if (ff == f0) {
                     p = pp;
-                    d = d + 1;
-                    f = f0;
+                    d++;
                     ff = f0;
                     neg = neg0;
                     continue;
                 }
                 else {
                     p = pp;
-                    f = ff + 1;
-                    ff = ff + 1;
+                    ff++;
+                    f = ff;
                     continue;
                 }
             }
-            else if (neg[0] == 0 && d[0] == 0) {
+            else if (neg == neg0 && d[0] == 0) {
                 return 0;
             }
             else if (p[0] == d[0]) {
-                ff--;
                 char* ptr = ff;
-                while (ptr[1] != 0) {
-                    ptr[0] = ptr[1];
+                while (ptr != f0) {
+                    ptr[-1] = ptr[0];
                     ptr++;
                 }
-                ptr[0] = p[0];
-                p = p + 1;
-                d = d + 1;
-                f = f0;
+                ptr[-1] = p[0];
+                ff--;
+                p++;
+                d++;
                 neg = neg0;
                 continue;
             }
-            else if (ff[0] == 0) {
+            else if (ff == f0) {
                 p = pp;
-                d = d + 1;
+                d++;
                 f = f0;
                 ff = f0;
                 neg = neg0;
@@ -67,20 +65,20 @@ int call_kmp3(char* p, char* d, char* free1, char* free2) {
                 neg--;
                 neg[0] = p[0];
                 p = pp;
-                f = ff + 1;
-                ff = ff + 1;
+                ff++;
+                f = ff;
                 continue;
             }
         }
         else if (p[0] == f[0]) {
-            p = p + 1;
-            f = f + 1;
+            p++;
+            f++;
             continue;
         }
         else {
             p = pp;
-            f = ff + 1;
-            ff = ff + 1;
+            ff++;
+            f = ff;
             continue;
         }
     }

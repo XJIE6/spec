@@ -82,6 +82,7 @@ void cmp_81(unsigned char cmd) {
 
 void cmp_83(unsigned char cmd) {
     parce_reg_mem();
+    print_params();
     p1 = p2;
     int a = int_8S();
     v.base = a;

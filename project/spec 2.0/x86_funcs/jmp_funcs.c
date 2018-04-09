@@ -33,7 +33,6 @@ void dy_jump(int to) {
 }
 
 void jc(unsigned char cmd, char sh) {
-    //fprintf(stderr, "TRY JUMP\n");
     //fprintf(stderr, "fff %#04x to %d\n", cmd, sh);
     int cur = 0;
     if (sh) {
@@ -42,6 +41,7 @@ void jc(unsigned char cmd, char sh) {
     else {
         cur = int_32();
     }
+    //fprintf(stderr, "TRY JUMP %d\n", cur);
     if (st->info_flags.is_dynamic) {
         dy_jump(cur);
         fprintf(stderr, "cjump %#04x to %d\n", cmd, st->next->hash);
@@ -152,6 +152,7 @@ void call_e8(unsigned char cmd) {
     p1.base = 0;
     p2 = p1;
     int cur = int_32();
+    //fprintf(stderr, "CALL %d\n", cur);
     //print_params();
     //fprintf(stderr, "%lld %lld\n", cur, &kmp2);
     eval(&p1);

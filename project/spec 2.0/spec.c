@@ -494,7 +494,7 @@ int i = 0;
 char* spec(state* _st) {
     res = mmap(NULL, 4096, PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
     //res = malloc(1000);
-    fprintf(stderr, "res = %d\n", (int) res);
+    //fprintf(stderr, "res = %d\n", (int) res);
     if (res == -1) {
         fprintf(stderr, "%d", errno);
         return 0;
@@ -518,23 +518,22 @@ char* spec(state* _st) {
             xxx++;
             continue;
         }
-
-        // fprintf(stderr, "CURRENT STATE\n");
+        // fprintf(stderr, "\n\nCURRENT STATE\n");
         // fprintf(stderr, "\n");
 
-        // fprintf(stderr, "p : %d, %d\n", st->mem[0][-80], st->info_mem[0][-80].mem);
-        // fprintf(stderr, "pp : %d, %d\n", st->mem[0][-32], st->info_mem[0][-32].mem);
-        // fprintf(stderr, "f : %d, %d\n", st->mem[0][-64], st->info_mem[0][-64].mem);
-        // fprintf(stderr, "ff : %d, %d\n", st->mem[0][-56], st->info_mem[0][-56].mem);
-        // fprintf(stderr, "neg : %d, %d\n", st->mem[0][-48], st->info_mem[0][-48].mem);
-        // fprintf(stderr, "f0 : %d, %d\n", st->mem[0][-24], st->info_mem[0][-24].mem);
+        // fprintf(stderr, "p : %d, %d\n", st->mem[0][-64], st->info_mem[0][-64].mem);
+        // fprintf(stderr, "pp : %d, %d\n", st->mem[0][-24], st->info_mem[0][-24].mem);
+        // fprintf(stderr, "f : %d, %d\n", st->mem[0][-56], st->info_mem[0][-56].mem);
+        // fprintf(stderr, "ff : %d, %d\n", st->mem[0][-48], st->info_mem[0][-48].mem);
+        // fprintf(stderr, "neg : %d, %d\n", st->mem[0][-40], st->info_mem[0][-40].mem);
+        // fprintf(stderr, "f0 : %d, %d\n", st->mem[0][-32], st->info_mem[0][-32].mem);
         // fprintf(stderr, "neg0 : %d, %d\n", st->mem[0][-16], st->info_mem[0][-16].mem);
         // for (int i = 0; i < 20; ++i) {
         //     fprintf(stderr, "%d ", st->mem[2][40 + i]);
         // }
         //getchar();
         use(st->hash);
-        fprintf(stderr, "\n\nStart block %d\n", st->hash % u_len);
+        fprintf(stderr, "\nStart block %d\n", st->hash % u_len);
         is_end = 0;
         long long last = st->regs[16];
         while(1) {

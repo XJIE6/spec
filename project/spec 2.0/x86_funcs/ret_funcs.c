@@ -17,7 +17,8 @@
 #define pop pop_64
 #endif
 
-void ret_c3(unsigned char cmd) {
+void ret_c3(unsigned char cmd) {//
+    //fprintf(stderr, "RET\n");
     pop_64();
     if (is_end) {
         p1.reg1 = 0;//rax

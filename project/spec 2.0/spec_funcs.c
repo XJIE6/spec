@@ -366,11 +366,12 @@ void eval(param* p) {
         return;
     }
     
-    //fprintf(stderr, "%lld %d % d %d\n", cur.base, cur.mem, st->mem[cur.mem][cur.base], *((type*)(st->mem[cur.mem] + cur.base)));
+    //fprintf(stderr, "%lld %d %d %d\n", cur.base, cur.mem, st->mem[cur.mem][cur.base], *((type*)(st->mem[cur.mem] + cur.base)));
     v.base = *((type*)(st->mem[cur.mem] + cur.base));
     //fprintf(stderr, "ERROR eval 34\n");
     v.mem = st->info_mem[cur.mem][cur.base].mem;
     //fprintf(stderr, "ERROR eval 34\n");
+    //fprintf(stderr, "LOOOL %d %d %d\n", is_dynamic, v.base, v.mem);
     is_dynamic = st->info_mem[cur.mem][cur.base].is_dynamic;
     //fprintf(stderr, "%lld %d\n", v.base, v.mem);
 }
