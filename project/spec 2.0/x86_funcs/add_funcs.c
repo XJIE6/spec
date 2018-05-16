@@ -77,7 +77,9 @@ void add_83(unsigned char cmd) {
 
 void add_01(unsigned char cmd) {
     parce_reg_mem();
+    print_params();
     eval(&p2);
+    print_value();
     value cur;
     cur.base = v.base;
     cur.mem = v.mem;
@@ -88,8 +90,11 @@ void add_01(unsigned char cmd) {
         fprintf(stderr, " ");
         print(&p1);
         fprintf(stderr, "\n");
+        assign(&p2);
+        return;
     }
     eval(&p1);
+    print_value();
     v.base += cur.base;
     if (v.mem == -1) {
         v.mem = cur.mem;
@@ -98,6 +103,7 @@ void add_01(unsigned char cmd) {
         fprintf(stderr, "ERROR 1236\n");
         return;
     }
+    print_value();
     if (is_dynamic) {
         prefix(&p1);
         fprintf(stderr, "add01 ");

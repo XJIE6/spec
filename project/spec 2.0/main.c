@@ -7,7 +7,7 @@
 
 //#include "kmp3.c"
 
-int main() {
+int main(int argc, char const *argv[]) {
     // int n = 30000;
     // int res[n];
     // srand(12345);
@@ -28,10 +28,17 @@ int main() {
     //run_pow(3, 5);
     //run_sort(300);
     //run_dict();
+    const char* p = argv[1];
+    int len = 0;
+    while (*p != 0) {
+        p++;
+        len++;
+    }
+    run_interpreter(argv[1], len);
     //run_prime(1000);
     //run_kmp();
     //run_kmp2();
-    run_kmp2();
+    //run_kmp2();
     // const char* s = "aba";
     // const char* S = "aabbabbaabaaaa";
     // int n = 100;

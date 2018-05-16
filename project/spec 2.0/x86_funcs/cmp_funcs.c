@@ -121,7 +121,9 @@ void cmp_39(unsigned char cmd) {
 
 void cmp_3b(unsigned char cmd) {
     parce_reg_mem();
+    print_params();
     eval(&p2);
+    print_value();
     if (is_dynamic) {
         fprintf(stderr, "cmp3b ");
         print(&p2);

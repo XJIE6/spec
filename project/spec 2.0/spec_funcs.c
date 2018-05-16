@@ -54,6 +54,7 @@ void cmp() {
         dyn = 1;
     }
     eval(&p1);
+    print_value();
     if (is_dynamic) {
         dyn = 1;
     }
@@ -135,7 +136,6 @@ void assign(param* p) {
         st->info_regs[p->reg1].mem = v.mem;
         //fprintf(stderr, "pre\n");
         st->info_regs[p->reg1].is_dynamic = is_dynamic;
-        //fprintf(stderr, "pre\n");
         return;
     }
     value cur;
@@ -337,13 +337,13 @@ void eval(param* p) {
         f = 1; 
     }
     value cur;
-    if (p->scale != 0 && st->info_regs[p->reg2].mem != -1) {
+    if (p->scale != 0 && p->reg2 != -1 && st->info_regs[p->reg2].mem != -1) {
         fprintf(stderr, "ERROR eval 34\n");
         return;
     }
     cur.base = st->regs[p->reg1] + p->base;
     cur.mem = st->info_regs[p->reg1].mem;
-    //fprintf(stderr, "%lld %d\n", cur.base, cur.mem);
+    fprintf(stderr, "%lld %d\n", cur.base, cur.mem);
     if (p->reg2 != -1) {
         cur.base += st->regs[p->reg2] * (1 << p->scale);
         if (st->info_regs[p->reg2].mem != -1) {
@@ -355,7 +355,12 @@ void eval(param* p) {
         }
     }
     if (f) {
-        v.base = cur.base;
+    	if (p -> scale != -1) {
+        	v.base = cur.base * (1 << p->scale);
+		}
+		else {
+			v.base = cur.base;
+		}
         v.mem = cur.mem;
         return;
     }

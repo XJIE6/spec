@@ -81,7 +81,7 @@ void eval_b6(char cmd) {
 void eval_8b(char cmd);
 void eval_0f(char cmd) {
     int cur = get_char();
-    //fprintf(stderr, "real %#04x\n", cur);
+    fprintf(stderr, "real %#04x\n", cur);
     if (cur >= 0x80 && cur <= 0x8f) {
         jc(cur, 0);
     }
@@ -370,7 +370,7 @@ void jc_sh(char cmd) {
     jc(cmd + 0x10, 1);
 }
 
-void eval_90(char cmd) {};
+void empty(char cmd) {};
 
 void init(void *(**a)()) {
     a[0x00] = add_01_8;
@@ -444,7 +444,8 @@ void init(void *(**a)()) {
 
     a[0x88] = mov_89_8;
     a[0x89] = eval_89;
-    a[0x90] = eval_90;
+    a[0x90] = empty;
+    a[0x98] = empty;
 
     a[0x8a] = mov_8b_8;
     a[0x8b] = eval_8b;

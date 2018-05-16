@@ -395,13 +395,13 @@ void print_state() {
 }
 
 void print_params() {
-    return;
+    //return;
     fprintf(stderr, "p1: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p1.reg1, (int) p1.reg2, (long long) p1.base, (int) p1.scale);
     fprintf(stderr, "p2: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p2.reg1, (int) p2.reg2, (long long) p2.base, (int) p2.scale);    
 }
 
 void print_value() {
-    return;
+    //return;
     fprintf(stderr, "v: base = %lld, mem = %d, is_dynamic = %d\n", (long long) v.base, (int) v.mem, (int) is_dynamic);        
 }
 
@@ -550,9 +550,9 @@ char* spec(state* _st) {
             // for (int i = 0; i < 10; ++i) {
             //     fprintf(stderr, "m %d %d\n", i, st->mem[0][1000 - i]);
             // }
-            //fprintf(stderr, "%d cmd %#04x\n", i, cur);
+            fprintf(stderr, "%d cmd %#04x\n", i, cur);
             i++;
-            //fprintf(stderr, "RIP = %lld\n", st->regs[16] - last);
+            //fprintf(stderr, "mem = %d %d %d\n", st->mem[1][0], st->mem[1][4], st->mem[1][8]);
             last = st->regs[16];
             print_state();
             cmd[cur](cur);

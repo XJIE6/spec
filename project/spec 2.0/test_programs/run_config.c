@@ -7,6 +7,7 @@ void kmp(int len1, char* s1, int len2, char* s2);
 char* eratosphen(int a);
 int call_kmp(char* p, char* d, char* free1, char* free2);
 int call_kmp3(char* p, char* d, char* free1, char* free2);
+void interpreter(char * program, char * param);
 state* new_state();
 
 void run_sort(int n) {
@@ -193,6 +194,27 @@ void run_kmp2() {
     }
 
     strcpy(st->mem[1], "aaaaa");
+
+    calc_hash(st);
+
+    spec(st);
+}
+
+void run_interpreter(char * program, int len) {
+    state* st = new_state();
+
+    st->mem_len = 2;
+
+    st->info_mem[1] = malloc(sizeof(info) * len);
+    st->mem[1] = malloc(len);
+
+    st->mem_mem_len[1] = len;
+
+    st->regs[16] = &interpreter;
+    st->info_regs[7].mem = 1;
+    st->info_regs[6].is_dynamic = 1;
+
+    strcpy(st->mem[1], program);
 
     calc_hash(st);
 
