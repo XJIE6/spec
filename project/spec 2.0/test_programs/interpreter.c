@@ -276,3 +276,11 @@ int interpreter(const char * _program, int * input) {
 		}
 	}
 }
+
+int main(int argc, char const *argv[]){
+	int a[3];
+	a[0] = 10;
+	a[1] = 2;
+	cout << "answer is: " << interpreter(argv[1], a) << endl;
+	return 0;
+}
