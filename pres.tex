@@ -1,5 +1,3 @@
-%% Простая презентация с примером включения программного кода и
-%% пошаговых спецэффектов
 \documentclass[demo]{beamer}
 \usepackage{amsmath}
 \usepackage{fontspec}
@@ -63,7 +61,7 @@
   $source$ --- программа на языке S\\
   $int$ --- интерпретатор для языка S на языке L\\
   \vfill
-  \begin{block}{Проекции Футамуры \hfill [1983]}
+  \begin{block}{Проекции Футамуры \hfill [1973]}
     $$
     \begin{array}{l l l c l}
       I & \llbracket spec \rrbracket_L &[int, source] &= &target\\
@@ -122,116 +120,61 @@
       $$\llbracket gcc \rrbracket [spec^{ \mathbf{ASM}}_{\textsc{C}}] =
       spec^{\mathbf{ASM}}_{\mathbf{ASM}}$$}
     \vfill
-  \item{Как получить $spec^{\mathbf{ASM}}_{\textsc{C}}$?
-      \only{\hspace{1cm}---\hspace{1cm} \textbf{\Large\color{green}Цель}}}
+  \item{Как получить $spec^{\mathbf{ASM}}_{\textsc{C}}$?}
     \vfill
   \end{itemize}
 \end{frame}
 
-\begin{frame}\frametitle{Детали реализации}
+\begin{frame}\frametitle{Цель и задачи}
+\begin{block}{Цель}
 \begin{itemize}
-\item Статические инструкции вычисляются
-\vfill
-\item Динамические инструкции упрощаются и записываются в ответ
-\vfill
-\item При динамических условиях вычисление раздваивается
-\vfill
-\item Если состояние уже было обработано ранее, специализация останавливается
+\item Исследование возможностей специализатора машинного кода
 \end{itemize}
-
-\end{frame}
-
-\begin{frame}\frametitle{Начальный этап}
+\end{block}
+\begin{block}{Задачи}
 \begin{itemize}
-    \item {Тренировочный специализатор для flowchart}
-    \vfill
-    \item {Изучение AMD64 Architecture Programmer’s Manual Volume 3: General-Purpose and System Instructions}
-    \vfill
-    \item {Выбрано подмножество инструкций: add, cmp, test, imul, jmp, jcc, mov, lea, pop, leave, push, ret, sub, call, ...}
-    \vfill
-    \item {Разработка архитектуры проекта}
+\item Изучить существующие подходы и алгоритмы специализации для низкоуровневых языков программирования
+\item Разработать архитектуру специализатора с учётом рассмотреных подходов и особенностей языка специалиации
+\item Добавление возможностей специализатора, необходимых для самоприменения 
+\item Исследование возможностей полученного специазатора в том числе на кмп тесте и каком-то там ещё
 \end{itemize}
+\end{block}
 \end{frame}
 
 \lstset{language=C}
-\begin{frame}[fragile]\frametitle{Интерпретация}
+\begin{frame}[fragile]\frametitle{Алгоритм}
 \begin{lstlisting}
-void sort(int len, int* a) {
-    for (int i = 0; i < len; ++i) {
-        for (int j = i + 1; j < len; ++j) {
-            if (a[i] > a[j]) {
-                int k = a[i];
-                a[i] = a[j];
-                a[j] = k;
-            }
-        }
-    }
-}
-\end{lstlisting}
-\end{frame}
+typedef struct _info {
+    char is_dynamic;
+    int mem;
+} info;
 
-\lstset{language=C}
-\begin{frame}[fragile]\frametitle{Работа с памятью}
-\begin{lstlisting}
-char* eratosphen(int n) {
-    char* a = my_malloc(n);
-    for (int i = 0; i < n; ++i) {
-        a[i] = 1;
-    }
-    a[0] = 0;
-    a[1] = 0;
-    for (int i = 2; i < n; ++i) {
-        if (a[i]) {
-            for (int j = i * i; j < n; j += i) {
-                a[j] = 0;
-            }
-        }
-    }
-    return a;
-}
+struct _state {
+    long long regs[17];
+    info info_regs[17];
+    char flags[64];
+    info info_flags;
+    char** mem;
+    info** info_mem;
+    int mem_len;
+    int mem_mem_len[100];
+    struct _state* next;
+    long long hash;
+};
 \end{lstlisting}
 \end{frame}
 
 \lstset{language=C}
-\begin{frame}[fragile]\frametitle{Простая специализация}
-\begin{lstlisting}
-int dict(int len, int* keys, int* values, int key) {
-    for (int i = 0; i < len; ++i) {
-        if (keys[i] == key) {
-            return value[i];
-        }
-    }
-    return -1;
-}
-\end{lstlisting}
-\vfill
-$\Bigg\downarrow{\qquad \llbracket spec \rrbracket_{ASM}[dict, [3, [0, 1, 2], ?, 1]] \qquad}$
-\vfill
-\begin{lstlisting}
-Start block 701084
-mov89 %rdx  -48(0) 
-mov8b -48(0)  %rax 
-add01 4  %rax 
-mov8b 0(rax)  %rax 
-ret
-\end{lstlisting}
-
-\end{frame}
-
-\lstset{language=C}
-\begin{frame}[fragile]\frametitle{Полный цикл обработки}
-\begin{lstlisting}
-int pow(int a, int b) {
-    if (b == 0) {
-        return 1;
-    }
-    return my_pow(a, b - 1) * a;
-}
-\end{lstlisting}
-\vfill
-$\Bigg\downarrow{\qquad \llbracket spec \rrbracket_{ASM}[pow, 5] \qquad}$
-\vfill
-\tiny 89 7D FC 8B 45 FC 89 C7 89 7D FC 8B 45 FC 89 C7 89 7D FC 8B 45 FC 89 C7 89 7D FC 8B 45 FC 89 C7 89 7D FC 8B 45 FC 89 C7 89 7D FC B8 01 00 00 00 0F AF 45 FC 0F AF 45 FC 0F AF 45 FC 0F AF 45 FC 0F AF 45 FC C3
+\begin{frame}[fragile]\frametitle{Дополнительные возможности}
+\begin{itemize}
+    \item {Расширенное подмножество инструкций: add, cmp, test, imul, jmp, jcc, mov, lea, pop, leave, push, ret, sub, call, ...}
+    \vfill
+    \item {Работа с выделением памятью}
+    \vfill
+    \item {Мультипроцедурная специализация}
+    \vfill
+    \item {Поддержка статических данных}
+\end{itemize}
 \end{frame}
 
 \lstset{language=C}
@@ -372,23 +315,21 @@ ret
 \end{columns}
 \end{frame}
 
-\begin{frame}\frametitle{Планы на будущее}
+\begin{frame}\frametitle{Интерпретация}
+Результаты специализации интерпретатора
+\end{frame}
 
+\begin{frame}\frametitle{Результаты}
 \begin{itemize}
-\item Специализировать интерпретатор
-\vfill 
-\item Специализировать специализатор
+\item Выбрана и реализована модель специализатора, отвечающая требованиям задачи
 \vfill
-\item Сравнить производительность
+\item Добавлены необходимые для самоприменения возможности
+\vfill
+\item Проведено исследование возможностей специализатора
 \end{itemize}
-
 \end{frame}
 
 \begin{frame}\frametitle{Конец}
 https://github.com/XJIE6/spec
 \end{frame}
 \end{document}
-%%% Local Variables:
-%%% mode: latex
-%%% TeX-master: t
-%%% End:
