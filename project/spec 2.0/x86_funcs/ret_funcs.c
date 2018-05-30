@@ -17,8 +17,7 @@
 #define pop pop_64
 #endif
 
-void ret_c3(unsigned char cmd) {//
-    //fprintf(stderr, "RET\n");
+void ret_c3(unsigned char cmd) {
     pop_64();
     if (is_end) {
         p1.reg1 = 0;//rax
@@ -32,7 +31,7 @@ void ret_c3(unsigned char cmd) {//
 
         return;
     }
-    //fprintf(stderr, "RET VALUE %d %d\n", st->regs[4], st->regs[5]);
+    //fprintf(stderr, "FFF RET VALUE %d\n", st->regs[0]);
     p1.reg1 = 16; //rip
     p1.reg2 = -1;
     p1.scale = -1;

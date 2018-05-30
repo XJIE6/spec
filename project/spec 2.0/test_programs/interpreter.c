@@ -1,5 +1,8 @@
 const char * program;
-int state[26];
+
+const char * get_program() {
+	return program;
+}
 
 char is_letter(char c) {
 	return (c >= 'a' && c <= 'z');
@@ -75,12 +78,12 @@ char is_digit(char c) {
 	return (c >= '0' && c <= '9');
 }
 
-int digit_or_var_val() {
+int digit_or_var_val(int * state) {
 	int val = 0;
 	if (is_digit(*program)) {
 		while(is_digit(*program)) {
-			val *= 10;
-			val += (*program) - '0';
+			int tmp = 10;
+			val = val * tmp + (*program) - '0';
 			program++;
 		}
 		read(";");
@@ -96,9 +99,9 @@ int digit_or_var_val() {
 	return val;
 }
 
-int cond() {
+int cond(int * state) {
 	read("(");
-	int val_l = digit_or_var_val();
+	int val_l = digit_or_var_val(state);
 	int opcode;
 	if (check("<")) {
 		opcode = 0;
@@ -119,7 +122,7 @@ int cond() {
 		read("!=");
 		opcode = 5;
 	}
-	int val_r = digit_or_var_val();
+	int val_r = digit_or_var_val(state);
 	int res;
 	switch(opcode) {
 		case 0:
@@ -190,6 +193,7 @@ void skip() {
 }
 
 int interpreter(const char * _program, int * input) {
+	int * state = my_malloc(26 * sizeof(int));
 	program = _program;
 	read("int main(");	
 	while(*program != ')') {
@@ -208,19 +212,19 @@ int interpreter(const char * _program, int * input) {
 	read(";");
 	while(1) {
 		if (check("while")) {
-			int res = cond();
+			int res = cond(state);
 			if (!res) {
 				skip();
 			}
 		}
 		else if (check("if")) {
-			int res = cond();
+			int res = cond(state);
 			if (!res) {
 				skip();
 			}
 		}
 		else if (check("return")) {
-			return digit_or_var_val();
+			return digit_or_var_val(state);
 		}
 		else if(_check("}")) {
 			const char * p = program + 1;
@@ -251,23 +255,21 @@ int interpreter(const char * _program, int * input) {
 				read("/=");
 				opcode = 4;
 			}
-			int val = digit_or_var_val();
-			switch(opcode) {
-				case 0:
-					state[var] = val;
-					break;
-				case 1:
-					state[var] += val;
-					break;
-				case 2:
-					state[var] -= val;
-					break;
-				case 3:
-					state[var] *= val;
-					break;
-				case 4:
-					state[var] /= val;
-					break;
+			int val = digit_or_var_val(state);
+			if (opcode == 0) {
+				state[var] = val;
+			}
+			else if (opcode == 1) {
+				state[var] += val;
+			}
+			else if (opcode == 2) {
+				state[var] -= val;
+			}
+			else if (opcode == 3) {
+				state[var] *= val;
+			}
+			else if (opcode == 4) {
+				state[var] /= val;
 			}
 			read(";");
 			while (is_space(*program)) {
@@ -275,12 +277,4 @@ int interpreter(const char * _program, int * input) {
 			}
 		}
 	}
-}
-
-int main(int argc, char const *argv[]){
-	int a[3];
-	a[0] = 10;
-	a[1] = 2;
-	cout << "answer is: " << interpreter(argv[1], a) << endl;
-	return 0;
 }

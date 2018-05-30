@@ -68,9 +68,15 @@ void add_81(unsigned char cmd) {
 void add_83(unsigned char cmd) {
     parce_reg_mem();
     eval(&p2);
-    v.base += int_8S();
+    int val = int_8S();
+    v.base += val;
     if (is_dynamic) {
-        fprintf(stderr, "add83\n");
+        prefix(&p2);
+        fprintf(stderr, "add83 ");
+        print(&p2, 1);
+        fprintf(stderr, " ");
+        fprintf(stderr, "%d", val);
+        fprintf(stderr, "\n");
     }
     assign(&p2);
 }

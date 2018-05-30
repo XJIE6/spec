@@ -139,13 +139,13 @@ void assign(param* p) {
         return;
     }
     value cur;
-    if (p->scale != 0 && st->info_regs[p->reg2].mem != -1) {
-        fprintf(stderr, "ERROR eval 34\n");
-        return;
-    }
-    cur.base = st->regs[p->reg1] + p->base;
+    // if (p->scale != 0 && st->info_regs[p->reg2].mem != -1) {
+    //     fprintf(stderr, "ERROR %d eval 34\n", p->scale);
+    //     return;
+    // }
+    cur.base = st->regs[p->reg1] * (1 << p->scale) + p->base;
     cur.mem = st->info_regs[p->reg1].mem;
-    
+    //fprintf(stderr, "123 \n %lld %lld post\n", cur.mem, cur.base);
     if (p->reg2 != -1) {
         cur.base += st->regs[p->reg2] * (1 << p->scale);
         if (st->info_regs[p->reg2].mem != -1) {
@@ -156,8 +156,15 @@ void assign(param* p) {
             cur.mem = st->info_regs[p->reg2].mem;
         }
     }
+    //fprintf(stderr, "123 \n %lld %lld post\n", cur.mem, cur.base);
     if (cur.mem == -1) {
-        *((type*)cur.base) = (type)v.base;
+    	//fprintf(stderr, "WAHA");
+    	if (v.mem == -1) {
+        	*((type*)cur.base) = (type)v.base;
+    	}
+    	else {
+    		*((type*)cur.base) = (type)v.base + st->mem[v.mem];
+    	}
         return;
     }
     //fprintf(stderr, "123 \n %lld %lld post\n", cur.mem, cur.base);
@@ -337,13 +344,13 @@ void eval(param* p) {
         f = 1; 
     }
     value cur;
-    if (p->scale != 0 && p->reg2 != -1 && st->info_regs[p->reg2].mem != -1) {
-        fprintf(stderr, "ERROR eval 34\n");
-        return;
-    }
-    cur.base = st->regs[p->reg1] + p->base;
+    // if (p->scale != 0 && p->reg2 != -1 && st->info_regs[p->reg2].mem != -1) {
+    //     fprintf(stderr, "ERROR eval 34\n");
+    //     return;
+    // }
+    cur.base = st->regs[p->reg1] * (1 << p->scale) + p->base;
     cur.mem = st->info_regs[p->reg1].mem;
-    fprintf(stderr, "%lld %d\n", cur.base, cur.mem);
+    //fprintf(stderr, "%lld %d\n", cur.base, cur.mem);
     if (p->reg2 != -1) {
         cur.base += st->regs[p->reg2] * (1 << p->scale);
         if (st->info_regs[p->reg2].mem != -1) {

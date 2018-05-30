@@ -165,13 +165,14 @@ void call_e8(unsigned char cmd) {
         p1.base = 0;
         eval(&p1);
         st->mem[st->mem_len] = my_malloc(v.base);
+        st->info_mem[st->mem_len] = my_malloc(sizeof(info) * v.base);
         st->mem_mem_len[st->mem_len] = v.base;
         p1.reg1 = 0; //rax
         p1.reg2 = -1;
         p1.scale = -1;
         p1.base = 0;
-        v.base = st->mem[st->mem_len];
-        v.mem = -1;
+        v.base = 0;
+        v.mem = st->mem_len;
         assign(&p1);
         ++(st->mem_len);
         return;
@@ -181,5 +182,6 @@ void call_e8(unsigned char cmd) {
     push_64();
     eval(&p2);
     v.base += cur;
+    //fprintf(stderr, "FFF CALL %d\n", v.base % 20);
     assign(&p2);
 }

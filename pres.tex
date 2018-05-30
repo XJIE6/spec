@@ -13,6 +13,7 @@
 \usepackage{polyglossia}
 \setdefaultlanguage{russian}
 \usepackage{graphicx}
+\definecolor{ao}{rgb}{0.0, 0.4, 0.0}
 \addtobeamertemplate{navigation symbols}{}{%
     \usebeamerfont{footline}%
     \usebeamercolor[fg]{footline}%
@@ -28,7 +29,7 @@
   basicstyle=\footnotesize\ttfamily,
   keywordstyle=\bfseries,
   commentstyle=\itshape\color{gray!40!black},
-  stringstyle=\color{red},
+  stringstyle=\color{ao},
   numbers=left,
   numbersep=5pt,
   numberstyle=\tiny\color{gray},
@@ -142,39 +143,196 @@
 \end{frame}
 
 \lstset{language=C}
-\begin{frame}[fragile]\frametitle{Алгоритм}
-\begin{lstlisting}
-typedef struct _info {
-    char is_dynamic;
-    int mem;
-} info;
-
-struct _state {
-    long long regs[17];
-    info info_regs[17];
-    char flags[64];
-    info info_flags;
-    char** mem;
-    info** info_mem;
-    int mem_len;
-    int mem_mem_len[100];
-    struct _state* next;
-    long long hash;
-};
+\begin{frame}[fragile]\frametitle{Binding time analisys}
+\color{red} динамичесий \color{ao} статический
+\color{black}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+int pow(@\textcolor{red}{int a}@, @\textcolor{ao}{int b}@) {
+    int res = 1;
+    while (b > 0) {
+        res = res * a;
+        b = b - 1;
+    }
+    return a;
+}
 \end{lstlisting}
+\end{column}
+\begin{column}{0.2\textwidth}
+$$\xrightarrow{\quad BTA \quad}$$
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+int pow(@\textcolor{red}{int a}@, @\textcolor{ao}{int b}@) {
+    @\textcolor{red}{int res = 1;}@
+    while (@\textcolor{ao}{b > 0}@) {
+        @\textcolor{red}{res = res * a}@;
+        @\textcolor{ao}{b = b - 1}@;
+    }
+    @\textcolor{red}{return a}@;
+}
+\end{lstlisting}
+\end{column}
+\end{columns}
 \end{frame}
 
 \lstset{language=C}
-\begin{frame}[fragile]\frametitle{Дополнительные возможности}
-\begin{itemize}
-    \item {Расширенное подмножество инструкций: add, cmp, test, imul, jmp, jcc, mov, lea, pop, leave, push, ret, sub, call, ...}
-    \vfill
-    \item {Работа с выделением памятью}
-    \vfill
-    \item {Мультипроцедурная специализация}
-    \vfill
-    \item {Поддержка статических данных}
-\end{itemize}
+\begin{frame}[fragile]\frametitle{Основные проблемы}
+Проблема : BTA делает регистры динамическими \\
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
+//%esi динамический
+mov %esi %eax
+//теперь %eax динамический
+mov 4 %eax
+//@специализатор   не   знает   значение@ %eax
+\end{lstlisting}
+Решение : Online специализация \\
+\vfill
+Проблема : Комплексные инструкции (push)\\\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
+//%esi динамический
+push %esi
+//теперь %esp динамический
+push 4
+pop %eax
+//@специализатор   не   знает   значение@ %eax
+\end{lstlisting}
+Решение : BTA разделяет инструкцию на простые\\
+\end{frame}
+
+
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Основные проблемы}
+Проблема : Статические адреса (например стек) становятся константами \\
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
+//%esi динамический
+push %esi
+//@специализируется в@
+mov %esi (268123094)
+//@адрес может меняться между запусками@ %eax
+\end{lstlisting}
+\vfill
+Решение : Символьные вычисления
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
+//%esi динамический
+push %esi
+//@специализируется в@
+mov %esi -48(0)
+\end{lstlisting}
+\end{frame}
+
+
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Основные проблемы}
+Проблема : Не всегда можно сделать lifting \\
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
+lea -72(0) %ebx
+add 10 %ebx
+//%edx динамический
+mov %ebx 4(%edx)
+//@после специализации получим@
+mov -62(0) 4(%ebx)
+//@запись из памяти в память запрещена@
+\end{lstlisting}
+\vfill
+Решение : Генерация дополнительных инструкций
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
+lea -72(0) %ebx
+add 10 %ebx
+//%edx динамический
+mov %ebx 4(%edx)
+//@после специализации получим@
+lea -62(0) %ebx // @сгенерированная инструкция@
+mov %ebx 4(%ebx)
+\end{lstlisting}
 \end{frame}
 
 \lstset{language=C}
@@ -189,7 +347,7 @@ struct _state {
   basicstyle=\fontsize{2}{2}\selectfont\ttfamily,
   keywordstyle=\bfseries,
   commentstyle=\itshape\color{gray!40!black},
-  stringstyle=\color{red},
+  stringstyle=\color{ao},
   numbers=left,
   numbersep=5pt,
   numberstyle=\fontsize{2}{2}\selectfont\ttfamily\color{gray},]
@@ -280,7 +438,7 @@ $$\xrightarrow{\quad \llbracket spec \rrbracket_{ASM}[kmp, "a"] \quad}$$
   basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
   keywordstyle=\bfseries,
   commentstyle=\itshape\color{gray!40!black},
-  stringstyle=\color{red},
+  stringstyle=\color{ao},
   numbers=left,
   numbersep=5pt,
   numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
@@ -315,18 +473,79 @@ ret
 \end{columns}
 \end{frame}
 
-\begin{frame}\frametitle{Интерпретация}
-Результаты специализации интерпретатора
-\end{frame}
+\lstset{language=C}
+\begin{frame}[fragile]\frametitle{Специализация интерпретатора}
+\begin{columns}
+\begin{column}{0.4\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{8}{4}\selectfont\ttfamily\color{gray},]
+int foo(@\textcolor{blue}{int a, int b}@){
+    int c;
+    @\textcolor{red}{c = a}@;
+    @\textcolor{ao}{c += b}@;
+    return c;
+}
+\end{lstlisting}
+\end{column}
+\begin{column}{0.4\textwidth}
+$$\xrightarrow{ \llbracket spec \rrbracket_{ASM}[interpreter, foo] }$$
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{6}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{3}{4}\selectfont\ttfamily\color{gray},]
+Start block -697046
+mov89 %rsi  -72(0) 
+call malloc
+@\textcolor{blue}{mov8b -72(0)  \%rax}@
+@\textcolor{blue}{mov8b 0(rax)  \%rax}@
+@\textcolor{blue}{mov89 \%rax  0(2)}@
+@\textcolor{blue}{add83 -72(0)  4}@
+@\textcolor{blue}{mov8b -72(0)  \%rax}@
+@\textcolor{blue}{mov8b 0(rax)  \%rax}@
+@\textcolor{blue}{mov89 \%rax  16(2)}@
+@\textcolor{blue}{add83 -72(0)  4}@
+@\textcolor{red}{mov8b 0(2)  \%rax}@ 
+@\textcolor{red}{mov89 \%rax  -100(0)}@ 
+@\textcolor{red}{mov8b -100(0)  \%rax}@ 
+@\textcolor{red}{mov89 \%rax  -28(0)}@ 
+@\textcolor{red}{mov8b -28(0)  \%rax}@ 
+@\textcolor{red}{mov89 \%rax  32(2)}@
+@\textcolor{ao}{mov8b 16(2)  \%rax}@ 
+@\textcolor{ao}{mov89 \%rax  -100(0)}@ 
+@\textcolor{ao}{mov8b -100(0)  \%rax}@ 
+@\textcolor{ao}{mov89 \%rax  -28(0)}@ 
+@\textcolor{ao}{mov8b 32(2)  \%rcx}@ 
+@\textcolor{ao}{mov8b -28(0)  \%rdx}@ 
+@\textcolor{ao}{add01 \%rdx  \%rcx}@ 
+@\textcolor{ao}{mov89 \%rdx  32(2)}@ 
+mov8b 32(2)  %rax 
+mov89 %rax  -100(0) 
+mov8b -100(0)  %rax 
+ret
 
-\begin{frame}\frametitle{Результаты}
-\begin{itemize}
-\item Выбрана и реализована модель специализатора, отвечающая требованиям задачи
-\vfill
-\item Добавлены необходимые для самоприменения возможности
-\vfill
-\item Проведено исследование возможностей специализатора
-\end{itemize}
+\end{lstlisting}
+\end{column}
+\end{columns}
 \end{frame}
 
 \begin{frame}\frametitle{Конец}

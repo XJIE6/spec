@@ -395,13 +395,13 @@ void print_state() {
 }
 
 void print_params() {
-    //return;
+    return;
     fprintf(stderr, "p1: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p1.reg1, (int) p1.reg2, (long long) p1.base, (int) p1.scale);
     fprintf(stderr, "p2: reg1 = %d, reg2 = %d, base = %lld, scale = %d\n", (int) p2.reg1, (int) p2.reg2, (long long) p2.base, (int) p2.scale);    
 }
 
 void print_value() {
-    //return;
+    return;
     fprintf(stderr, "v: base = %lld, mem = %d, is_dynamic = %d\n", (long long) v.base, (int) v.mem, (int) is_dynamic);        
 }
 
@@ -491,6 +491,8 @@ state* que;
 #undef BIT64
 int i = 0;
 
+const char * get_program();
+
 char* spec(state* _st) {
     res = mmap(NULL, 4096, PROT_EXEC | PROT_WRITE | PROT_READ, MAP_ANONYMOUS | MAP_PRIVATE, 0, 0);
     //res = malloc(1000);
@@ -518,20 +520,6 @@ char* spec(state* _st) {
             xxx++;
             continue;
         }
-        // fprintf(stderr, "\n\nCURRENT STATE\n");
-        // fprintf(stderr, "\n");
-
-        // fprintf(stderr, "p : %d, %d\n", st->mem[0][-64], st->info_mem[0][-64].mem);
-        // fprintf(stderr, "pp : %d, %d\n", st->mem[0][-24], st->info_mem[0][-24].mem);
-        // fprintf(stderr, "f : %d, %d\n", st->mem[0][-56], st->info_mem[0][-56].mem);
-        // fprintf(stderr, "ff : %d, %d\n", st->mem[0][-48], st->info_mem[0][-48].mem);
-        // fprintf(stderr, "neg : %d, %d\n", st->mem[0][-40], st->info_mem[0][-40].mem);
-        // fprintf(stderr, "f0 : %d, %d\n", st->mem[0][-32], st->info_mem[0][-32].mem);
-        // fprintf(stderr, "neg0 : %d, %d\n", st->mem[0][-16], st->info_mem[0][-16].mem);
-        // for (int i = 0; i < 20; ++i) {
-        //     fprintf(stderr, "%d ", st->mem[2][40 + i]);
-        // }
-        //getchar();
         use(st->hash);
         fprintf(stderr, "\nStart block %d\n", st->hash % u_len);
         is_end = 0;
@@ -550,8 +538,13 @@ char* spec(state* _st) {
             // for (int i = 0; i < 10; ++i) {
             //     fprintf(stderr, "m %d %d\n", i, st->mem[0][1000 - i]);
             // }
-            fprintf(stderr, "%d cmd %#04x\n", i, cur);
+            is_dynamic = 0;
             i++;
+            //fprintf(stderr, "%d cmd %#04x\n", i, cur);
+
+            // if (i % 1000 == 0) {
+            //     fprintf(stderr, "program %d\n", get_program());
+            // }
             //fprintf(stderr, "mem = %d %d %d\n", st->mem[1][0], st->mem[1][4], st->mem[1][8]);
             last = st->regs[16];
             print_state();
