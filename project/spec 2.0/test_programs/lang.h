@@ -2,10 +2,13 @@ typedef struct _state {
 	int * vars;
 } State;
 
+enum TExpr{TConst, TVar, TBinop, TCall};
+
 typedef struct _expr {
-	enum TExpr{TConst, TVar, TBinop, TCall} type;
+	TExpr type;
 	void * p;
 } Expr;
+
 
 typedef struct _param {
 	Expr * e;
@@ -53,8 +56,10 @@ typedef struct _var {
 	int var;
 } Var;
 
+enum opcode{Oadd, Osub, Omul, Odiv, Omod, Olt, Ole, Ogt, Oge, Oeq, One, Oand, Oor};
+
 typedef struct _binop {
-	enum opcode{add, sub} op;
+	opcode op;
 	Expr * l, * r;
 } Binop;
 
@@ -62,4 +67,3 @@ typedef struct _call {
 	int fun;
 	Param * params;
 } Call;
-
