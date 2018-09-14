@@ -15,8 +15,10 @@ typedef struct _param {
 	struct _param * next;
 } Param;
 
-typedef struct _stmt {
-	enum TStmt{TSkip, TAss, TSeq, TIf, TWhile, TRun, TReturn} type;
+enum TStmt{TSkip, TAss, TSeq, TIf, TWhile, TRun, TReturn};
+
+typedef struct _stmt { 
+	TStmt type;
 	void * s;
 } Stmt;
 
@@ -67,3 +69,20 @@ typedef struct _call {
 	int fun;
 	Param * params;
 } Call;
+
+typedef struct _arg {
+	int var;
+	struct _arg * next;
+} Arg;
+
+typedef struct _def {
+	int name;
+	Arg* args;
+	Stmt* s;
+	struct _def * next;
+} Def;
+
+typedef struct _program {
+	Def* defs;
+	Stmt* s;
+} Program;
