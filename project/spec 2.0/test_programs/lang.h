@@ -1,5 +1,7 @@
 typedef struct _state {
 	int * vars;
+	char is_ret;
+	int ret_val;
 } State;
 
 enum TExpr{TConst, TVar, TBinop, TCall};

@@ -1,37 +1,3 @@
-// #include <stdio.h>
-
-// char* s;
-
-// int read(const char* a, int mode = 0) {
-// 	while (isspece(*s)) {
-// 		s++;
-// 	}
-// 	char* old = s;
-// 	while (*a != 0) {
-// 		if (*a != *b) {
-// 			s = old;
-// 			return 0;
-// 		}
-// 		a++;
-// 		s++;
-// 	}
-// 	if (mode) {
-// 		s = old;
-// 	}
-// 	return 1;
-// }
-
-// Stmt * read_stmt() {
-// 	split
-// }
-
-// State* parse(char * program) {
-// 	while (read("fun", 1)) {
-// 		read_function();
-// 	}
-// 	read_stmt();
-// }
-
 #include <pcomb.h>
 
 #include <iostream>
@@ -40,58 +6,9 @@
 #include "lang.h"
 
 
-// This files shows how to use pcomb to write a simple calculator
-
 using namespace pcomb;
 
-// AST definitions
-// class Expr
-// {
-// public:
-// 	virtual long eval() const = 0;
-// 	virtual ~Expr() = default;
-// };
-
-// class NumExpr: public Expr
-// {
-// private:
-// 	long num;
-// public:
-// 	NumExpr(long n): num(n) {}
-
-// 	long eval() const override { return num; }
-// };
-
-// class BinExpr: public Expr
-// {
-// private:
-// 	char opCode;
-// 	ExprPtr lhs, rhs;
-// public:
-// 	BinExpr(char o, ExprPtr l, ExprPtr r): opCode(o), lhs(std::move(l)), rhs(std::move(r)) {}
-
-// 	long eval() const override
-// 	{
-// 		assert(lhs && rhs);
-// 		switch (opCode)
-// 		{
-// 			case '+':
-// 				return lhs->eval() + rhs->eval();
-// 			case '-':
-// 				return lhs->eval() - rhs->eval();
-// 			case '*':
-// 				return lhs->eval() * rhs->eval();
-// 			case '/':
-// 				return lhs->eval() / rhs->eval();
-// 			default:
-// 				throw std::runtime_error("Invalid opcode");
-// 		}
-// 	}
-// };
-
 auto expr0 = LazyParser<Expr*>();
-
-// Grammar of the calculator
 
 auto id = rule(token(regex("\\w+")), [] (auto name) -> int {
 	return name.to_string()[0]; // TODO
@@ -103,11 +20,13 @@ auto param = alt
 		[] (auto call) -> Param* {
 			Param* res = (Param*) malloc(sizeof(Param));
 			res->e = std::get<1>(call);
+			res->next = NULL;
 			Param* cur = res;
 			for (auto& param: std::get<2>(call)) {
 				cur->next = (Param*) malloc(sizeof(Param));
 				cur = cur->next;
 				cur->e = std::get<1>(param);
+				cur->next = NULL;
 			}
 			return res;
 		}
@@ -434,11 +353,13 @@ auto arg = alt
 		[] (auto call) -> Arg* {
 			Arg* res = (Arg*) malloc(sizeof(Arg));
 			res->var = std::get<1>(call);
+			res->next = NULL;
 			Arg* cur = res;
 			for (auto& param: std::get<2>(call)) {
 				cur->next = (Arg*) malloc(sizeof(Arg));
 				cur = cur->next;
 				cur->var = std::get<1>(param);
+				cur->next = NULL;
 			}
 			return res;
 		}
@@ -458,12 +379,15 @@ auto program = rule(seq(many(seq(token(str("fun")), id, arg, token(str("begin"))
 			(*cur)->s = std::get<4>(def);
 			cur = &((*cur)->next);
 		}
+		(*cur) = NULL;
 		return prog;
 	});
 
 auto parser = bigstr(program);
 
-int eval_expr(Expr * e, State * s) {
+void eval_stmt(Def* def, Stmt* stmt, State* s);
+
+int eval_expr(Def* def, Expr* e, State* s) {
 	int l, r;
 	switch(e->type) {
 		case TConst:
@@ -473,8 +397,8 @@ int eval_expr(Expr * e, State * s) {
 			return s->vars[((Var*)e->p)->var];
 			break;
 		case TBinop:
-			l = eval_expr(((Binop *)e->p)->l, s);
-			r = eval_expr(((Binop *)e->p)->r, s);
+			l = eval_expr(def, ((Binop *)e->p)->l, s);
+			r = eval_expr(def, ((Binop *)e->p)->r, s);
 			switch(((Binop *)e->p)->op) {
 				case Oadd:
 					return l + r;
@@ -505,49 +429,87 @@ int eval_expr(Expr * e, State * s) {
 			}
 			break;
 		case TCall:
-			return 0; //to-do
+		{
+			State* new_s = (State*) malloc(sizeof(State));
+			new_s->vars = (int*) malloc(sizeof(int) * 200);
+			new_s->is_ret = false;
+			new_s->ret_val = 0;
+			Def* copy = def;
+			while (copy->name != ((Call *) e->p)->fun) { //no null check
+				copy = copy->next;
+			}
+			Param* param = ((Call *) e->p)->params;
+			Arg* arg = (copy)->args;
+			while (param != NULL) {
+				new_s->vars[arg->var] = eval_expr(def, param->e, s);
+				arg = arg->next;
+				param = param->next;
+			}
+			eval_stmt(def, copy->s, new_s);
+			return new_s->ret_val;
 			break;
+		}
 	}
 	return 0;
 }
 
-int eval_stmt(Stmt * stmt, State * s) {
+void eval_stmt(Def* def, Stmt* stmt, State* s) {
 	switch (stmt->type) {
 		case TSkip:
-			return 0;
 			break;
 		case TAss:
-			s->vars[((Ass *) stmt->s)->var] = eval_expr(((Ass *) stmt->s)->e, s);
+			s->vars[((Ass *) stmt->s)->var] = eval_expr(def, ((Ass *) stmt->s)->e, s);
 			break;
 		case TSeq:
-			eval_stmt(((Seq *) stmt->s)->l, s); //continue if return
-			eval_stmt(((Seq *) stmt->s)->r, s);
+			eval_stmt(def, ((Seq *) stmt->s)->l, s);
+			if (s->is_ret) {
+				return;
+			}
+			eval_stmt(def, ((Seq *) stmt->s)->r, s);
 			break;
 		case TIf:
-			if (eval_expr(((If *) stmt->s)->e, s)) {
-				eval_stmt(((If *) stmt->s)->l, s);
+			if (eval_expr(def, ((If *) stmt->s)->e, s)) {
+				eval_stmt(def, ((If *) stmt->s)->l, s);
 			}
 			else {
-				eval_stmt(((If *) stmt->s)->r, s);
+				eval_stmt(def, ((If *) stmt->s)->r, s);
 			}
 			break;
 		case TWhile:
-			while (eval_expr(((While *) stmt->s)->e, s)) {
-				eval_stmt(((While *) stmt->s)->s, s);
+			while (eval_expr(def, ((While *) stmt->s)->e, s)) {
+				eval_stmt(def, ((While *) stmt->s)->s, s);
 			}
 			break;
 		case TRun:
-			return 0; //to-do
+		{
+			State* new_s = (State*) malloc(sizeof(State));
+			new_s->vars = (int*) malloc(sizeof(int) * 200);
+			new_s->is_ret = false;
+			new_s->ret_val = 0;
+			Def* copy = def;
+			while (copy->name != ((Run *) stmt->s)->fun) { //no null check
+				copy = copy->next;
+			}
+			Param* param = ((Run *) stmt->s)->params;
+			Arg* arg = (copy)->args;
+			while (param != 0) {
+				new_s->vars[arg->var] = eval_expr(def, param->e, s);
+				arg = arg->next;
+				param = param->next;
+			}
+			eval_stmt(def, copy->s, new_s);
 			break;
+		}
 		case TReturn:
-			return eval_expr(((Return *) stmt->s)->e, s);
+			s->is_ret = true;
+			s->ret_val = eval_expr(def, ((Return *) stmt->s)->e, s);
 			break;
 	}
-
 }
 
 int eval_prog(Program* prog, State* s) {
-	return eval_stmt(prog->s, s);
+	eval_stmt(prog->defs, prog->s, s);
+	return s->ret_val;
 }
 
 void parseLine(const std::string& lineStr)
@@ -561,26 +523,17 @@ void parseLine(const std::string& lineStr)
 		return;
 	}
 	State s;
-	int vars[100];
-	vars[97] = 3;
+	int vars[200];
 	s.vars = vars;
-	std::cout << "Result = " << eval_prog(parseResult.getOutput(), &s) << "\n";
+	std::cout << eval_prog(parseResult.getOutput(), &s);
 }
 
 int main()
 {
-	std::cout << "Simple calculator powered by pcomb\n";
-	while (true)
-	{
-		std::cout << "> ";
-
-		auto lineStr = std::string();
-		std::getline(std::cin, lineStr);
-
-		if (lineStr.empty())
-			break;
-
-		parseLine(lineStr);
+	std::string lineStr = std::string();
+	std::string cur = std::string();
+	while (std::getline(std::cin, cur)) {
+		lineStr += '\n' + cur;
 	}
-	std::cout << "Bye bye!" << std::endl;
+	parseLine(lineStr);
 }
