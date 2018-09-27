@@ -88,6 +88,7 @@ void cmp_83(unsigned char cmd) {
     v.base = a;
     v.mem = -1;
     is_dynamic = 0;
+    print_value();
     cmp();
     if (is_dynamic) {
         fprintf(stderr, "cmp83 ");

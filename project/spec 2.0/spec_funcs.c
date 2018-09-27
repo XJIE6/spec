@@ -64,9 +64,17 @@ void cmp() {
         return;
     }
     if (cur.mem != v.mem) {
-        fprintf(stderr, "MEM ARE NOT EQUAL\n");
-        is_end = 1;
-        return;
+        if (v.mem == -1 && v.base == 0) {
+            cur.base = 1;
+        }
+        else if (cur.mem == -1 && cur.base == 0) {
+            v.base = 1;
+        }
+        else {
+            fprintf(stderr, "MEM ARE NOT EQUAL\n");
+            is_end = 1;
+            return;
+        }
     }
     type a = v.base, b = cur.base;
     //fprintf(stderr, "CMP %d %d\n", a, b);
@@ -363,7 +371,7 @@ void eval(param* p) {
     }
     if (f) {
     	if (p -> scale != -1) {
-        	v.base = cur.base * (1 << p->scale);
+        	v.base = cur.base; // strange fix * (1 << p->scale);
 		}
 		else {
 			v.base = cur.base;

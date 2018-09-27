@@ -5,25 +5,33 @@
 
 #include "lang.h"
 
-
 using namespace pcomb;
+
+void * start, * current;
+void * cleverMalloc(int size) {
+	void * last = current;
+	current += size;
+	return last;
+}
+
+int eval_prog(Program* prog, ProgramState* s);
 
 auto expr0 = LazyParser<Expr*>();
 
 auto id = rule(token(regex("\\w+")), [] (auto name) -> int {
-	return name.to_string()[0]; // TODO
+	return name.to_string()[0] - 'a'; // TODO
 });
 
 auto param = alt
 (
 	rule(seq(token(ch('(')), expr0.getRef(), many(seq(token(ch(',')), expr0.getRef())), token(ch(')'))),
-		[] (auto call) -> Param* {
-			Param* res = (Param*) malloc(sizeof(Param));
+		[] (auto call) -> Par* {
+			Par* res = (Par*) cleverMalloc(sizeof(Par));
 			res->e = std::get<1>(call);
 			res->next = NULL;
-			Param* cur = res;
+			Par* cur = res;
 			for (auto& param: std::get<2>(call)) {
-				cur->next = (Param*) malloc(sizeof(Param));
+				cur->next = (Par*) cleverMalloc(sizeof(Par));
 				cur = cur->next;
 				cur->e = std::get<1>(param);
 				cur->next = NULL;
@@ -31,22 +39,22 @@ auto param = alt
 			return res;
 		}
 	),
-	rule(seq(token(ch('(')), token(ch(')'))), [](auto nothing)-> Param * {return NULL;})
+	rule(seq(token(ch('(')), token(ch(')'))), [](auto nothing)-> Par * {return NULL;})
 );
 
 auto nexpr = alt
 (
 	rule(token(regex("[+-]?\\d+")), [] (auto n) -> Expr* { 
-		Expr * e = (Expr*) malloc(sizeof(Expr));
-		Const * c = (Const*) malloc(sizeof(Const));
+		Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+		Const * c = (Const*) cleverMalloc(sizeof(Const));
 		e->type = TConst;
 		e->p = c;
 		c->val = std::stoul(n.to_string());
 		return e;
 	}),
 	rule(seq(id, param), [] (auto call) -> Expr* { 
-		Expr * e = (Expr*) malloc(sizeof(Expr));
-		Call * c = (Call*) malloc(sizeof(Call));
+		Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+		Call * c = (Call*) cleverMalloc(sizeof(Call));
 		e->type = TCall;
 		e->p = c;
 		c->fun = std::get<0>(call);
@@ -54,8 +62,8 @@ auto nexpr = alt
 		return e;
 	}),
 	rule(id, [] (auto id) -> Expr* { 
-		Expr * e = (Expr*) malloc(sizeof(Expr));
-		Var * c = (Var*) malloc(sizeof(Var));
+		Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+		Var * c = (Var*) cleverMalloc(sizeof(Var));
 		e->type = TVar;
 		e->p = c;
 		c->var = id;
@@ -80,8 +88,8 @@ auto mul = rule
 		auto& exprVec = std::get<1>(pair);
 
 		for (auto& pair: exprVec) {
-			Expr * e = (Expr*) malloc(sizeof(Expr));
-			Binop * c = (Binop*) malloc(sizeof(Binop));
+			Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+			Binop * c = (Binop*) cleverMalloc(sizeof(Binop));
 			e->type = TBinop;
 			e->p = c;
 			c->l = res;
@@ -112,8 +120,8 @@ auto add = rule
 		auto& exprVec = std::get<1>(pair);
 
 		for (auto& pair: exprVec) {
-			Expr * e = (Expr*) malloc(sizeof(Expr));
-			Binop * c = (Binop*) malloc(sizeof(Binop));
+			Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+			Binop * c = (Binop*) cleverMalloc(sizeof(Binop));
 			e->type = TBinop;
 			e->p = c;
 			c->l = res;
@@ -141,8 +149,8 @@ auto eq = rule
 		auto& exprVec = std::get<1>(pair);
 
 		for (auto& pair: exprVec) {
-			Expr * e = (Expr*) malloc(sizeof(Expr));
-			Binop * c = (Binop*) malloc(sizeof(Binop));
+			Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+			Binop * c = (Binop*) cleverMalloc(sizeof(Binop));
 			e->type = TBinop;
 			e->p = c;
 			c->l = res;
@@ -176,8 +184,8 @@ auto andi = rule
 		auto& exprVec = std::get<1>(pair);
 
 		for (auto& pair: exprVec) {
-			Expr * e = (Expr*) malloc(sizeof(Expr));
-			Binop * c = (Binop*) malloc(sizeof(Binop));
+			Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+			Binop * c = (Binop*) cleverMalloc(sizeof(Binop));
 			e->type = TBinop;
 			e->p = c;
 			c->l = res;
@@ -198,8 +206,8 @@ auto ori = rule
 		auto& exprVec = std::get<1>(pair);
 
 		for (auto& pair: exprVec) {
-			Expr * e = (Expr*) malloc(sizeof(Expr));
-			Binop * c = (Binop*) malloc(sizeof(Binop));
+			Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+			Binop * c = (Binop*) cleverMalloc(sizeof(Binop));
 			e->type = TBinop;
 			e->p = c;
 			c->l = res;
@@ -221,7 +229,7 @@ auto els = alt
 		return std::get<1>(triple);
 	}),
 	rule(token(str("fi")), [](auto single) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TSkip;
 		return stmt;
 	})
@@ -230,32 +238,32 @@ auto els = alt
 auto simple = alt
 (
 	rule (seq(id, param), [](auto pair) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TRun;
-		Run* run = (Run *) malloc(sizeof(Run));
+		Run* run = (Run *) cleverMalloc(sizeof(Run));
 		stmt->s = run;
 		run->fun = std::get<0>(pair);
 		run->params = std::get<1>(pair);
 		return stmt;
 	}),
 	rule (seq(id, token(str(":=")), expr), [](auto triple) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TAss;
-		Ass* ass = (Ass *) malloc(sizeof(Ass));
+		Ass* ass = (Ass *) cleverMalloc(sizeof(Ass));
 		stmt->s = ass;
 		ass->var = std::get<0>(triple);
 		ass->e = std::get<2>(triple);
 		return stmt;
 	}),
 	rule (token(str("skip")), [](auto single) -> Stmt*{
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TSkip;
 		return stmt;
 	}),
 	rule (seq(token(str("return")), expr), [](auto pair) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TReturn;
-		Return* ret = (Return *) malloc(sizeof(Return));
+		Return* ret = (Return *) cleverMalloc(sizeof(Return));
 		stmt->s = ret;
 		ret->e = std::get<1>(pair);
 		return stmt;
@@ -263,16 +271,16 @@ auto simple = alt
 	rule (seq(token(str("if")), expr, token(str("then")), st0.getRef(), 
 		many(seq(token(str("elif")), expr, token(str("then")), st0.getRef())),
 		els), [](auto ifstmt) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TIf;
-		If* iff = (If *) malloc(sizeof(If));
+		If* iff = (If *) cleverMalloc(sizeof(If));
 		stmt->s = iff;
 		iff->e = std::get<1>(ifstmt);
 		iff->l = std::get<3>(ifstmt);
 		for (auto& elif: std::get<4>(ifstmt)) {
-			iff->r = (Stmt *) malloc(sizeof(Stmt));
+			iff->r = (Stmt *) cleverMalloc(sizeof(Stmt));
 			iff->r->type = TIf;
-			iff->r->s = (If *) malloc(sizeof(If));
+			iff->r->s = (If *) cleverMalloc(sizeof(If));
 			iff = (If *)iff->r->s;
 			iff->e = std::get<1>(elif);
 			iff->l = std::get<3>(elif);
@@ -282,9 +290,9 @@ auto simple = alt
 	}),
 	rule (seq(token(str("while")), expr, token(str("do")), st0.getRef(), token(str("od"))), 
 		[](auto whlstmt) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TWhile;
-		While* whl = (While *) malloc(sizeof(While));
+		While* whl = (While *) cleverMalloc(sizeof(While));
 		stmt->s = whl;
 		whl->e = std::get<1>(whlstmt);
 		whl->s = std::get<3>(whlstmt);
@@ -292,13 +300,13 @@ auto simple = alt
 	}),
 	rule (seq(token(str("repeat")), st0.getRef(), token(str("until")), expr),
 		[](auto whlstmt) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TSeq;
-		Stmt* stmt1 = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt1 = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt1->type = TWhile;
-		Seq* s = (Seq *) malloc(sizeof(Seq));
+		Seq* s = (Seq *) cleverMalloc(sizeof(Seq));
 		stmt->s = s;
-		While* whl = (While *) malloc(sizeof(While));
+		While* whl = (While *) cleverMalloc(sizeof(While));
 		stmt1->s = whl;
 		s->l = std::get<1>(whlstmt);
 		s->r = stmt1;
@@ -309,17 +317,17 @@ auto simple = alt
 	rule (seq(token(str("for")), st0.getRef(), token(ch(',')), expr, token(ch(',')), st0.getRef(), 
 		token(str("do")), st0.getRef(), token(str("od"))),
 		[](auto whlstmt) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TSeq;
-		Stmt* stmt1 = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt1 = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt1->type = TWhile;
-		Stmt* stmt2 = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt2 = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt2->type = TSeq;
-		Seq* s = (Seq *) malloc(sizeof(Seq));
+		Seq* s = (Seq *) cleverMalloc(sizeof(Seq));
 		stmt->s = s;
-		While* whl = (While *) malloc(sizeof(While));
+		While* whl = (While *) cleverMalloc(sizeof(While));
 		stmt1->s = whl;
-		Seq* s2 = (Seq *) malloc(sizeof(Seq));
+		Seq* s2 = (Seq *) cleverMalloc(sizeof(Seq));
 		stmt2->s = s2;
 		s->l = std::get<1>(whlstmt);
 		s->r = stmt1;
@@ -334,9 +342,9 @@ auto simple = alt
 auto sequ = alt
 (
 	rule(seq(simple, token(ch(';')), st0.getRef()), [](auto triple) -> Stmt* {
-		Stmt* stmt = (Stmt *) malloc(sizeof(Stmt));
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TSeq;
-		Seq* s = (Seq *) malloc(sizeof(Seq));
+		Seq* s = (Seq *) cleverMalloc(sizeof(Seq));
 		stmt->s = s;
 		s->l = std::get<0>(triple);
 		s->r = std::get<2>(triple);
@@ -351,12 +359,12 @@ auto arg = alt
 (
 	rule(seq(token(ch('(')), id, many(seq(token(ch(',')), id)), token(ch(')'))),
 		[] (auto call) -> Arg* {
-			Arg* res = (Arg*) malloc(sizeof(Arg));
+			Arg* res = (Arg*) cleverMalloc(sizeof(Arg));
 			res->var = std::get<1>(call);
 			res->next = NULL;
 			Arg* cur = res;
 			for (auto& param: std::get<2>(call)) {
-				cur->next = (Arg*) malloc(sizeof(Arg));
+				cur->next = (Arg*) cleverMalloc(sizeof(Arg));
 				cur = cur->next;
 				cur->var = std::get<1>(param);
 				cur->next = NULL;
@@ -369,11 +377,11 @@ auto arg = alt
 
 auto program = rule(seq(many(seq(token(str("fun")), id, arg, token(str("begin")), st, token(str("end")))), st), 
 	[](auto pair)->Program* {
-		Program* prog = (Program *) malloc(sizeof(Program));
+		Program* prog = (Program *) cleverMalloc(sizeof(Program));
 		prog->s = std::get<1>(pair);
 		Def ** cur = &(prog->defs);
 		for (auto& def: std::get<0>(pair)) {
-			*cur = (Def *) malloc(sizeof(Def));
+			*cur = (Def *) cleverMalloc(sizeof(Def));
 			(*cur)->name = std::get<1>(def);
 			(*cur)->args = std::get<2>(def);
 			(*cur)->s = std::get<4>(def);
@@ -385,136 +393,11 @@ auto program = rule(seq(many(seq(token(str("fun")), id, arg, token(str("begin"))
 
 auto parser = bigstr(program);
 
-void eval_stmt(Def* def, Stmt* stmt, State* s);
-
-int eval_expr(Def* def, Expr* e, State* s) {
-	int l, r;
-	switch(e->type) {
-		case TConst:
-			return ((Const *)e->p)->val;
-			break;
-		case TVar:
-			return s->vars[((Var*)e->p)->var];
-			break;
-		case TBinop:
-			l = eval_expr(def, ((Binop *)e->p)->l, s);
-			r = eval_expr(def, ((Binop *)e->p)->r, s);
-			switch(((Binop *)e->p)->op) {
-				case Oadd:
-					return l + r;
-				case Osub:
-					return l - r;
-				case Omul:
-					return l * r;
-				case Odiv:
-					return l / r;
-				case Omod:
-					return l % r;
-				case Olt:
-					return l < r;
-				case Ole:
-					return l <= r;
-				case Ogt:
-					return l > r;
-				case Oge:
-					return l >= r;
-				case Oeq:
-					return l == r;
-				case One:
-					return l != r;
-				case Oand:
-					return l && r;
-				case Oor:
-					return l || r;
-			}
-			break;
-		case TCall:
-		{
-			State* new_s = (State*) malloc(sizeof(State));
-			new_s->vars = (int*) malloc(sizeof(int) * 200);
-			new_s->is_ret = false;
-			new_s->ret_val = 0;
-			Def* copy = def;
-			while (copy->name != ((Call *) e->p)->fun) { //no null check
-				copy = copy->next;
-			}
-			Param* param = ((Call *) e->p)->params;
-			Arg* arg = (copy)->args;
-			while (param != NULL) {
-				new_s->vars[arg->var] = eval_expr(def, param->e, s);
-				arg = arg->next;
-				param = param->next;
-			}
-			eval_stmt(def, copy->s, new_s);
-			return new_s->ret_val;
-			break;
-		}
-	}
-	return 0;
-}
-
-void eval_stmt(Def* def, Stmt* stmt, State* s) {
-	switch (stmt->type) {
-		case TSkip:
-			break;
-		case TAss:
-			s->vars[((Ass *) stmt->s)->var] = eval_expr(def, ((Ass *) stmt->s)->e, s);
-			break;
-		case TSeq:
-			eval_stmt(def, ((Seq *) stmt->s)->l, s);
-			if (s->is_ret) {
-				return;
-			}
-			eval_stmt(def, ((Seq *) stmt->s)->r, s);
-			break;
-		case TIf:
-			if (eval_expr(def, ((If *) stmt->s)->e, s)) {
-				eval_stmt(def, ((If *) stmt->s)->l, s);
-			}
-			else {
-				eval_stmt(def, ((If *) stmt->s)->r, s);
-			}
-			break;
-		case TWhile:
-			while (eval_expr(def, ((While *) stmt->s)->e, s)) {
-				eval_stmt(def, ((While *) stmt->s)->s, s);
-			}
-			break;
-		case TRun:
-		{
-			State* new_s = (State*) malloc(sizeof(State));
-			new_s->vars = (int*) malloc(sizeof(int) * 200);
-			new_s->is_ret = false;
-			new_s->ret_val = 0;
-			Def* copy = def;
-			while (copy->name != ((Run *) stmt->s)->fun) { //no null check
-				copy = copy->next;
-			}
-			Param* param = ((Run *) stmt->s)->params;
-			Arg* arg = (copy)->args;
-			while (param != 0) {
-				new_s->vars[arg->var] = eval_expr(def, param->e, s);
-				arg = arg->next;
-				param = param->next;
-			}
-			eval_stmt(def, copy->s, new_s);
-			break;
-		}
-		case TReturn:
-			s->is_ret = true;
-			s->ret_val = eval_expr(def, ((Return *) stmt->s)->e, s);
-			break;
-	}
-}
-
-int eval_prog(Program* prog, State* s) {
-	eval_stmt(prog->defs, prog->s, s);
-	return s->ret_val;
-}
-
-void parseLine(const std::string& lineStr)
+extern "C" void parseLine(char* str, void** ptr, int* len, Program ** p)
 {
-	InputStream ss(lineStr);
+	start = malloc(1000000000);
+	current = start;
+	InputStream ss(str);
 	auto parseResult = parser.parse(ss);
 	if (parseResult.hasError())
 	{
@@ -522,18 +405,8 @@ void parseLine(const std::string& lineStr)
 		std::cout << "Parsing failed at line " << remainingStream.getLineNumber() << ", column " << remainingStream.getColumnNumber() << "\n";
 		return;
 	}
-	State s;
-	int vars[200];
-	s.vars = vars;
-	std::cout << eval_prog(parseResult.getOutput(), &s);
-}
-
-int main()
-{
-	std::string lineStr = std::string();
-	std::string cur = std::string();
-	while (std::getline(std::cin, cur)) {
-		lineStr += '\n' + cur;
-	}
-	parseLine(lineStr);
+	*ptr = start;
+	*len = (char *)current - (char *) start;
+	(*p) = parseResult.getOutput();
+	return;
 }

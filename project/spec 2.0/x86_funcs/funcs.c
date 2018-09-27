@@ -94,6 +94,9 @@ void eval_0f(char cmd) {
     else if(cur == 0xb6) {
         eval_b6(cur);
     }
+    else if(cur == 0x1f) {
+        //nop operator
+    }
     else { 
         fprintf(stderr, "%#04x\n", cur);
         is_end = 1;
@@ -345,6 +348,27 @@ void eval_c7(char cmd) {
     }
 }
 
+void eval_f7(char cmd) {
+    char f = read_reg();
+    switch(f) {
+        case 0:
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+            if (REXW()) {
+                idiv_f7_64(cmd);
+            }
+            else {
+                idiv_f7_32(cmd);
+            }
+        break;
+    }
+}
+
 void eval_ff(char cmd) {
     char f = read_reg();
     switch(f) {
@@ -446,6 +470,7 @@ void init(void *(**a)()) {
     a[0x89] = eval_89;
     a[0x90] = empty;
     a[0x98] = empty;
+    a[0x99] = empty;
 
     a[0x8a] = mov_8b_8;
     a[0x8b] = eval_8b;
@@ -484,7 +509,7 @@ void init(void *(**a)()) {
 
     a[0xeb] = jmp_eb;
 
-
+    a[0xf7] = eval_f7;
     a[0xff] = eval_ff;
 
 }

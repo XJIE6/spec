@@ -34,7 +34,7 @@ int main(int argc, char const *argv[]) {
         p++;
         len++;
     }
-    run_interpreter(argv[1], len);
+    run_interpreter2(argv[1]);
     //run_prime(1000);
     //run_kmp();
     //run_kmp2();

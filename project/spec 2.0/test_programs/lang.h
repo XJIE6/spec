@@ -1,26 +1,26 @@
-typedef struct _state {
+typedef struct _program_state {
 	int * vars;
 	char is_ret;
 	int ret_val;
-} State;
+} ProgramState;
 
 enum TExpr{TConst, TVar, TBinop, TCall};
 
 typedef struct _expr {
-	TExpr type;
+	enum TExpr type;
 	void * p;
 } Expr;
 
 
-typedef struct _param {
+typedef struct _par {
 	Expr * e;
-	struct _param * next;
-} Param;
+	struct _par * next;
+} Par;
 
 enum TStmt{TSkip, TAss, TSeq, TIf, TWhile, TRun, TReturn};
 
 typedef struct _stmt { 
-	TStmt type;
+	enum TStmt type;
 	void * s;
 } Stmt;
 
@@ -45,7 +45,7 @@ typedef struct _while {
 
 typedef struct _run {
 	int fun;
-	Param * params;
+	Par * params;
 } Run;
 
 typedef struct _return {
@@ -63,13 +63,13 @@ typedef struct _var {
 enum opcode{Oadd, Osub, Omul, Odiv, Omod, Olt, Ole, Ogt, Oge, Oeq, One, Oand, Oor};
 
 typedef struct _binop {
-	opcode op;
+	enum opcode op;
 	Expr * l, * r;
 } Binop;
 
 typedef struct _call {
 	int fun;
-	Param * params;
+	Par * params;
 } Call;
 
 typedef struct _arg {

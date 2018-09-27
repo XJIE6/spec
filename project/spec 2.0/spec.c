@@ -11,7 +11,7 @@ state* st;
 char* res;
 char* last; 
 
-const int MAX_MEM_SIZE = 10;
+const int MAX_MEM_SIZE = 12;
 const int MAX_STACK_SIZE = 1000000;
 
 
@@ -531,13 +531,13 @@ char* spec(state* _st) {
                 REX = cur;
                 cur = get_char();
             }
-            // fprintf(stderr, "HERE\n");
-            // for (int i = 0; i < 17; ++i) {
-            //     fprintf(stderr, "r %lld %lld\n", i, st->regs[i]);
-            // }
-            // for (int i = 0; i < 10; ++i) {
-            //     fprintf(stderr, "m %d %d\n", i, st->mem[0][1000 - i]);
-            // }
+            /*fprintf(stderr, "HERE\n");
+            for (int i = 0; i < 8; ++i) {
+                fprintf(stderr, "r%lld %lld %d\n", i, st->regs[i], st->info_regs[i].mem);
+            }*/
+            /*for (int i = 0; i < 12; ++i) {
+                 fprintf(stderr, "m %d %d %d\n", i, ((int*)st->mem[1])[i], st->info_mem[1][i * 4].mem);
+            }*/
             is_dynamic = 0;
             i++;
             //fprintf(stderr, "%d cmd %#04x\n", i, cur);
