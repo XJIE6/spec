@@ -68,32 +68,7 @@ int eval_stmt(Stmt * stmt, State * s) {
 
 
 int main() {
-	// Const c;
-	// c.val = 7;
-	// Expr e;
-	// e.type = TConst;
-	// e.p = &c;
-	// printf("%d", eval_expr(&e, 0));
-	// int a[5];
-	// a[0] = 1;
-	// a[1] = 1;
-	// a[2] = 0;
-	// a[3] = 0;
-	// a[4] = 5;
-	// State st;
-	// st.vars = &a;
-	// Stmt m;
-	// m.type = TWhile
-	// While w;
-	// m.s = &w;
-	// Expr cond;
-
-	// while (v3 < v4) {
-	// 	v2 = v1 + v0
-	// 	v0 = v1
-	// 	v1 = v2
-	// }
-	char c;
-	scanf("%c", &c);
-	printf("%c", c);
+	Program* p;
+	ProgramState* ps;
+	eval_prog(p, ps);
 }

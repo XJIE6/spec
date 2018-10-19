@@ -19,7 +19,7 @@
 
 void ret_c3(unsigned char cmd) {
     pop_64();
-    if (is_end) {
+    // if (is_end) {
         p1.reg1 = 0;//rax
         p1.reg2 = -1;
         p1.scale = -1;
@@ -30,14 +30,14 @@ void ret_c3(unsigned char cmd) {
         write_byte(0xc3);
 
         return;
-    }
+    // }
     //fprintf(stderr, "FFF RET VALUE %d\n", st->regs[0]);
-    p1.reg1 = 16; //rip
-    p1.reg2 = -1;
-    p1.scale = -1;
-    p1.base = 0;
-    if (is_dynamic) {
-        fprintf(stderr, "WTF RET%d\n", cmd);
-    }
-    assign(&p1);
+    // p1.reg1 = 16; //rip
+    // p1.reg2 = -1;
+    // p1.scale = -1;
+    // p1.base = 0;
+    // if (is_dynamic) {
+    //     fprintf(stderr, "WTF RET%d\n", cmd);
+    // }
+    // assign(&p1);
 }

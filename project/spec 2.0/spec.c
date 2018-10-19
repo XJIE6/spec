@@ -540,7 +540,7 @@ char* spec(state* _st) {
             }*/
             is_dynamic = 0;
             i++;
-            //fprintf(stderr, "%d cmd %#04x\n", i, cur);
+            fprintf(stderr, "%d cmd %#04x\n", i, cur);
 
             // if (i % 1000 == 0) {
             //     fprintf(stderr, "program %d\n", get_program());
@@ -549,14 +549,17 @@ char* spec(state* _st) {
             last = st->regs[16];
             print_state();
             cmd[cur](cur);
+            fprintf(stderr, "9");
             if (st->next != NULL) {
                 st->next->next = que;
                 que = st->next;
                 st->next = NULL;
             }
+            fprintf(stderr, "9");
             if (is_end) {
                 break;
             }
+            fprintf(stderr, "9");
         }
     }
     fprintf(stderr, "USED: %d\n", xxx);

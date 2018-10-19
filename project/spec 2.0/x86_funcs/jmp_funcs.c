@@ -177,11 +177,21 @@ void call_e8(unsigned char cmd) {
         ++(st->mem_len);
         return;
     }
+
+    copy(st);
     //fprintf(stderr, "CALL VALUE %d %d\n", st->regs[4], st->regs[5]);
     //print_value();
     push_64();
+    st->mem_mem_len[0] += st->regs[4];
+    st->mem[0] += st->regs[4];
     eval(&p2);
     v.base += cur;
     //fprintf(stderr, "FFF CALL %d\n", v.base % 20);
     assign(&p2);
+
+    calc_hash(st->next);
+    st->next->next = st;
+    st = st->next;
+    st->info_regs[0].is_dynamic = 1;
+    calc_hash(st->next);
 }
