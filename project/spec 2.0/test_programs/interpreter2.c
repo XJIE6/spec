@@ -1,5 +1,11 @@
+#define TEST
+
 #include <stdlib.h>
+#include "../my_malloc.c"
 #include "lang.h"
+#ifdef TEST
+#include <stdio.h>
+#endif
 
 void eval_stmt(Def* def, Stmt* stmt, ProgramState* s);
 
@@ -9,6 +15,14 @@ int eval_expr(Def* def, Expr* e, ProgramState* s) {
 	if (e->type == TConst) {
 		return ((Const *)e->p)->val;
 	}
+	#ifdef TEST
+	if (e->type == TRead) {
+		int res;
+		scanf("%d", &res);
+		printf("> ");
+		return res;
+	}
+	#endif
 	else if (e->type == TVar) {
 		return values[((Var*)e->p)->var];
 	}
@@ -144,6 +158,12 @@ void eval_stmt(Def* def, Stmt* stmt, ProgramState* s) {
 		}
 		eval_stmt(def, copy->s, new_s);
 	}
+	#ifdef TEST
+	else if (stmt->type == TWrite) {
+		int res = eval_expr(def, ((Write *) stmt->s)->e, s);
+		printf("%d\n", res);
+	}
+	#endif
 	else if (stmt->type == TReturn) {
 		s->is_ret = 1;
 		s->ret_val = eval_expr(def, ((Return *) stmt->s)->e, s);

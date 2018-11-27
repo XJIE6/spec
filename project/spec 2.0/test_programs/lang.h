@@ -4,7 +4,7 @@ typedef struct _program_state {
 	int ret_val;
 } ProgramState;
 
-enum TExpr{TConst, TVar, TBinop, TCall};
+enum TExpr{TConst, TVar, TBinop, TCall, TRead};
 
 typedef struct _expr {
 	enum TExpr type;
@@ -17,7 +17,7 @@ typedef struct _par {
 	struct _par * next;
 } Par;
 
-enum TStmt{TSkip, TAss, TSeq, TIf, TWhile, TRun, TReturn};
+enum TStmt{TSkip, TAss, TSeq, TIf, TWhile, TRun, TReturn, TWrite};
 
 typedef struct _stmt { 
 	enum TStmt type;
@@ -47,6 +47,10 @@ typedef struct _run {
 	int fun;
 	Par * params;
 } Run;
+
+typedef struct _write {
+	Expr * e;
+} Write;
 
 typedef struct _return {
 	Expr * e;

@@ -1,3 +1,5 @@
+#define TEST
+
 #include <pcomb.h>
 
 #include <iostream>
@@ -52,6 +54,14 @@ auto nexpr = alt
 		c->val = std::stoul(n.to_string());
 		return e;
 	}),
+
+	#ifdef TEST
+	rule(seq(token(str("read")), token(ch('(')), token(ch(')'))), [] (auto read) -> Expr* {
+		Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+		e->type = TRead;
+	}),
+	#endif
+
 	rule(seq(id, param), [] (auto call) -> Expr* { 
 		Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
 		Call * c = (Call*) cleverMalloc(sizeof(Call));
@@ -237,6 +247,17 @@ auto els = alt
 
 auto simple = alt
 (
+	#ifdef TEST
+	rule (seq(token(str("write")), token(ch('(')), expr, token(ch(')'))), 
+	[] (auto writestmt) -> Stmt* {
+		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
+		stmt->type = TWrite;
+		Write* write = (Write *) cleverMalloc(sizeof(Write));
+		stmt->s = write;
+		write->e = std::get<2>(writestmt);
+		return stmt;
+	}),
+	#endif
 	rule (seq(id, param), [](auto pair) -> Stmt* {
 		Stmt* stmt = (Stmt *) cleverMalloc(sizeof(Stmt));
 		stmt->type = TRun;
