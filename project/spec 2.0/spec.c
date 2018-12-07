@@ -6,6 +6,8 @@
 #include "spec.h"
 #include "state.h"
 
+void* my_malloc(int n);
+
 unsigned char REX;
 state* st;
 char* res;
@@ -195,6 +197,35 @@ state* new_state() {
     return cur;
 }
 
+state* crop(state* cur) {
+    //MAYBE BUG
+    //fprintf(stderr, "IN CROP\n");
+    int delta = cur->regs[4];
+    cur->mem_mem_len[0] += delta;
+    cur->mem[0] += delta;
+    for (int i = 0; i < 17; ++i) {
+        if (cur->info_regs[i].mem == 0) {
+            cur->regs[i] -= delta;
+            //fprintf(stderr, "reg %d\n", i);
+        }
+    }
+
+    for (int j = -cur->mem_mem_len[0]; j < 0; ++j) {
+        if (cur->info_mem[0][j].mem == 0) {
+            cur->mem[0][j] -= delta;
+            //fprintf(stderr, "stack %d\n", j);
+        }
+    }
+    //fprintf(stderr, "OUT CROP\n");
+    // for (int i = 1; i < cur->mem_len; ++i) {
+    //     for (int j = 0; j < cur->mem_mem_len[i]; ++j) {
+    //         if (cur->info_mem[i][j].mem == 0) {
+    //             cur->mem[i][j] += delta;
+    //         }
+    //     }
+    // }
+}
+
 state* copy(state* cur) {
     state* new = new_state();
     for (int i = 0; i < 17; ++i) {
@@ -233,6 +264,8 @@ state* copy(state* cur) {
         }
     }
     cur->next = new;
+    new->next = cur;
+    return new;
 }
 
 void print_reg(int i) {
@@ -490,15 +523,6 @@ int i = 0;
 
 const char * get_program();
 
-typedef struct _state_stack {
-    state* start_state;
-    state* current_state;
-    void* generated_code;
-    state* parallel_state;
-    state** result_place;
-    struct _state_stack* next;
-} state_stack;
-
 typedef struct _specialized_part {
     state* start_state;
     void* generated_code;
@@ -506,13 +530,27 @@ typedef struct _specialized_part {
     struct _specialized_part* next;
 } specialized_part;
 
-char* spec(state* _state) {
-    state* result;
+typedef struct _state_stack {
+    state* start_state;
+    state* current_state;
+    state* state_after_call;
+    void* generated_code;
+    state* parallel_state;
+    state** result_place;
+    struct _state_stack* next;
     specialized_part* specialized;
+} state_stack;
+
+int my_pow(int a, int b);
+
+char* spec(state* _state) {
+    state* result = NULL;
+    specialized_part* specialized = NULL;
 
     state_stack* stack = malloc(sizeof(state_stack));
-    stack->start_state = NULL;
+    stack->start_state = copy(_state);
     stack->current_state = _state;
+    stack->state_after_call = NULL;
     stack->generated_code = NULL; // empty
     stack->parallel_state = NULL;
     stack->result_place = &result;
@@ -530,17 +568,60 @@ char* spec(state* _state) {
     
     unsigned char cur;
     
-    while(stack != NULL) {
+    state* last;
+
+    end: while(stack != NULL) {
         state_stack* current = stack;
         stack = stack->next;
         current->next = NULL;
-        //use check
+        calc_hash(current->current_state);
+        specialized_part* tmp = specialized;
+        //fprintf(stderr, "OUR %d\n", current->current_state->regs[16]);
+        while (tmp != NULL) {
+            //fprintf(stderr, "IN QUEUE %d\n", tmp->start_state->regs[16]);
+            if (tmp->start_state->hash == current->current_state->hash) {
+                fprintf(stderr, "REPEAT\n");
+
+                if (tmp->end_state == NULL) {
+                    //MAKE ALL DYNAMIC
+                    //ONLY RAX DYNAMIC FOR NOW
+                    //tmp->end_state = copy(tmp->start_state);
+                    fprintf(stderr, "ERROR 23k\n");
+                    return 0;
+                }
+
+                *(current->result_place) = copy(tmp->end_state);
+                goto end;
+            }
+            tmp = tmp->next;
+        }
 
         fprintf(stderr, "\nStart block\n");
         is_end = 0;
         long long last = st->regs[16];
-        while(1) {
+        specialized_part* used = malloc(sizeof(specialized_part));
+        fprintf(stderr, "USED %d\n", current->start_state->regs[16]);
+        used->start_state = current->start_state;
+        used->generated_code = NULL;
+        used->end_state = NULL;
+        used->next = specialized;
+        specialized = used;
+        current->specialized = used;
+        inner: while(1) {
+            if (current->state_after_call != NULL) {
 
+            //fprintf(stderr, "pp read %d \n", current->current_state->regs[16]);
+                current->state_after_call->mem[0] = current->current_state->mem[0];
+                current->state_after_call->mem_mem_len[0] = current->current_state->mem_mem_len[0];
+                current->state_after_call->regs[16] = current->current_state->regs[16];
+                current->state_after_call->regs[4] = current->current_state->regs[4];
+                current->state_after_call->regs[5] = current->current_state->regs[5];
+                current->current_state = current->state_after_call;
+                current->state_after_call = NULL;
+
+            //fprintf(stderr, "pp read %d \n", RIP);
+                //fprintf(stderr, "START FROM %d\n", RIP);
+            }
             st = current->current_state;
 
             REX = 0;
@@ -550,22 +631,26 @@ char* spec(state* _state) {
                 cur = get_char();
             }
 
-            fprintf(stderr, "%d cmd %#04x\n", i, cur);
+            //fprintf(stderr, "%d cmd %#04x RSP = %d\n", i, cur, RSP);
+            i++;
 
             //new code
-            if (cur == 0x98) {
+            if (cur == 0xe8) {
                 fprintf(stderr, "IT'S NEW CALL HERE!!!\n");
                 p1.reg1 = 16; //rip
                 p1.reg2 = -1;
                 p1.scale = -1;
                 p1.base = 0;
                 p2 = p1;
+
                 int cur = int_32();
                 eval(&p1);
-                // if (v.base + cur == my_malloc) {
-                //     fprintf(stderr, "MALLOC NOT SUPPORTED!!!\n");
-                //     return 0;
-                // }
+                if (v.base + cur == my_malloc) {
+                    fprintf(stderr, "MALLOC NOT SUPPORTED!!!\n");
+                    return 0;
+                }
+
+                //fprintf(stderr, "END IN %d\n", RIP);
 
                 current->next = stack;
                 stack = current;
@@ -576,32 +661,43 @@ char* spec(state* _state) {
                 push_64();
                 eval(&p2);
                 v.base += cur;
-                //fprintf(stderr, "FFF CALL %d\n", v.base % 20);
                 assign(&p2);
 
-
-                st->mem_mem_len[0] += st->regs[4];
-                st->mem[0] += st->regs[4];
+                crop(st);
                 //crop?
 
-                calc_hash(st->next);
-
+                //fprintf(stderr, "pp read %d \n", RIP);
+                calc_hash(st);
                 copy(start);
                 state* start_copy = start->next;
                 start_copy->hash = start->hash;
 
+                specialized_part* tmp = specialized;
+
+                while (tmp != NULL) {
+                    if (tmp->start_state->hash == st->hash) {
+                        fprintf(stderr, "RECURSIVE\n");
+
+                        if (tmp->end_state == NULL) {
+                            //
+                            current->current_state->info_regs[0].is_dynamic = 1;
+                            goto inner;
+                        }
+                    }
+                    tmp = tmp->next;
+                }
+
                 state_stack* new = malloc(sizeof(state_stack));
                 new->start_state = start;
                 new->current_state = start_copy;
+                new->state_after_call = NULL;
                 new->generated_code = NULL; //empty
                 new->parallel_state = NULL;
-                new->result_place = & (current->current_state);
-
-
+                new->result_place = & (current->state_after_call);
 
                 new->next = stack;
                 stack = new;
-                continue;
+                break;
             }
 
             if (0x70 <= cur && cur <= 0x7f && st->info_flags.is_dynamic) {
@@ -622,27 +718,30 @@ char* spec(state* _state) {
                 v.base += cur;
                 assign(&p1);
 
-                calc_hash(st->next);
+                calc_hash(st);
 
                 copy(start);
                 state* start_copy = start->next;
                 start_copy->hash = start->hash;
-                
                 state_stack* new = malloc(sizeof(state_stack));
                 new->start_state = start;
                 new->current_state = start_copy;
+                new->state_after_call = NULL;
                 new->generated_code = NULL; //empty
                 new->parallel_state = NULL;
                 new->result_place = & (current->parallel_state);
 
-                continue;
+                new->next = stack;
+                stack = new;
+
+                break;
             }
 
             if (cur == 0x0f && st->info_flags.is_dynamic) {
                 int cur2 = try_get_char();
-                if (0x80 <= cur2 && cur <= 0x8f) {
+                if (0x80 <= cur2 && cur2 <= 0x8f) {
                     cur = get_char();
-                    fprintf(stderr, "IT'S NEW DYJUMP HERE!!!\n");
+                    fprintf(stderr, "IT'S NEW DYJUMP HERE!!! %d\n", cur);
                     int cur = int_32();
                     
                     //copy
@@ -670,29 +769,35 @@ char* spec(state* _state) {
                     state_stack* new = malloc(sizeof(state_stack));
                     new->start_state = start;
                     new->current_state = start_copy;
+                    new->state_after_call = NULL;
                     new->generated_code = NULL; //empty
                     new->parallel_state = NULL;
                     new->result_place = & (current->parallel_state);
 
+                    new->next = stack;
+                    stack = new;
+
+                    break;
                 }
             }
 
             if (cur == 0xc3) {
+                p1.reg1 = 0;//rax
+                p1.reg2 = -1;
+                p1.scale = -1;
+                p1.base = 0;
+                prefix(&p1);
+
                 fprintf(stderr, "IT'S NEW RET HERE!!!\n");
-                state* result_state = current->current_state; //unite(); // unite current_state with parallel_state to result state
+                copy(current->current_state);
+                state* result_state = current->current_state->next; //unite(); // unite current_state with parallel_state to result state
                 *(current->result_place) = result_state;
 
-                specialized_part* used = malloc(sizeof(specialized_part));
-                used->start_state = current->start_state;
-                used->generated_code = current->generated_code;
-                used->end_state = result_state;
-
-                used->next = specialized;
-                specialized = used;
+                current->specialized->generated_code = current->generated_code;
+                current->specialized->end_state = current->current_state;
+                break;
             }
-            else {
-                cmd[cur](cur);    
-            }
+            cmd[cur](cur);
             //new code
             
 

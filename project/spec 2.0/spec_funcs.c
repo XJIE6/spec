@@ -116,6 +116,7 @@ void cmp() {
 
 void push() {
     RSP -= sizeof(type);
+    //fprintf(stderr, "PUSH %d\n", RSP);
     p1.reg1 = 4; //rsp
     p1.reg2 = -1;
     p1.scale = 0;
@@ -124,7 +125,8 @@ void push() {
 }
 
 void pop() {
-    if (RSP >= 0) {
+    //fprintf(stderr, "POP %d\n", RSP);
+    if (RSP > 0) {
         is_end = 1;
         return;
     }
@@ -309,28 +311,29 @@ void prefix(param* p) {
         fprintf(stderr, ", ");
         print(p, 0);
         fprintf(stderr, "\n");
-        if (v.mem == 0) {
-            write_byte(0x8b);
-            param pp = *p;
-            p1 = *p;
-            p2.reg1 = 4; //RSP
-            p2.reg2 = -1;
-            p2.base = v.base;
-            write_params();
-            *p = pp;
-        }
-        else if (v.mem == -1) {
-            write_byte(0xb8 + p->reg1);
-            write_int(v.base);
-        }
-        else {
-            fprintf(stderr, "ERROR PREFIX");
-            is_end = 1;
-            return;
-        }
+        // if (v.mem == 0) {
+        //     write_byte(0x8b);
+        //     param pp = *p;
+        //     p1 = *p;
+        //     p2.reg1 = 4; //RSP
+        //     p2.reg2 = -1;
+        //     p2.base = v.base;
+        //     write_params();
+        //     *p = pp;
+        // }
+        // else if (v.mem == -1) {
+        //     write_byte(0xb8 + p->reg1);
+        //     write_int(v.base);
+        // }
+        // else {
+        //     fprintf(stderr, "ERROR PREFIX");
+        //     is_end = 1;
+        //     return;
+        // }
     }
     v = v1;
     is_dynamic = d;
+    //fprintf(stderr, "end");
     return;
     //fprintf(stderr, "print prefix\n");
 }
@@ -351,6 +354,7 @@ void eval(param* p) {
         p->scale += 50;
         f = 1; 
     }
+               
     value cur;
     // if (p->scale != 0 && p->reg2 != -1 && st->info_regs[p->reg2].mem != -1) {
     //     fprintf(stderr, "ERROR eval 34\n");

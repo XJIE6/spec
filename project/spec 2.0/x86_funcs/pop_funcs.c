@@ -28,10 +28,12 @@
 
 void pop_58(unsigned char cmd) {
     pop_64();
+    print_value();
     p1.reg1 = cmd - 0x58 + (REXR() << 3);
     p1.reg2 = -1;
     p1.base = 0;
     p1.scale = -1;
+    print_params();
     if (is_dynamic) {
         fprintf(stderr, "pop%d\n", cmd);
     }

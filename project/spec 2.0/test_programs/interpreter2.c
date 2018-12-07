@@ -1,7 +1,7 @@
-#define TEST
+//#define TEST
 
 #include <stdlib.h>
-#include "../my_malloc.c"
+//#include "../my_malloc.c"
 #include "lang.h"
 #ifdef TEST
 #include <stdio.h>

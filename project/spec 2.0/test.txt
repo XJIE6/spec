@@ -1,0 +1,8 @@
+a := 4;
+while x do
+	b := b * 2;
+	x := x - 1
+od;
+return b
+
+ ./main "$(cat test.txt)" 

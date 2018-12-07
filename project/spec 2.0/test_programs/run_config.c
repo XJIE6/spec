@@ -46,26 +46,26 @@ void run_pow(int a, int b) {
 
     st->regs[16] = &my_pow;
     st->regs[7] = a;
-    st->info_regs[7].is_dynamic = 1;
+    st->info_regs[6].is_dynamic = 1;
     st->regs[6] = b;
 
     calc_hash(st);
 
-    int (*f)(int, int) = spec(st);
-    //unsigned char * f = spec(st);
+    //int (*f)(int, int) = spec(st);
+    spec(st);
 
-    fprintf(stderr, "WOW\n");
-    fprintf(stderr, "%d\n", st->regs[0]);
-    int res = f(2, b);
-    fprintf(stderr, "WOW\n");
-    fprintf(stderr, "%d\n", res);
-    fprintf(stderr, "WOW\n");
-    res = f(3, b);
-    fprintf(stderr, "WOW\n");
-    fprintf(stderr, "%d\n", res);
-    res = f(4, b);
-    fprintf(stderr, "WOW\n");
-    fprintf(stderr, "%d\n", res);
+    // fprintf(stderr, "WOW\n");
+    // fprintf(stderr, "%d\n", st->regs[0]);
+    // int res = f(2, b);
+    // fprintf(stderr, "WOW\n");
+    // fprintf(stderr, "%d\n", res);
+    // fprintf(stderr, "WOW\n");
+    // res = f(3, b);
+    // fprintf(stderr, "WOW\n");
+    // fprintf(stderr, "%d\n", res);
+    // res = f(4, b);
+    // fprintf(stderr, "WOW\n");
+    // fprintf(stderr, "%d\n", res);
     // for (int i = 0; i < 100; ++i) {
     //     fprintf(stderr, "%02X ", *f);
     //     f++;

@@ -1,4 +1,4 @@
-#define TEST
+//#define TEST
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,13 +30,15 @@ int main(int argc, char const *argv[]) {
     //run_pow(3, 5);
     //run_sort(300);
     //run_dict();
-    const char* p = argv[1];
-    int len = 0;
-    while (*p != 0) {
-        p++;
-        len++;
-    }
+
+    // const char* p = argv[1];
+    // int len = 0;
+    // while (*p != 0) {
+    //     p++;
+    //     len++;
+    // }
     run_interpreter2(argv[1]);
+
     //run_prime(1000);
     //run_kmp();
     //run_kmp2();
