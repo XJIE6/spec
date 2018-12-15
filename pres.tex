@@ -1,4 +1,5 @@
 \documentclass{beamer}
+\usecolortheme{crane}
 \usepackage{amsmath}
 \usepackage{fontspec}
 \usepackage{xunicode}
@@ -19,7 +20,7 @@
 \definecolor{ao}{rgb}{0.0, 0.4, 0.0}
 \definecolor{br}{rgb}{0.4, 0.2, 0.0}
 \addtobeamertemplate{navigation symbols}{}{%
-    \usebeamerfont{footline}%
+    \usebeamerfont{fotline}%
     \usebeamercolor[fg]{footline}%
     \hspace{1em}%
     \insertframenumber/\inserttotalframenumber
@@ -46,7 +47,7 @@
 \begin{document}
 \title{Специализация машинного кода}
 \author{Юрий Кравченко\\{\footnotesize\textcolor{gray}{руководитель Березун Даниил Андреевич}}}
-\institute{СПбАУ}
+\institute{Лаборатория языковых инструментов}
 \frame{\titlepage}
 
 \begin{frame}\frametitle{Специализация}
@@ -108,26 +109,9 @@
       $$\llbracket gcc \rrbracket [spec^{ \mathbf{ASM}}_{\textsc{C}}] =
       spec^{\mathbf{ASM}}_{\mathbf{ASM}}$$}
     \vfill
-  \item{Как получить $spec^{\mathbf{ASM}}_{\textsc{C}}$?}
+  \item{Как получить $spec^{\mathbf{ASM}}_{\textsc{C}}$? \pause \hfill {\large \color{red} --- \hfill Цель} \hfill}
     \vfill
   \end{itemize}
-\end{frame}
-
-\begin{frame}\frametitle{Цель и задачи}
-\begin{block}{Цель}
-Исследование возможности и особенностей специализации машинного код
-\end{block}
-\begin{block}{Задачи}
-\footnotesize{
-\begin{itemize}
-\item Изучить существующие подходы и алгоритмы специализации низкоуровневых языков программирования
-\item Исследовать особенности специализации машинного кода
-\item Предложить алгоритм специализации машинного кода
-\item Реализовать прототип специализатора для машинного кода на языке C, основанного на предложенном алгоритме специализации
-\item Произвести апробацию возможностей полученного специализатора
-\end{itemize}
-}
-\end{block}
 \end{frame}
 
 \begin{frame}{Существующие подходы}
@@ -154,63 +138,18 @@
   	\end{itemize}
 \end{frame}
 
-
-\lstset{language=C}
-\begin{frame}[fragile]\frametitle{Binding time analisys(BTA)}
-Анализ времени исполнения классифицирует переменные/инструкции на \color{ao}{статические} \color{black} и \color{red}{динамические}
+\begin{frame}[fragile]\frametitle{Дипломная работа}
+\begin{itemize}
+\item Исследованы различные подходы специализации низкоуровневых языков
 \vfill
-\color{black}
-\begin{columns}
-\begin{column}{0.4\textwidth}
-\begin{lstlisting}[
-  belowcaptionskip=.2\baselineskip,
-  breaklines=true,
-  xleftmargin=\parindent,
-  showstringspaces=false,
-  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
-  keywordstyle=\bfseries,
-  commentstyle=\itshape\color{gray!40!black},
-  stringstyle=\color{ao},
-  numbers=left,
-  numbersep=5pt,
-  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
-int pow(@\textcolor{red}{int a}@, @\textcolor{ao}{int b}@) {
-    int res = 1;
-    while (b > 0) {
-        res = res * a;
-        b = b - 1;
-    }
-    return a;
-}
-\end{lstlisting}
-\end{column}
-\begin{column}{0.2\textwidth}
-$$\xrightarrow{\quad BTA \quad}$$
-\end{column}
-\begin{column}{0.4\textwidth}
-\begin{lstlisting}[
-  belowcaptionskip=.2\baselineskip,
-  breaklines=true,
-  xleftmargin=\parindent,
-  showstringspaces=false,
-  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
-  keywordstyle=\bfseries,
-  commentstyle=\itshape\color{gray!40!black},
-  stringstyle=\color{ao},
-  numbers=left,
-  numbersep=5pt,
-  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
-int pow(@\textcolor{red}{int a}@, @\textcolor{ao}{int b}@) {
-    @\textcolor{red}{int res = 1;}@
-    while (@\textcolor{ao}{b > 0}@) {
-        @\textcolor{red}{res = res * a}@;
-        @\textcolor{ao}{b = b - 1}@;
-    }
-    @\textcolor{red}{return a}@;
-}
-\end{lstlisting}
-\end{column}
-\end{columns}
+\item Исследованы особенности специализации машинного кода
+\vfill
+\item Предложен алгоритм специализации машинного кода
+\vfill
+\item Реализован прототип специализатора на языке С и произведена его апробация
+\vfill
+\item Аппробирована первая проекция проекция футамуры для маленького языка
+\end{itemize}
 \end{frame}
 
 \lstset{language=C}
@@ -302,160 +241,204 @@ mov %esi -48(0)
 \end{lstlisting}
 \end{frame}
 
-\lstset{language=C}
-\begin{frame}[fragile]{Алгоритм}
+\begin{frame}[fragile]\frametitle{А что сейчас?}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{itemize}
+\item есть функции
+\vfill
+\item for, while, if
+\vfill
+\item нет структур данных
+\vfill
+\item один тип - int
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
 \begin{lstlisting}[
   belowcaptionskip=.2\baselineskip,
   breaklines=true,
   xleftmargin=\parindent,
   showstringspaces=false,
-  basicstyle=\fontsize{9}{4}\selectfont\ttfamily,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
   keywordstyle=\bfseries,
   commentstyle=\itshape\color{gray!40!black},
   stringstyle=\color{ao},
   numbers=left,
   numbersep=5pt,
-  numberstyle=\fontsize{9}{4}\selectfont\ttfamily\color{gray},]
-Input: program, program_input
-state @$\leftarrow$@ generate_state(program, program_input)
-queue @$\leftarrow$@ state
-while(!queue.empty()) {
-    st @$\leftarrow$@ queue.pop()
-    while(!st.end()){
-        cmd @$\leftarrow$@ st.read_cmd()
-        params @$\leftarrow$@ st.read_params()
-        if (BTA(params) == static) {
-            st @$\leftarrow$@ st.eval(cmd, params)
-        }
-        else {
-            st @$\leftarrow$@ st.dynamic_eval(cmd, params)
-            reduced @$\leftarrow$@ st.reduce(cmd, params)
-            result @$\leftarrow$@ result ++ reduced
-        }
-    }
-}
-Output: result
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+fun foo (a, b)
+begin
+    if (b == 0)
+    then
+        return 1
+    else
+        c := foo(a, b - 1);
+        return a * c
+    fi
+end
+
+a := 7;
+b := 5;
+return foo(a, b) 
 \end{lstlisting}
+\end{column}
+\end{columns}
 \end{frame}
 
-\begin{frame}{Реализация прототипа}
-\begin{itemize}
-\vfill
-\item Реализован на языке С
-\vfill
-\item Выбран набор ключевых тестов и реализован фукционал для прохождения данных тестов
-\vfill
-\item Специализатор способен обрабатывать основные машинные инструкции: mov, lea, add, sub, imul, cmp, test, call, ret, push, pop, jmp, jcc
-\vfill
-\item Результатом работы специализатора является программа на языке, схожим с ассемблером. Язык позволяет наглядно представлять результаты специализации 
-\vfill
-\item Генерация машинного кода реализована для узкого набора инcтрукций
-\vfill
-\end{itemize}
-\end{frame}
 
-\lstset{language=C}
-\begin{frame}[fragile]\frametitle{KMP тест }
-\begin{itemize}
-\item $\llbracket spec \rrbracket_{ASM}[kmp, "ababac"]$
-\vfill
-\item Для прохождения данного теста необходимо преобразовать наивный алгоритм поиска подстроки в строке в оптимальный (например, KMP).
-\vfill
-\item Искомая строка является \color{ao} статической \color{black}
-\vfill
-\item Строка, в которой происходит поиск, является \color{red} динамической \color{black}
-\vfill
-\item Тест пройден 
-\end{itemize}
+\begin{frame}[fragile]\frametitle{Межпроцедурность}
 
-\end{frame}
-
-\begin{frame}[fragile]\frametitle{Специализация интерпретатора}
-\begin{tabular}{l  c  r}
-
-\begin{minipage}[t]{0.3\textwidth}
-\footnotesize{
-int add(\textcolor{blue}{int a, int b})\{\\
-\hspace*{10mm} int c;\\
-\hspace*{10mm} \textcolor{br}{c = a};\\
-\hspace*{10mm} \textcolor{ao}{c += b};\\
-\hspace*{10mm} return c;\\
-\}\\
+\vfill
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+@\textcolor{red}{некое состояние программы}@
+@\textcolor{red}{rdx - динамический}@
+mov rdx rcx 
+call foo
+@\textcolor{red}{какое состояние?}@
+\end{lstlisting}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+int foo(int @\textcolor{red}{a}@) {
+    if (@\textcolor{red}{a}@ > 0) {
+        return 1;
+    }
+    return 0;
 }
-\end{minipage}
-& 
-\begin{minipage}[t]{0.4\textwidth}
-$$\xrightarrow{ \llbracket spec \rrbracket_{ASM}[interpreter, add] }$$
-\end{minipage}    & 
-\multirow{2}{*}{
-\begin{minipage}[c]{0.4\textwidth}
-\tiny{
-Start block -697046\\
-mov89 \%rsi  -72(0) \\
-call malloc\\
-\textcolor{blue}{mov8b -72(0)  \%rax}\\
-\textcolor{blue}{mov8b 0(rax)  \%rax}\\
-\textcolor{blue}{mov89 \%rax  0(2)}\\
-\textcolor{blue}{add83 -72(0)  4}\\
-\textcolor{blue}{mov8b -72(0)  \%rax}\\
-\textcolor{blue}{mov8b 0(rax)  \%rax}\\
-\textcolor{blue}{mov89 \%rax  16(2)}\\
-\textcolor{blue}{add83 -72(0)  4}\\
-\textcolor{br}{mov8b 0(2)  \%rax}\\ 
-\textcolor{red}{mov89 \%rax  -100(0)}\\ 
-\textcolor{red}{mov8b -100(0)  \%rax}\\ 
-\textcolor{br}{mov89 \%rax  -28(0)}\\ 
-\textcolor{br}{mov8b -28(0)  \%rax}\\ 
-\textcolor{br}{mov89 \%rax  32(2)}\\
-\textcolor{ao}{mov8b 16(2)  \%rax}\\ 
-\textcolor{red}{mov89 \%rax  -100(0)}\\ 
-\textcolor{red}{mov8b -100(0)  \%rax}\\ 
-\textcolor{ao}{mov89 \%rax  -28(0)}\\ 
-\textcolor{ao}{mov8b 32(2)  \%rcx}\\ 
-\textcolor{ao}{mov8b -28(0)  \%rdx}\\ 
-\textcolor{ao}{add01 \%rcx  \%rdx}\\ 
-\textcolor{ao}{mov89 \%rdx  32(2)}\\ 
-mov8b 32(2)  \%rax \\
-mov89 \%rax  -100(0)\\ 
-mov8b -100(0)  \%rax \\
-ret\\
+\end{lstlisting}
+\end{column}
+\end{columns}
+\vfill
+\begin{columns}
+\begin{column}{\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+int bar(int @\textcolor{ao}{a}@, int @\textcolor{red}{b}@) {
+    if (@\textcolor{red}{b}@ == 0) {
+        return 1;
+    }
+    return bar(@\textcolor{ao}{a}@, @\textcolor{red}{b - 1}@) * @\textcolor{ao}{a}@;
 }
-\vspace*{20mm}
-\end{minipage}
-}\\
- \multicolumn{2}{c}{
-\begin{minipage}[c]{0.7\textwidth}
-\begin{itemize}
-\vfill
-\item Цель данного теста - 
-оценить количество лишних инструкций
-\vspace*{5mm}
-\end{itemize}
-\end{minipage}}
- & \\
-\multicolumn{2}{c}{
-\begin{minipage}[c]{0.7\textwidth}
-\begin{itemize}
-\vfill
-\item Результат специализации отвечает требуемой функциональности. Лишние инструкции присутствуют
-\end{itemize}
-\end{minipage}}  & \\
-\end{tabular}
+\end{lstlisting}
+\end{column}
+\end{columns}
 \vfill
 \end{frame}
 
 
-\begin{frame}\frametitle{Итоги}
+\begin{frame}[fragile]\frametitle{Первая проекция}
+\footnotesize{$$\llbracket spec \rrbracket_L [int, source] = target$$}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{8}{4}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+return x + 2
+\end{lstlisting}
+\end{column}
+\begin{column}{0.5\textwidth}
+\begin{lstlisting}[
+  belowcaptionskip=.2\baselineskip,
+  breaklines=true,
+  xleftmargin=\parindent,
+  showstringspaces=false,
+  basicstyle=\fontsize{7}{3}\selectfont\ttfamily,
+  keywordstyle=\bfseries,
+  commentstyle=\itshape\color{gray!40!black},
+  stringstyle=\color{ao},
+  numbers=left,
+  numbersep=5pt,
+  numberstyle=\fontsize{6}{4}\selectfont\ttfamily\color{gray},]
+Start block 1
+call 2
+mov8b 12(2)  %rax 
+ret
+
+Start block 2
+call 3
+mov89 %rax  %rdx 
+mov89 %rdx  12(2) 
+premov 0(2) %rax 
+ret
+
+Start block 3
+call 4
+mov89 %rax  -80(0)
+call 5
+mov8b -80(0)  %rax 
+add01 2  %rax
+ret
+
+Start block 4
+mov8b 108(2)  %rax 
+ret
+
+Start block 5
+premov 2 %rax 
+ret
+\end{lstlisting}
+\end{column}
+\end{columns}
+\vfill
+\end{frame}
+
+
+\begin{frame}[fragile]\frametitle{Планы на будущее}
+\vfill
+Вторая проекция $$\llbracket spec \rrbracket_L [spec, int] = comp$$
 \begin{itemize}
-\item Исследованы различные подходы специализации низкоуровневых языков
 \vfill
-\item Исследованы особенности специализации машинного кода
+\item Модифицировать специализатор
 \vfill
-\item Предложен алгоритм специализации машинного кода
+\item Раздвоить специализатор
 \vfill
-\item Реализован прототип специализатора на языке С и произведена его апробация
+\item Сравнить с компилятором и первой проекцией
 \vfill
-\item Вторая проекция футамуры не завершена
 \end{itemize}
 \end{frame}
+
 \end{document}
