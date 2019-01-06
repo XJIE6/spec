@@ -1,9 +1,10 @@
-//#define TEST
+#define TEST
 
 #include <pcomb.h>
 
 #include <iostream>
 #include <stdexcept>
+#include <string>
 
 #include "lang.h"
 
@@ -18,10 +19,19 @@ void * cleverMalloc(int size) {
 
 int eval_prog(Program* prog, ProgramState* s);
 
+std::string names [1000];
+int last = 0;
+
 auto expr0 = LazyParser<Expr*>();
 
 auto id = rule(token(regex("\\w+")), [] (auto name) -> int {
-	return name.to_string()[0] - 'a'; // TODO
+	for (int i = 0; i < last; ++i) {
+		if (names[i] == name.to_string()) {
+			return i;
+		}
+	}
+	names[last] = name.to_string();
+	return last++;
 });
 
 auto param = alt
@@ -331,7 +341,19 @@ auto simple = alt
 		stmt1->s = whl;
 		s->l = std::get<1>(whlstmt);
 		s->r = stmt1;
-		whl->e = std::get<3>(whlstmt);
+		Expr * e = (Expr*) cleverMalloc(sizeof(Expr));
+		Binop * c = (Binop*) cleverMalloc(sizeof(Binop));
+		e->type = TBinop;
+		e->p = c;
+		c->l = std::get<3>(whlstmt);
+		Expr * e1 = (Expr*) cleverMalloc(sizeof(Expr));
+		Const * c1 = (Const*) cleverMalloc(sizeof(Const));
+		e1->type = TConst;
+		e1->p = c1;
+		c1->val = 0;
+		c->r = e1;
+		c->op = Oeq;
+		whl->e = e;
 		whl->s = std::get<1>(whlstmt);
 		return stmt;
 	}),

@@ -9,7 +9,54 @@
 
 //#include "kmp3.c"
 
+int eval_prog(Program* prog, ProgramState* s);
+
+
 int main(int argc, char const *argv[]) {
+
+    FILE *f = fopen(argv[1], "rb");
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);  //same as rewind(f);
+
+    char *string = malloc(fsize + 1);
+    fread(string, fsize, 1, f);
+    fclose(f);
+
+    string[fsize] = 0;
+
+    void * mem;
+    int len;
+
+    Program * p = NULL;
+    parseLine(string, &mem, &len, &p);
+
+    int a[200];
+
+    ProgramState s;
+    s.is_ret = 0;
+    s.ret_val = 0;
+    s.vars = &a;
+    eval_prog(p, &s);
+
+
+    //run_interpreter2(string);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     // int n = 30000;
     // int res[n];
     // srand(12345);
@@ -37,7 +84,6 @@ int main(int argc, char const *argv[]) {
     //     p++;
     //     len++;
     // }
-    run_interpreter2(argv[1]);
 
     //run_prime(1000);
     //run_kmp();
