@@ -3,13 +3,13 @@ OBJ = spec.o test_programs/interpreter.o test_programs/interpreter2.o test_progr
 CPPOBJ = test_programs/parser.o
 
 main: main.o $(OBJ) $(CPPOBJ)
-	gcc -Wall -o $@ $^ -lstdc++
+	gcc -Wall -O0 -o $@ $^ -lstdc++
 
 test_programs/parser.o: test_programs/parser.cpp
-	g++ -c -W -std=c++14 -o test_programs/parser.o -I test_programs/pcomb/include/ test_programs/parser.cpp
+	g++ -c -O0 -W -std=c++14 -o test_programs/parser.o -I test_programs/pcomb/include/ test_programs/parser.cpp
 
 %.o: %.c $(DEPS)
-	gcc -c -W -o $@ $< -mno-tls-direct-seg-refs
+	gcc -c -O0 -W -o $@ $< -mno-tls-direct-seg-refs
 
 clean:
 	rm -f *.o test_programs/*.o x86_funcs/*.o main

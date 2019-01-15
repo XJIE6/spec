@@ -1,4 +1,4 @@
-#define TEST
+//#define TEST
 
 #include <pcomb.h>
 
@@ -19,12 +19,18 @@ void * cleverMalloc(int size) {
 
 int eval_prog(Program* prog, ProgramState* s);
 
-std::string names [1000];
+std::string names [23];
+std::string dy_names [3] = {"x", "y", "z"};
 int last = 0;
 
 auto expr0 = LazyParser<Expr*>();
 
 auto id = rule(token(regex("\\w+")), [] (auto name) -> int {
+	for (int j = 0; j < 3; ++j) {
+		if (dy_names[j] == name) {
+			return 23 + j;
+		}
+	}
 	for (int i = 0; i < last; ++i) {
 		if (names[i] == name.to_string()) {
 			return i;

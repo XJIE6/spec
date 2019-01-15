@@ -1,4 +1,4 @@
-#define TEST
+//#define TEST
 
 #include <stdlib.h>
 //#include "../my_malloc.c"
@@ -88,8 +88,8 @@ int eval_expr(Def* def, Expr* e, ProgramState* s) {
 		}
 	}
 	else if (e->type == TCall) {
-		ProgramState* new_s = (ProgramState*) malloc(sizeof(ProgramState));
-		new_s->vars = (int*) malloc(sizeof(int) * 200);
+		ProgramState* new_s = (ProgramState*) my_malloc(sizeof(ProgramState));
+		new_s->vars = (int*) my_malloc(sizeof(int) * 200);
 		new_s->is_ret = 0;
 		new_s->ret_val = 0;
 		Def* copy = def;

@@ -6,7 +6,7 @@
 #include "spec.h"
 #include "state.h"
 
-void* my_malloc(int n);
+void* my_malloc(long long n);
 
 unsigned char REX;
 state* st;
@@ -525,7 +525,7 @@ const char * get_program();
 
 typedef struct _specialized_part {
     state* start_state;
-    void* generated_code;
+    code* generated_code;
     state* end_state;
     struct _specialized_part* next;
 } specialized_part;
@@ -534,14 +534,74 @@ typedef struct _state_stack {
     state* start_state;
     state* current_state;
     state* state_after_call;
-    void* generated_code;
+    code* generated_code;
     state* parallel_state;
     state** result_place;
     struct _state_stack* next;
     specialized_part* specialized;
 } state_stack;
 
+typedef struct _code {
+    char name[10];
+    param p1;
+    param p2;
+    struct _code* next;
+}
+
 int my_pow(int a, int b);
+
+state* unite(state* a, state* b) {
+    if (b == NULL) {
+        return a;
+    }
+    fprintf(stderr, "IN\n");
+    for (int i = 0; i < 17; ++i) {
+        if (a->regs[i]                 != b->regs[i]              ||
+            a->info_regs[i].mem        != b->info_regs[i].mem     ||
+            a->info_regs[i].is_dynamic != b->info_regs[i].is_dynamic) {
+            a->info_regs[i].is_dynamic = 1;
+        }
+    }
+
+    char f = a->info_flags.is_dynamic == b->info_flags.is_dynamic;
+    for (int i = 0; i < 64; ++i) {
+        f = f && (a->flags[i] == b->flags[i]);
+    }
+    if (!f) {
+        a->info_flags.is_dynamic = 1;
+    }
+    // hard question 
+    // new->mem_len = cur->mem_len;
+    // for (int i = 0; i < cur->mem_len; ++i) {
+    //     new->mem_mem_len[i] = cur->mem_mem_len[i];
+    // }
+
+    // int k = 1; 
+    // while (cur->mem_mem_len[k]) {
+    //     new->mem[k] = malloc(cur->mem_mem_len[k]);
+    //     new->info_mem[k] = malloc(sizeof(info) * cur->mem_mem_len[k]);
+    //     k++;
+    // }
+    for (int j = -a->mem_mem_len[0]; j < 0; ++j) {
+        if (a->mem[0][j]                 != b->mem[0][j]              ||
+            a->info_mem[0][j].mem        != b->info_mem[0][j].mem     ||
+            a->info_mem[0][j].is_dynamic != b->info_mem[0][j].is_dynamic) {
+            a->info_mem[0][j].is_dynamic = 1;
+        }
+    }
+    for (int i = 1; i < a->mem_len; ++i) {
+        for (int j = 0; j < a->mem_mem_len[i]; ++j) {
+            if (a->mem[i][j]                 != b->mem[i][j]              ||
+                a->info_mem[i][j].mem        != b->info_mem[i][j].mem     ||
+                a->info_mem[i][j].is_dynamic != b->info_mem[i][j].is_dynamic) {
+                a->info_mem[i][j].is_dynamic = 1;
+            }
+        }
+    }
+    fprintf(stderr, "OUT\n");
+    return a;
+}
+
 
 char* spec(state* _state) {
     state* result = NULL;
@@ -631,7 +691,7 @@ char* spec(state* _state) {
                 cur = get_char();
             }
 
-            //fprintf(stderr, "%d cmd %#04x RSP = %d\n", i, cur, RSP);
+            //fprintf(stderr, "%d cmd %#04x\n", i, cur);
             i++;
 
             //new code
@@ -646,8 +706,26 @@ char* spec(state* _state) {
                 int cur = int_32();
                 eval(&p1);
                 if (v.base + cur == my_malloc) {
-                    fprintf(stderr, "MALLOC NOT SUPPORTED!!!\n");
-                    return 0;
+                    
+                    fprintf(stderr, "call malloc\n");
+                    p1.reg1 = 7; //rdi
+                    p1.reg2 = -1;
+                    p1.scale = -1;
+                    p1.base = 0;
+                    eval(&p1);
+                    st->mem[st->mem_len] = my_malloc(v.base);
+                    st->info_mem[st->mem_len] = my_malloc(sizeof(info) * v.base);
+                    st->mem_mem_len[st->mem_len] = v.base;
+                    p1.reg1 = 0; //rax
+                    p1.reg2 = -1;
+                    p1.scale = -1;
+                    p1.base = 0;
+                    v.base = 0;
+                    v.mem = st->mem_len;
+                    assign(&p1);
+                    ++(st->mem_len);
+
+                    continue;
                 }
 
                 //fprintf(stderr, "END IN %d\n", RIP);
@@ -734,6 +812,8 @@ char* spec(state* _state) {
                 new->next = stack;
                 stack = new;
 
+                st = current->current_state;
+
                 break;
             }
 
@@ -777,6 +857,8 @@ char* spec(state* _state) {
                     new->next = stack;
                     stack = new;
 
+                    st = current->current_state;
+
                     break;
                 }
             }
@@ -790,7 +872,7 @@ char* spec(state* _state) {
 
                 fprintf(stderr, "IT'S NEW RET HERE!!!\n");
                 copy(current->current_state);
-                state* result_state = current->current_state->next; //unite(); // unite current_state with parallel_state to result state
+                state* result_state = unite(current->current_state->next, current->parallel_state);
                 *(current->result_place) = result_state;
 
                 current->specialized->generated_code = current->generated_code;

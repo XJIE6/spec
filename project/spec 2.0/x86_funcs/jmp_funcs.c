@@ -141,7 +141,7 @@ void movsxd_63(unsigned char cmd) {
     assign(&p1);
 }
 
-void* my_malloc(int n);
+void* my_malloc(long long n);
 
 int kmp2();
 

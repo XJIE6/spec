@@ -25,22 +25,22 @@ int main(int argc, char const *argv[]) {
 
     string[fsize] = 0;
 
-    void * mem;
-    int len;
+    // void * mem;
+    // int len;
 
-    Program * p = NULL;
-    parseLine(string, &mem, &len, &p);
+    // Program * p = NULL;
+    // parseLine(string, &mem, &len, &p);
 
-    int a[200];
+    // int a[200];
 
-    ProgramState s;
-    s.is_ret = 0;
-    s.ret_val = 0;
-    s.vars = &a;
-    eval_prog(p, &s);
+    // ProgramState s;
+    // s.is_ret = 0;
+    // s.ret_val = 0;
+    // s.vars = &a;
+    // eval_prog(p, &s);
 
 
-    //run_interpreter2(string);
+    run_interpreter2(string);
 
 
 
