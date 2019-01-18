@@ -225,7 +225,7 @@ auto andi = rule
 
 auto ori = rule
 (
-	seq(andi, many(seq(token(str("||")), andi))),
+	seq(andi, many(seq(token(str("!!")), andi))),
 	[] (auto pair) -> Expr*
 	{
 		Expr* res = std::get<0>(pair);

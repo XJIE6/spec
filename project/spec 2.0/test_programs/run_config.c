@@ -336,7 +336,6 @@ void pretty_program(Program * program) {
 }
 
 void run_interpreter2(char* program) {
-
     state* st = new_state();
     void * mem;
     int len;

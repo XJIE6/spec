@@ -7,7 +7,7 @@
 #include <stdio.h>
 #endif
 
-void eval_stmt(Def* def, Stmt* stmt, ProgramState* s);
+int eval_stmt(Def* def, Stmt* stmt, ProgramState* s);
 
 int eval_expr(Def* def, Expr* e, ProgramState* s) {
 	int * values = s->vars;
@@ -111,7 +111,7 @@ int eval_expr(Def* def, Expr* e, ProgramState* s) {
 	return 0;
 }
 
-void eval_stmt(Def* def, Stmt* stmt, ProgramState* s) {
+int eval_stmt(Def* def, Stmt* stmt, ProgramState* s) {
 	int * values = s->vars;
 	if (stmt->type == TSkip) {
 	}
@@ -121,9 +121,6 @@ void eval_stmt(Def* def, Stmt* stmt, ProgramState* s) {
 	}
 	else if (stmt->type == TSeq) {
 		eval_stmt(def, ((Seq *) stmt->s)->l, s);
-		if (s->is_ret) {
-			return;
-		}
 		eval_stmt(def, ((Seq *) stmt->s)->r, s);
 	}
 	else if (stmt->type == TIf) {
@@ -168,10 +165,11 @@ void eval_stmt(Def* def, Stmt* stmt, ProgramState* s) {
 	else if (stmt->type == TReturn) {
 		s->is_ret = 1;
 		s->ret_val = eval_expr(def, ((Return *) stmt->s)->e, s);
+		return s->ret_val;
 	}
+	return 0;
 }
 
 int eval_prog(Program* prog, ProgramState* s) {
-	eval_stmt(prog->defs, prog->s, s);
-	return s->ret_val;
+	return eval_stmt(prog->defs, prog->s, s);
 }

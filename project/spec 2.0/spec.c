@@ -523,6 +523,13 @@ int i = 0;
 
 const char * get_program();
 
+typedef struct _code {
+    char name[10];
+    param p1;
+    param p2;
+    struct _code* next;
+} code;
+
 typedef struct _specialized_part {
     state* start_state;
     code* generated_code;
@@ -541,12 +548,7 @@ typedef struct _state_stack {
     specialized_part* specialized;
 } state_stack;
 
-typedef struct _code {
-    char name[10];
-    param p1;
-    param p2;
-    struct _code* next;
-}
+
 
 int my_pow(int a, int b);
 
@@ -554,7 +556,6 @@ state* unite(state* a, state* b) {
     if (b == NULL) {
         return a;
     }
-    fprintf(stderr, "IN\n");
     for (int i = 0; i < 17; ++i) {
         if (a->regs[i]                 != b->regs[i]              ||
             a->info_regs[i].mem        != b->info_regs[i].mem     ||
@@ -598,7 +599,6 @@ state* unite(state* a, state* b) {
             }
         }
     }
-    fprintf(stderr, "OUT\n");
     return a;
 }
 
@@ -672,6 +672,7 @@ char* spec(state* _state) {
 
             //fprintf(stderr, "pp read %d \n", current->current_state->regs[16]);
                 current->state_after_call->mem[0] = current->current_state->mem[0];
+                current->state_after_call->info_mem[0] = current->current_state->info_mem[0];
                 current->state_after_call->mem_mem_len[0] = current->current_state->mem_mem_len[0];
                 current->state_after_call->regs[16] = current->current_state->regs[16];
                 current->state_after_call->regs[4] = current->current_state->regs[4];
@@ -690,8 +691,9 @@ char* spec(state* _state) {
                 REX = cur;
                 cur = get_char();
             }
+            
+            //fprintf(stderr, "%d cmd %#04x info: %d %d\n", i, cur, st->mem[0][-112], st->info_mem[0][-112].mem);
 
-            //fprintf(stderr, "%d cmd %#04x\n", i, cur);
             i++;
 
             //new code
