@@ -7,6 +7,13 @@
 #include "state.h"
 #include "machine_code.h"
 
+typedef struct _code {
+    char name[10];
+    param p1;
+    param p2;
+    struct _code* next;
+} code;
+
 typedef struct _specialized_part {
     state* start_state;
     code_block* generated_code;
@@ -24,6 +31,7 @@ typedef struct _state_stack {
     struct _state_stack* next;
     specialized_part* specialized;
 } state_stack;
+
 
 char* spec(state* _state) {
     state* result = NULL;
@@ -84,6 +92,7 @@ char* spec(state* _state) {
 
             //fprintf(stderr, "pp read %d \n", current->current_state->regs[16]);
                 current->state_after_call->mem[0] = current->current_state->mem[0];
+                current->state_after_call->info_mem[0] = current->current_state->info_mem[0];
                 current->state_after_call->mem_mem_len[0] = current->current_state->mem_mem_len[0];
                 current->state_after_call->regs[16] = current->current_state->regs[16];
                 current->state_after_call->regs[4] = current->current_state->regs[4];
@@ -102,8 +111,9 @@ char* spec(state* _state) {
                 REX = cur;
                 cur = get_char();
             }
+            
+            //fprintf(stderr, "%d cmd %#04x info: %d %d\n", i, cur, st->mem[0][-112], st->info_mem[0][-112].mem);
 
-            //fprintf(stderr, "%d cmd %#04x\n", i, cur);
             i++;
 
             //new code

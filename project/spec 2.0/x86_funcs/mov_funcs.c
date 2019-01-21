@@ -101,6 +101,8 @@ void mov_b8(unsigned char cmd) {
     p1.reg2 = -1;
     p1.base = 0;
     p1.scale = -1;
+    print_params();
+    print_value();
     assign(&p1);
 }
 

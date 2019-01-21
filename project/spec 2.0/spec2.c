@@ -547,7 +547,6 @@ state* unite(state* a, state* b) {
     if (b == NULL) {
         return a;
     }
-    fprintf(stderr, "IN\n");
     for (int i = 0; i < 17; ++i) {
         if (a->regs[i]                 != b->regs[i]              ||
             a->info_regs[i].mem        != b->info_regs[i].mem     ||
@@ -591,7 +590,6 @@ state* unite(state* a, state* b) {
             }
         }
     }
-    fprintf(stderr, "OUT\n");
     return a;
 }
 
