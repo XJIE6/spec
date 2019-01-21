@@ -1,6 +1,6 @@
 #include "machine_code.h"
 
-code read_instruction(char* instruction) {
+code* read_instruction(state* state) {
 	fprintf(stderr, "NOT IMPLEMENTED\n");
 }
 void write_instruction(code instruction, char* place) {

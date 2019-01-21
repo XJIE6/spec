@@ -12,6 +12,7 @@ typedef struct _param {
 typedef struct _value {
     long long base;
     char mem;
+    unsigned char is_dynamic;
 } value;
 
 extern unsigned char is_dynamic;
