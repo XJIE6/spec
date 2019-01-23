@@ -97,10 +97,18 @@ char* spec(state* _state) {
                 current->current_state = current->state_after_call;
                 current->state_after_call = NULL;
             }
-            code* current = read_instruction(current->current_state);
-            if (code->number == 0xe8) { //call
+
+            char REX = 0;
+            char current_instrction = get_char(current->current_state);
+            if (cur >= 0x40 && cur <= 0x4f) {
+                REX = cur;
+                cur = get_char(current->current_state);
+            }
+
+            //call
+            if (current_instruction == 0xe8) {
                 value v = eval(current->current_state, &RIP);
-                long long address = v->base + code->address;
+                long long address = v->base + int_32(current->current_state);
                 if (address == my_malloc) {
                     //TODO generate malloc instruction
                     v = eval(current->current_state, &RDI);
@@ -122,15 +130,108 @@ char* spec(state* _state) {
                 state* start = copy(current->current_state);
                 push_64(start);
                 v = eval(&RIP);
-                v.base += cur;
+                v.base += code->address;
                 assign(start, &RIP, v);
                 crop(start);
                 calc_hash(start);
+                //check if recursive call
+                //prbably redunant
+                specialized_part* tmp = specialized;
+                while (tmp != NULL) {
+                    if (tmp->start_state->hash == st->hash) {
+                        if (tmp->end_state == NULL) {
+                            current->current_state->info_regs[0].is_dynamic = 1;
+                            goto state_loop;
+                        }
+                    }
+                    tmp = tmp->next;
+                }
+
                 state* start_copy = copy(start);
                 start_copy->hash = start->hash;
 
-                //TODO from 744 spec2.c
+                state_stack* new = malloc(sizeof(state_stack));
+                new->start_state = start;
+                new->current_state = start_copy;
+                new->state_after_call = NULL;
+                new->generated_code = NULL; //empty
+                new->parallel_state = NULL;
+                new->result_place = & (current->state_after_call);
 
+                new->next = stack;
+                stack = new;
+                break;
+            }
+            //jump while flags is dynamic
+            if (0x70 <= current_instruction && current_instruction <= 0x7f && 
+                current->current_state->info_flags.is_dynamic) {
+                //put current state on stack
+                current->next = stack;
+                stack = current;
+                state* start = copy(current->current_state);
+                value v = eval(start, &RIP);
+                v.base += int_8S();
+                assign(start, &RIP, v);
+                calc_hash(start);
+
+                state* start_copy = copy(start);
+                start_copy->hash = start->hash;
+                state_stack* new = malloc(sizeof(state_stack));
+                new->start_state = start;
+                new->current_state = start_copy;
+                new->state_after_call = NULL;
+                new->generated_code = NULL; //empty
+                new->parallel_state = NULL;
+                new->result_place = & (current->parallel_state);
+                new->next = stack;
+                stack = new;
+                break;
+            }
+            //jump while flags is dynamic
+            if (current_instruction == 0x0f && 
+                current->current_state->info_flags.is_dynamic) {
+                int cur2 = try_get_char();
+                if (0x80 <= cur2 && cur2 <= 0x8f) {
+                    cur = get_char();
+                    //put current state on stack
+                    current->next = stack;
+                    stack = current;
+                    state* start = copy(current->current_state);
+                    value v = eval(start, &RIP);
+                    v.base += int_32();
+                    assign(start, &RIP, v);
+                    calc_hash(start);
+
+                    state* start_copy = copy(start);
+                    start_copy->hash = start->hash;
+                    state_stack* new = malloc(sizeof(state_stack));
+                    new->start_state = start;
+                    new->current_state = start_copy;
+                    new->state_after_call = NULL;
+                    new->generated_code = NULL; //empty
+                    new->parallel_state = NULL;
+                    new->result_place = & (current->parallel_state);
+                    new->next = stack;
+                    stack = new;
+                    break;
+                }
+            }
+
+            if (current_instruction == 0xc3) {
+                prefix(&RAX);
+                state* new = copy(current->current_state);
+                state* result_state = unite(new, current->parallel_state);
+                *(current->result_place) = result_state;
+
+                current->specialized->generated_code = current->generated_code;
+                current->specialized->end_state = current->current_state;
+                break;
+            }
+            cmd[cur](cur);
+            //new code
+            
+            if (is_end) {
+                break;
             }
         }
     }
