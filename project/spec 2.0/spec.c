@@ -228,11 +228,6 @@ char* spec(state* _state) {
                 break;
             }
             cmd[cur](cur);
-            //new code
-            
-            if (is_end) {
-                break;
-            }
         }
     }
 }

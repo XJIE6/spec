@@ -42,35 +42,35 @@
 #define prefix prefix_64
 #endif
 
-void add_05(unsigned char cmd) {
-    p1.reg1 = 0;
-    p1.reg2 = -1;
-    p1.base = 0;
-    p1.scale = -1;
-    eval(&p1);
-    v.base += int_s();
-    if (is_dynamic) {
-        fprintf(stderr, "add05\n");
+code* add_05(state* st, code* instruction) {
+    instruction->p1 = {.reg1 = 0; .reg2 = -1; .base = 0; .scale = -1};
+    value v = eval(st, &(instruction->p1));
+    instruction->base = int_s(st);
+    if (v.is_dynamic) {
+        return instruction;
     }
-    assign(&p1);
+    v.base += instruction->base;
+    assign(st, &(instruction->p1), v);
+    return NULL;
 }
 
-void add_81(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    v.base += int_s();
-    if (is_dynamic) {
-        fprintf(stderr, "add81\n");
+code* add_81(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v = eval(st, &(instruction->p2));
+    instruction->base = int_s();
+    if (v.is_dynamic) {
+        return instruction;
     }
-    assign(&p2);
+    v.base += instruction->base;
+    assign(st, &(instruction->p2), v);
+    return NULL;
 }
 
-void add_83(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    int val = int_8S();
-    v.base += val;
-    if (is_dynamic) {
+code* add_83(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v = eval(st, &(instruction->p2));
+    instruction->base = int_8S();
+    if (v.is_dynamic) {
         prefix(&p2);
         fprintf(stderr, "add83 ");
         print(&p2, 1);
@@ -78,79 +78,60 @@ void add_83(unsigned char cmd) {
         fprintf(stderr, "%d", val);
         fprintf(stderr, "\n");
     }
+    v.base += val;
     assign(&p2);
 }
 
-void add_01(unsigned char cmd) {
-    parce_reg_mem();
-    print_params();
-    eval(&p2);
-    print_value();
-    value cur;
-    cur.base = v.base;
-    cur.mem = v.mem;
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "add01 ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
-        assign(&p2);
-        return;
+code* add_01(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, &(instruction->p1));
+    if (v1->is_dynamic) {
+        dynamic(st, instruction->p2);
+        code* pref = prefix(st, &(instruction->p2));
+        instruction->next = pref;
+        return instruction;
     }
-    eval(&p1);
-    print_value();
-    v.base += cur.base;
-    if (v.mem == -1) {
-        v.mem = cur.mem;
+    value v2 = eval(st, &(instruction->p2));
+    if (v2->is_dynamic) {
+        code* pref = prefix(st, &(instruction->p1));
+        instruction->next = pref;
+        return instruction;
     }
-    else if (cur.mem != -1) {
+    v1.base += v2.base;
+    if (v1.mem == -1) {
+        v1.mem = v2.mem;
+    }
+    else if (v2.mem != -1) {
         fprintf(stderr, "ERROR 1236\n");
-        return;
+        return NULL;
     }
-    print_value();
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "add01 ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
-    }
-    assign(&p2);
+    assign(st, &(instruction->p2), v1);
+    return NULL;
 }
 
-void add_03(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    value cur;
-    cur.base = v.base;
-    cur.mem = v.mem;
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "add03 ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+code* add_03(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, &(instruction->p1));
+    if (v1->is_dynamic) {
+        code* pref = prefix(st, &(instruction->p2));
+        instruction->next = pref;
+        return instruction;
     }
-    eval(&p1);
-    v.base += cur.base;
-    if (v.mem == -1) {
-        v.mem = cur.mem;
+    value v2 = eval(st, &(instruction->p2));
+    if (v2->is_dynamic) {
+        dynamic(st, instruction->p1);
+        code* pref = prefix(st, &(instruction->p1));
+        instruction->next = pref;
+        return instruction;
     }
-    else if (cur.mem != -1) {
+    v1.base += v2.base;
+    if (v1.mem == -1) {
+        v1.mem = v2.mem;
+    }
+    else if (v2.mem != -1) {
         fprintf(stderr, "ERROR 11\n");
-        return;
+        return NULL;
     }
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "add03 ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
-    }
-    assign(&p1);
+    assign(st, &(instruction->p1), v1);
+    return NULL;
 }

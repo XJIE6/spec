@@ -47,15 +47,13 @@
 #define MIN LLONG_MIN
 #endif
 
-void cmp() {
-    value cur = v;
+void cmp(state* st, param* p, value* v) {
     char dyn = 0;
-    if (is_dynamic) {
+    if (v.is_dynamic) {
         dyn = 1;
     }
-    eval(&p1);
-    print_value();
-    if (is_dynamic) {
+    value pvalue = eval(p);
+    if (pvalue.is_dynamic) {
         dyn = 1;
     }
     if (dyn) {
@@ -63,11 +61,11 @@ void cmp() {
         st->info_flags.is_dynamic = 1;
         return;
     }
-    if (cur.mem != v.mem) {
+    if (pvalue.mem != v.mem) {
         if (v.mem == -1 && v.base == 0) {
-            cur.base = 1;
+            pvalue.base = 1;
         }
-        else if (cur.mem == -1 && cur.base == 0) {
+        else if (pvalue.mem == -1 && pvalue.base == 0) {
             v.base = 1;
         }
         else {
@@ -76,7 +74,7 @@ void cmp() {
             return;
         }
     }
-    type a = v.base, b = cur.base;
+    type a = v.base, b = pvalue.base;
     //fprintf(stderr, "CMP %d %d\n", a, b);
     if (a < b) {
         st->flags[0] = 1;
@@ -116,7 +114,6 @@ void cmp() {
 
 void push() {
     RSP -= sizeof(type);
-    //fprintf(stderr, "PUSH %d\n", RSP);
     p1.reg1 = 4; //rsp
     p1.reg2 = -1;
     p1.scale = 0;
@@ -125,7 +122,6 @@ void push() {
 }
 
 void pop() {
-    //fprintf(stderr, "POP %d\n", RSP);
     if (RSP > 0) {
         is_end = 1;
         return;
@@ -138,14 +134,11 @@ void pop() {
     RSP += sizeof(type);
 }
 
-void assign(param* p) {
+void assign(state* st, param* p, value* v) {
     if (p->scale == -1) {
-        //fprintf(stderr, "pre\n");
         st->regs[p->reg1] = v.base;
-        //fprintf(stderr, "pre\n");
         st->info_regs[p->reg1].mem = v.mem;
-        //fprintf(stderr, "pre\n");
-        st->info_regs[p->reg1].is_dynamic = is_dynamic;
+        st->info_regs[p->reg1].is_dynamic = v.is_dynamic;
         return;
     }
     value cur;
@@ -155,7 +148,6 @@ void assign(param* p) {
     // }
     cur.base = st->regs[p->reg1] * (1 << p->scale) + p->base;
     cur.mem = st->info_regs[p->reg1].mem;
-    //fprintf(stderr, "123 \n %lld %lld post\n", cur.mem, cur.base);
     if (p->reg2 != -1) {
         cur.base += st->regs[p->reg2] * (1 << p->scale);
         if (st->info_regs[p->reg2].mem != -1) {
@@ -166,9 +158,7 @@ void assign(param* p) {
             cur.mem = st->info_regs[p->reg2].mem;
         }
     }
-    //fprintf(stderr, "123 \n %lld %lld post\n", cur.mem, cur.base);
     if (cur.mem == -1) {
-    	//fprintf(stderr, "WAHA");
     	if (v.mem == -1) {
         	*((type*)cur.base) = (type)v.base;
     	}
@@ -177,19 +167,14 @@ void assign(param* p) {
     	}
         return;
     }
-    //fprintf(stderr, "123 \n %lld %lld post\n", cur.mem, cur.base);
-    //fprintf(stderr, "1234 \n %lld %lld %lld post\n", st->mem[1], st->mem[cur.mem], (st->mem[cur.mem] + cur.base));
-    //fprintf(stderr, "WAHA \n %lld post\n", (int*)(st->mem[1] + 0));
     *((type*)(st->mem[cur.mem] + cur.base)) = v.base;
     st->info_mem[cur.mem][cur.base].mem = v.mem;
     st->info_mem[cur.mem][cur.base].is_dynamic = is_dynamic;
 }
 
 
-void print(param* p, char f) {
-    value v1 = v;
-    char d = is_dynamic;
-    eval(p);
+void print(state* st, param* p, char f) {
+    value v = eval(st, p);
     if (f && !is_dynamic) {
         if (v.mem != -1) {
             fprintf(stderr, "%d(%d) ", v.base, v.mem);
@@ -197,15 +182,13 @@ void print(param* p, char f) {
         else {
             fprintf(stderr, "%d ", v.base);
         }
-        v = v1;
-        is_dynamic = d;
+        v.is_dynamic = d;
         return;
     }
     if (p->scale == -1) {
         fprintf(stderr, "%%");
         print_reg(p->reg1);
         fprintf(stderr, " ");
-        v = v1;
         is_dynamic = d;
         return;
     }
@@ -213,8 +196,8 @@ void print(param* p, char f) {
     pp.reg2 = -1;
     pp.base = 0;
     pp.scale = -1;
-    eval(&pp);
-    if (is_dynamic) {
+    v = eval(st, &pp);
+    if (v.is_dynamic) {
         if (p->reg2 == -1) {
             fprintf(stderr, "%d(", p->base);
             print_reg(p->reg1);
@@ -227,12 +210,11 @@ void print(param* p, char f) {
             else {
                 fprintf(stderr, "%d(", p->base);
             }
-            param pp;
             pp.reg1 = p->reg2;
             pp.reg2 = -1;
             pp.base = 0;
             pp.scale = -1;
-            eval(&pp);
+            v = eval(st, &pp);
             if (is_dynamic) {
                 print_reg(p->reg2);
             }
@@ -266,13 +248,11 @@ void print(param* p, char f) {
             else {
                 fprintf(stderr, "%d(", p->base);
             }
-            value v2 = v;
-            param pp;
             pp.reg1 = p->reg2;
             pp.reg2 = -1;
             pp.base = 0;
             pp.scale = -1;
-            eval(&pp);
+            v = eval(st, &pp);
             if (is_dynamic) {
                 print_reg(p->reg2);
             }
@@ -283,7 +263,6 @@ void print(param* p, char f) {
                 else {
                     fprintf(stderr, "%d ", v.base);
                 }
-                v = v2;
             }
             fprintf(stderr, ", ");
             if (v.mem != -1) {
@@ -296,15 +275,11 @@ void print(param* p, char f) {
             fprintf(stderr, "%d) ", p->scale);
         }
     }
-    v = v1;
-    is_dynamic = d;
     return;
 }
 
-void prefix(param* p) {
-    value v1 = v;
-    char d = is_dynamic;
-    eval(p);
+void prefix(state* st, param* p) {
+    value v = eval(st, p);
     if (!is_dynamic) {
         fprintf(stderr, "premov ");
         print(p, 1);
@@ -331,23 +306,20 @@ void prefix(param* p) {
         //     return;
         // }
     }
-    v = v1;
-    is_dynamic = d;
-    //fprintf(stderr, "end");
     return;
-    //fprintf(stderr, "print prefix\n");
 }
 
-void eval(param* p) {
+value eval(state* st, param* p) {
+    value v;
     if ((p->reg1 != -1 && st->info_regs[p->reg1].is_dynamic) || (p->reg2 != -1 && st->info_regs[p->reg2].is_dynamic)) {
-        is_dynamic = 1;
-        return;
+        v.is_dynamic = 1;
+        return v;
     }
     if (p->scale == -1) {
         v.base = st->regs[p->reg1];
         v.mem = st->info_regs[p->reg1].mem;
-        is_dynamic = st->info_regs[p->reg1].is_dynamic;
-        return;
+        v.is_dynamic = st->info_regs[p->reg1].is_dynamic;
+        return v;
     }
     char f = 0;
     if (p->scale < 0) {
@@ -362,13 +334,12 @@ void eval(param* p) {
     // }
     cur.base = st->regs[p->reg1] * (1 << p->scale) + p->base;
     cur.mem = st->info_regs[p->reg1].mem;
-    //fprintf(stderr, "%lld %d\n", cur.base, cur.mem);
     if (p->reg2 != -1) {
         cur.base += st->regs[p->reg2] * (1 << p->scale);
         if (st->info_regs[p->reg2].mem != -1) {
             if (cur.mem != -1) {
                 fprintf(stderr, "ERROR eval 342\n");
-                return;
+                return v;
             }
             cur.mem = st->info_regs[p->reg2].mem;
         }
@@ -381,150 +352,15 @@ void eval(param* p) {
 			v.base = cur.base;
 		}
         v.mem = cur.mem;
-        return;
+        return v;
     }
     if (cur.mem == -1) {
         v.base = *((type*)cur.base);
         v.mem = -1;
-        is_dynamic = 0;
-        return;
+        v.is_dynamic = 0;
+        return v;
     }
-    
-    //fprintf(stderr, "%lld %d %d %d\n", cur.base, cur.mem, st->mem[cur.mem][cur.base], *((type*)(st->mem[cur.mem] + cur.base)));
     v.base = *((type*)(st->mem[cur.mem] + cur.base));
-    //fprintf(stderr, "ERROR eval 34\n");
     v.mem = st->info_mem[cur.mem][cur.base].mem;
-    //fprintf(stderr, "ERROR eval 34\n");
-    //fprintf(stderr, "LOOOL %d %d %d\n", is_dynamic, v.base, v.mem);
     is_dynamic = st->info_mem[cur.mem][cur.base].is_dynamic;
-    //fprintf(stderr, "%lld %d\n", v.base, v.mem);
-}
-
-void sib() {
-    cur = get_char();
-    scale = bit1_2(cur);
-    _index = bit3_5(cur) + ((REXX() << 3));
-    base = bit6_8(cur);
-    if (base == 5) {
-        base += REXB() << 3;
-        switch (mod) {
-            case 0:
-                p2.reg1 = _index;
-                p2.reg2 = -1;
-                p2.scale = scale;
-                p2.base = int_32S();
-            break;
-
-            case 1:                
-                p2.reg1 = base;
-                p2.reg2 = _index;
-                //p2.reg1 = _index;
-                //p2.reg2 = base;
-                p2.scale = scale;
-                p2.base = int_8S();
-            break;
-
-            case 2:
-                p2.reg1 = base;
-                p2.reg2 = _index;
-                //p2.reg1 = _index;
-                //p2.reg2 = base;
-                p2.scale = scale;
-                p2.base = int_32S();
-            break;
-
-            default:
-                fprintf(stderr, "ERROR mod 2\n");
-                //is_exit = 1;
-        }
-    }
-    else if (_index == 4) {
-        base += REXB() << 3;
-        p2.reg1 = base;
-        p2.reg2 = -1;
-        p2.scale = scale;
-        p2.base = 0;
-    }
-    else {
-        base += REXB() << 3;
-        p2.reg1 = base;
-        p2.reg2 = _index;
-        //p2.reg1 = _index;
-        //p2.reg2 = base;
-        p2.scale = scale;
-        p2.base = 0;
-    }
-}
-
-void parce_reg_mem() {
-    cur = get_char();
-    mod = bit1_2(cur);
-    reg = bit3_5(cur) + (REXR() << 3);
-    r_m = bit6_8(cur);
-    p1.reg1 = reg;
-    p1.reg2 = -1;
-    p1.scale = -1;
-    p1.base = 0;
-    //fprintf(stderr, "%d : MOD\n", mod);
-    switch(mod) {
-        case 0:
-            if (r_m == 4) {
-                sib();
-                return;
-            }
-            if (r_m == 5) {
-                base = int_32S();
-                p2.reg1 = 16;
-                p2.reg2 = -1;
-                p2.scale = 0;
-                p2.base = base;
-                return;
-            }
-            r_m += REXB() << 3;
-            p2.reg1 = r_m;
-            p2.reg2 = -1;
-            p2.scale = 0;
-            p2.base = 0;
-        break;
-
-        case 1:
-            if (r_m == 4) {
-                sib();
-                p2.base = int_8S();
-                return;
-            }
-            r_m += REXB() << 3;
-            base = int_8S();
-            p2.reg1 = r_m;
-            p2.reg2 = -1;
-            p2.scale = 0;
-            p2.base = base;
-        break;
-
-        case 2:
-            if (r_m == 4) {
-                sib();
-                p2.base = int_32S();
-                return;
-            }
-            r_m += REXB() << 3;
-            base = int_32S();
-            p2.reg1 = r_m;
-            p2.reg2 = -1;
-            p2.scale = 0;
-            p2.base = base;
-        break;
-
-        case 3:
-            r_m += REXB() << 3;
-            p2.reg1 = r_m;
-            p2.reg2 = -1;
-            p2.scale = -1;
-            p2.base = 0;
-        break;
-
-        default:
-            fprintf(stderr, "ERROR mod 12\n");
-            //is_exit = 1;
-    }
 }

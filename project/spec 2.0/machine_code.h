@@ -1,11 +1,11 @@
 #pragma once
 
 typedef struct _code {
-    char prefix;
+    char RAX;
     char number; 
     param p1;
     param p2;
-    long long address;
+    long long base;
     struct _code* next;
 } code;
 
