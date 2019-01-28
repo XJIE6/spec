@@ -2,12 +2,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "spec.h"
-#include "state.h"
+#include "test_programs/lang.h"
+#include "test_programs/run_config.h"
 
-#include "test_programs/run_config.c"
-
-//#include "kmp3.c"
 
 int eval_prog(Program* prog, ProgramState* s);
 

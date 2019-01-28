@@ -6,43 +6,9 @@
 #include "spec.h"
 #include "state.h"
 #include "machine_code.h"
-
-typedef struct _code {
-    char name[10];
-    param p1;
-    param p2;
-    struct _code* next;
-} code;
-
-typedef struct _specialized_part {
-    state* start_state;
-    code_block* generated_code;
-    state* end_state;
-    struct _specialized_part* next;
-} specialized_part;
-
-typedef struct _state_stack {
-    state* start_state;
-    state* current_state;
-    state* state_after_call;
-    code_block* generated_code;
-    state* parallel_state;
-    state** result_place;
-    struct _state_stack* next;
-    specialized_part* specialized;
-} state_stack;
-
-state_stack* init_state_stack(state* start_state) {
-    state_stack* stack = malloc(sizeof(state_stack));
-    stack->start_state = copy(start_state);
-    stack->current_state = start_state;
-    stack->state_after_call = NULL;
-    stack->generated_code = NULL; // empty
-    stack->parallel_state = NULL;
-    stack->result_place = malloc(sizeof(state));
-    stack->next = NULL;
-    return stack;
-}
+#include "registers.h"
+#include "spec_funcs.h"
+#include "my_malloc.h"
 
 char* spec(state* _state) {
     specialized_part* specialized = NULL;
@@ -99,27 +65,27 @@ char* spec(state* _state) {
             }
 
             char REX = 0;
-            char current_instrction = get_char(current->current_state);
-            if (cur >= 0x40 && cur <= 0x4f) {
-                REX = cur;
-                cur = get_char(current->current_state);
+            char current_instruction = get_char(current->current_state);
+            if (current_instruction >= 0x40 && current_instruction <= 0x4f) {
+                REX = current_instruction;
+                current_instruction = get_char(current->current_state);
             }
 
             //call
             if (current_instruction == 0xe8) {
-                value v = eval(current->current_state, &RIP);
-                long long address = v->base + int_32(current->current_state);
-                if (address == my_malloc) {
+                value v = eval_32(current->current_state, RIP);
+                v.base += int_32(current->current_state);
+                if (v.base == my_malloc) {
                     //TODO generate malloc instruction
-                    v = eval(current->current_state, &RDI);
-                    st->mem[st->mem_len] = my_malloc(v.base);
-                    st->info_mem[st->mem_len] = my_malloc(sizeof(info) * v.base);
-                    st->mem_mem_len[st->mem_len] = v.base;
+                    v = eval_32(current->current_state, RDI);
+                    current->current_state->mem[current->current_state->mem_len] = my_malloc(v.base);
+                    current->current_state->info_mem[current->current_state->mem_len] = my_malloc(sizeof(info) * v.base);
+                    current->current_state->mem_mem_len[current->current_state->mem_len] = v.base;
                     v.base = 0;
-                    v.mem = st->mem_len;
-                    v.is_dynamic = false;
-                    assign(current->current_state, &RAX, v);
-                    ++(st->mem_len);
+                    v.mem = current->current_state->mem_len;
+                    v.is_dynamic = 0;
+                    assign_32(current->current_state, RAX, v);
+                    ++(current->current_state->mem_len);
                     continue;
                 }
                 //TODO
@@ -129,16 +95,14 @@ char* spec(state* _state) {
                 // create new state
                 state* start = copy(current->current_state);
                 push_64(start);
-                v = eval(&RIP);
-                v.base += code->address;
-                assign(start, &RIP, v);
+                assign_32(start, RIP, v);
                 crop(start);
                 calc_hash(start);
                 //check if recursive call
                 //prbably redunant
                 specialized_part* tmp = specialized;
                 while (tmp != NULL) {
-                    if (tmp->start_state->hash == st->hash) {
+                    if (tmp->start_state->hash == start->hash) {
                         if (tmp->end_state == NULL) {
                             current->current_state->info_regs[0].is_dynamic = 1;
                             goto state_loop;
@@ -169,9 +133,9 @@ char* spec(state* _state) {
                 current->next = stack;
                 stack = current;
                 state* start = copy(current->current_state);
-                value v = eval(start, &RIP);
-                v.base += int_8S();
-                assign(start, &RIP, v);
+                value v = eval_32(start, RIP);
+                v.base += int_8S(start);
+                assign_32(start, RIP, v);
                 calc_hash(start);
 
                 state* start_copy = copy(start);
@@ -190,16 +154,16 @@ char* spec(state* _state) {
             //jump while flags is dynamic
             if (current_instruction == 0x0f && 
                 current->current_state->info_flags.is_dynamic) {
-                int cur2 = try_get_char();
+                int cur2 = try_get_char(current->current_state);
                 if (0x80 <= cur2 && cur2 <= 0x8f) {
-                    cur = get_char();
+                    current_instruction = get_char(current->current_state);
                     //put current state on stack
                     current->next = stack;
                     stack = current;
                     state* start = copy(current->current_state);
-                    value v = eval(start, &RIP);
-                    v.base += int_32();
-                    assign(start, &RIP, v);
+                    value v = eval_32(start, RIP);
+                    v.base += int_32(start);
+                    assign_32(start, RIP, v);
                     calc_hash(start);
 
                     state* start_copy = copy(start);
@@ -218,7 +182,7 @@ char* spec(state* _state) {
             }
 
             if (current_instruction == 0xc3) {
-                prefix(&RAX);
+                prefix(RAX);
                 state* new = copy(current->current_state);
                 state* result_state = unite(new, current->parallel_state);
                 *(current->result_place) = result_state;
@@ -227,7 +191,8 @@ char* spec(state* _state) {
                 current->specialized->end_state = current->current_state;
                 break;
             }
-            cmd[cur](cur);
+            eval_instruction(current->current_state, current_instruction);
         }
     }
+    return NULL;
 }

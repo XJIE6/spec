@@ -1,8 +1,9 @@
 //#define TEST
 
 #include <stdlib.h>
-//#include "../my_malloc.c"
+#include "../my_malloc.h"
 #include "lang.h"
+#include "interpreter2.h"
 #ifdef TEST
 #include <stdio.h>
 #endif

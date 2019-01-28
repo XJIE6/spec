@@ -4,7 +4,6 @@
 #define add_05 add_05_8
 #define add_81 add_81_8
 #define add_83 add_83_8
-#define parce_reg_mem parce_reg_mem_8
 #define assign assign_8
 #define eval eval_8
 #define int_s int_8
@@ -18,7 +17,6 @@
 #define add_05 add_05_32
 #define add_81 add_81_32
 #define add_83 add_83_32
-#define parce_reg_mem parce_reg_mem_32
 #define assign assign_32
 #define eval eval_32
 #define int_s int_32
@@ -32,7 +30,6 @@
 #define add_05 add_05_64
 #define add_81 add_81_64
 #define add_83 add_83_64
-#define parce_reg_mem parce_reg_mem_64
 #define assign assign_64
 #define eval eval_64
 #define eval eval_64
@@ -43,57 +40,53 @@
 #endif
 
 code* add_05(state* st, code* instruction) {
-    instruction->p1 = {.reg1 = 0; .reg2 = -1; .base = 0; .scale = -1};
-    value v = eval(st, &(instruction->p1));
+    instruction->p1 = RAX;
+    value v = eval(st, instruction->p1);
     instruction->base = int_s(st);
     if (v.is_dynamic) {
         return instruction;
     }
     v.base += instruction->base;
-    assign(st, &(instruction->p1), v);
+    assign(st, instruction->p1, v);
     return NULL;
 }
 
 code* add_81(state* st, code* instruction) {
     parce_reg_mem(st, instruction);
-    value v = eval(st, &(instruction->p2));
-    instruction->base = int_s();
+    value v = eval(st, instruction->p2);
+    instruction->base = int_s(st);
     if (v.is_dynamic) {
         return instruction;
     }
     v.base += instruction->base;
-    assign(st, &(instruction->p2), v);
+    assign(st, instruction->p2, v);
     return NULL;
 }
 
 code* add_83(state* st, code* instruction) {
     parce_reg_mem(st, instruction);
-    value v = eval(st, &(instruction->p2));
-    instruction->base = int_8S();
+    value v = eval(st, instruction->p2);
+    instruction->base = int_8S(st);
     if (v.is_dynamic) {
-        prefix(&p2);
-        fprintf(stderr, "add83 ");
-        print(&p2, 1);
-        fprintf(stderr, " ");
-        fprintf(stderr, "%d", val);
-        fprintf(stderr, "\n");
+        return instruction;
     }
-    v.base += val;
-    assign(&p2);
+    v.base += instruction->base;
+    assign(st, instruction->p2, v);
+    return NULL;
 }
 
 code* add_01(state* st, code* instruction) {
     parce_reg_mem(st, instruction);
-    value v1 = eval(st, &(instruction->p1));
-    if (v1->is_dynamic) {
+    value v1 = eval(st, instruction->p1);
+    if (v1.is_dynamic) {
         dynamic(st, instruction->p2);
-        code* pref = prefix(st, &(instruction->p2));
+        code* pref = prefix(st, instruction->p2);
         instruction->next = pref;
         return instruction;
     }
-    value v2 = eval(st, &(instruction->p2));
-    if (v2->is_dynamic) {
-        code* pref = prefix(st, &(instruction->p1));
+    value v2 = eval(st, instruction->p2);
+    if (v2.is_dynamic) {
+        code* pref = prefix(st, instruction->p1);
         instruction->next = pref;
         return instruction;
     }
@@ -105,22 +98,22 @@ code* add_01(state* st, code* instruction) {
         fprintf(stderr, "ERROR 1236\n");
         return NULL;
     }
-    assign(st, &(instruction->p2), v1);
+    assign(st, instruction->p2, v1);
     return NULL;
 }
 
 code* add_03(state* st, code* instruction) {
     parce_reg_mem(st, instruction);
-    value v1 = eval(st, &(instruction->p1));
-    if (v1->is_dynamic) {
-        code* pref = prefix(st, &(instruction->p2));
+    value v1 = eval(st, instruction->p1);
+    if (v1.is_dynamic) {
+        code* pref = prefix(st, instruction->p2);
         instruction->next = pref;
         return instruction;
     }
-    value v2 = eval(st, &(instruction->p2));
-    if (v2->is_dynamic) {
+    value v2 = eval(st, instruction->p2);
+    if (v2.is_dynamic) {
         dynamic(st, instruction->p1);
-        code* pref = prefix(st, &(instruction->p1));
+        code* pref = prefix(st, instruction->p1);
         instruction->next = pref;
         return instruction;
     }
@@ -132,6 +125,6 @@ code* add_03(state* st, code* instruction) {
         fprintf(stderr, "ERROR 11\n");
         return NULL;
     }
-    assign(st, &(instruction->p1), v1);
+    assign(st, instruction->p1, v1);
     return NULL;
 }

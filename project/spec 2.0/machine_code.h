@@ -1,22 +1,49 @@
 #pragma once
 
-typedef struct _code {
-    char RAX;
-    char number; 
-    param p1;
-    param p2;
-    long long base;
-    struct _code* next;
-} code;
+#include "state.h"
 
-typedef struct _code_block {
-	long long hash;
-	code* instructions;
-	struct _code_block* next;
-} code_block;
-
-code* read_instruction(state* state);
 void write_instruction(code instruction, char* place);
 void* write_blocks(code_block* blocks);
 int size(code* instructions);
 
+unsigned char get_char(state* st);
+
+unsigned char try_get_char(state* st);
+
+char read_reg(state* st);
+
+char get_schar(state* st);
+
+int int_8S(state* st);
+
+int int_8(state* st);
+
+int int_16S(state* st);
+
+int int_16(state* st);
+
+int int_32S(state* st);
+
+unsigned int int_32(state* st);
+
+long long int_64S(state* st);
+
+unsigned long long int_64(state* st);
+
+void parce_reg_mem(state* st, code* instruction);
+
+void my_clf(state* st);
+
+unsigned char bit3_5(unsigned char b);
+
+unsigned char bit1_2(unsigned char b);
+
+unsigned char bit6_8(unsigned char b);
+
+unsigned char REXW(char REX);
+
+unsigned char REXR(char REX);
+
+unsigned char REXX(char REX);
+
+unsigned char REXB(char REX);

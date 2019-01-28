@@ -1,3 +1,107 @@
+void print(state* st, param p, char f) {
+    value v = eval(st, p);
+    if (f && !v.is_dynamic) {
+        if (v.mem != -1) {
+            fprintf(stderr, "%d(%d) ", v.base, v.mem);
+        }
+        else {
+            fprintf(stderr, "%d ", v.base);
+        }
+        return;
+    }
+    if (p.scale == -1) {
+        fprintf(stderr, "%%");
+        print_reg(p.reg1);
+        fprintf(stderr, " ");
+        return;
+    }
+    param pp = p;
+    pp.reg2 = -1;
+    pp.base = 0;
+    pp.scale = -1;
+    v = eval(st, pp);
+    if (v.is_dynamic) {
+        if (p.reg2 == -1) {
+            fprintf(stderr, "%d(", p.base);
+            print_reg(p.reg1);
+            fprintf(stderr, ") ");
+        }
+        else {
+            if (p.base == 0) {
+                fprintf(stderr, "(");
+            }
+            else {
+                fprintf(stderr, "%d(", p.base);
+            }
+            pp.reg1 = p.reg2;
+            pp.reg2 = -1;
+            pp.base = 0;
+            pp.scale = -1;
+            v = eval(st, pp);
+            if (v.is_dynamic) {
+                print_reg(p.reg2);
+            }
+            else {
+                if (v.mem != -1) {
+                    fprintf(stderr, "%d(%d) ", v.base, v.mem);
+                }
+                else {
+                    fprintf(stderr, "%d ", v.base);
+                }
+            }
+            fprintf(stderr, ", ");
+            print_reg(p.reg1);
+            fprintf(stderr, ", ");
+            fprintf(stderr, "%d) ", p.scale);
+        }
+    }
+    else {
+        if (p.reg2 == -1) {
+            if (v.mem != -1) {
+                fprintf(stderr, "%d(%d) ", p.base + v.base, v.mem);
+            }
+            else {
+                fprintf(stderr, "%d ", p.base + v.base);
+            }
+        }
+        else {
+            if (p.base == 0) {
+                fprintf(stderr, "(");
+            }
+            else {
+                fprintf(stderr, "%d(", p.base);
+            }
+            pp.reg1 = p.reg2;
+            pp.reg2 = -1;
+            pp.base = 0;
+            pp.scale = -1;
+            v = eval(st, pp);
+            if (v.is_dynamic) {
+                print_reg(p.reg2);
+            }
+            else {
+                if (v.mem != -1) {
+                    fprintf(stderr, "%d(%d) ", v.base, v.mem);
+                }
+                else {
+                    fprintf(stderr, "%d ", v.base);
+                }
+            }
+            fprintf(stderr, ", ");
+            if (v.mem != -1) {
+                fprintf(stderr, "%d(%d) ", v.base, v.mem);
+            }
+            else {
+                fprintf(stderr, "%d ", v.base);
+            }
+            fprintf(stderr, ", ");
+            fprintf(stderr, "%d) ", p.scale);
+        }
+    }
+    return;
+}
+
+
 #include <stdio.h>
 #include <limits.h>
 #include <sys/mman.h>
