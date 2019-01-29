@@ -4,7 +4,6 @@
 #define sub_2d sub_2d_8
 #define sub_81 sub_81_8
 #define sub_83 sub_83_8
-#define parce_reg_mem parce_reg_mem_8
 #define assign assign_8
 #define eval eval_8
 #define int_s int_8
@@ -18,7 +17,6 @@
 #define sub_2d sub_2d_32
 #define sub_81 sub_81_32
 #define sub_83 sub_83_32
-#define parce_reg_mem parce_reg_mem_32
 #define assign assign_32
 #define eval eval_32
 #define int_s int_32
@@ -32,7 +30,6 @@
 #define sub_2d sub_2d_64
 #define sub_81 sub_81_64
 #define sub_83 sub_83_64
-#define parce_reg_mem parce_reg_mem_64
 #define assign assign_64
 #define eval eval_64
 #define int_s int_32S
@@ -41,104 +38,104 @@
 #define prefix prefix_64
 #endif
 
-void sub_2d(unsigned char cmd) {
-    p1.reg1 = 0;
-    p1.reg2 = -1;
-    p1.base = 0;
-    p1.scale = -1;
-    eval(&p1);
-    v.base -= int_s();
-    if (is_dynamic) {
-        fprintf(stderr, "sub2d\n");
+code* sub_2d(state* st, code* instruction) {
+    instruction->p1 = RAX;
+    value v = eval(st, instruction->p1);
+    instruction->base = int_s(st);
+    if (v.is_dynamic) {
+        return instruction;
     }
-    assign(&p1);
+    v.base -= instruction->base;
+    assign(st, instruction->p1, v);
+    return NULL;
 }
 
-void sub_81(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    v.base -= int_s();
-    if (is_dynamic) {
-        fprintf(stderr, "sub81\n");
+code* sub_81(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v = eval(st, instruction->p2);
+    instruction->base = int_s(st);
+    if (v.is_dynamic) {
+        return instruction;
     }
-    assign(&p2);
+    v.base -= instruction->base;
+    assign(st, instruction->p2, v);
+    return NULL;
 }
 
-void sub_83(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    int d = int_8S();
-    v.base -= d;
-    if (is_dynamic) {
-        fprintf(stderr, "sub83\n");
+code* sub_83(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v = eval(st, instruction->p2);
+    instruction->base = int_8S(st);
+    if (v.is_dynamic) {
+        return instruction;
     }
-    assign(&p2);
+    v.base += instruction->base;
+    assign(st, instruction->p2, v);
+    return NULL;
 }
 
-void sub_29(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    value cur;
-    cur.base = v.base;
-    cur.mem = v.mem;
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "sub29 ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+code* sub_29(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p1);
+    if (v1.is_dynamic) {
+        dynamic(st, instruction->p2);
+        code* pref = prefix(st, instruction->p2);
+        instruction->next = pref;
+        return instruction;
     }
-    eval(&p1);
-    v.base -= cur.base;
-    if (v.mem == -1) {
-        v.mem = cur.mem;
+    value v2 = eval(st, instruction->p2);
+    if (v2.is_dynamic) {
+        code* pref1 = prefix(st, instruction->p1);
+        code* pref2 = prefix(st, instruction->p2);
+        if (pref1 == NULL) {
+            instruction->next = pref2;
+            return instruction;
+        }
+        pref1->next = pref2;
+        instruction->next = pref1;
+        return instruction;
     }
-    else if (cur.mem != -1) {
-        fprintf(stderr, "ERROR 1236\n");
-        return;
+    v2.base -= v1.base;
+    if (v2.mem == -1) {
+        v2.mem = v1.mem;
     }
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "sub29 ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+    else if (v1.mem != -1) {
+        fprintf(stderr, "ERROR 832\n");
+        return NULL;
     }
-    assign(&p2);
+    assign(st, instruction->p2, v2);
+    return NULL;
 }
 
-void sub_2b(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    value cur;
-    cur.base = v.base;
-    cur.mem = v.mem;
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "sub2b ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+code* sub_2b(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p1);
+    if (v1.is_dynamic) {
+        code* pref = prefix(st, instruction->p2);
+        instruction->next = pref;
+        return instruction;
     }
-    eval(&p1);
-    v.base -= cur.base;
-    if (v.mem == -1) {
-        v.mem = cur.mem;
+    value v2 = eval(st, instruction->p2);
+    if (v2.is_dynamic) {
+        dynamic(st, instruction->p1);
+        code* pref1 = prefix(st, instruction->p1);
+        code* pref2 = prefix(st, instruction->p2);
+        if (pref1 == NULL) {
+            instruction->next = pref2;
+            return instruction;
+        }
+        pref1->next = pref2;
+        instruction->next = pref1;
+        return instruction;
     }
-    else if (cur.mem != -1) {
-        fprintf(stderr, "ERROR 11\n");
-        return;
+    v1.base -= v2.base;
+    if (v1.mem == -1) {
+        v1.mem = v2.mem;
     }
-    if (is_dynamic) {
-        prefix(&p1);
-        fprintf(stderr, "sub2b ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+    else if (v2.mem != -1) {
+        fprintf(stderr, "ERROR 115\n");
+        return NULL;
     }
-    assign(&p1);
+    assign(st, instruction->p1, v1);
+    return NULL;
 }

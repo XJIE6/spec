@@ -35,8 +35,7 @@ int main(int argc, char const *argv[]) {
     // s.ret_val = 0;
     // s.vars = &a;
     // eval_prog(p, &s);
-
-
+    
     run_interpreter2(string);
 
 

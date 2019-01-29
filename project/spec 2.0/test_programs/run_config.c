@@ -135,7 +135,6 @@ void run_interpreter2(char* program) {
     st->mem_mem_len[1] = len;
 
 
-
     for (int i = 0; i < len; ++i) {
         st->info_mem[1][i].is_dynamic = 0;
         st->info_mem[1][i].mem = -1;

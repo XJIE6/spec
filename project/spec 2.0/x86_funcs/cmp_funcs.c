@@ -5,7 +5,6 @@
 #define cmp_39 cmp_39_8
 #define cmp_3b cmp_3b_8
 #define test_85 test_85_8
-#define parce_reg_mem parce_reg_mem_8
 #define assign assign_8
 #define eval eval_8
 #define cmp cmp_8
@@ -22,7 +21,6 @@
 #define cmp_39 cmp_39_32
 #define cmp_3b cmp_3b_32
 #define test_85 test_85_32
-#define parce_reg_mem parce_reg_mem_32
 #define assign assign_32
 #define eval eval_32
 #define cmp cmp_32
@@ -39,7 +37,6 @@
 #define cmp_39 cmp_39_64
 #define cmp_3b cmp_3b_64
 #define test_85 test_85_64
-#define parce_reg_mem parce_reg_mem_64
 #define assign assign_64
 #define eval eval_64
 #define cmp cmp_64
@@ -50,126 +47,122 @@
 #define prefix prefix_64
 #endif
 
-void cmp_3d(unsigned char cmd) {
-    p1.reg1 = 0;
-    p1.reg2 = -1;
-    p1.base = 0;
-    p1.scale = -1;
-    int a = int_u();
-    v.base = a;
-    v.mem = -1;
-    is_dynamic = 0;
-    cmp();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp_3d rax %d\n", a);
+code* cmp_3d(state* st, code* instruction) {
+    instruction->p1 = RAX;
+    value v1 = eval(st, instruction->p1);
+    value v2 = {int_u(st), -1, 0};
+    instruction->base = v2.base;
+    cmp(st, v1, v2);
+    if (v1.is_dynamic) {
+        return instruction;
     }
+    return NULL;
 }
 
-void cmp_81(unsigned char cmd) {
-    parce_reg_mem();
-    p1 = p2;
-    int a = int_s();
-    v.base = a;
-    v.mem = -1;
-    is_dynamic = 0;
-    cmp();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp81 ");
-        print(&p2);
-        fprintf(stderr, " %d\n", a);
+code* cmp_81(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p2);
+    value v2 = {int_s(st), -1, 0};
+    instruction->base = v2.base;
+    cmp(st, v1, v2);
+    if (v1.is_dynamic) {
+        return instruction;
     }
+    return NULL;
 }
 
-void cmp_83(unsigned char cmd) {
-    parce_reg_mem();
-    print_params();
-    p1 = p2;
-    int a = int_8S();
-    v.base = a;
-    v.mem = -1;
-    is_dynamic = 0;
-    print_value();
-    cmp();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp83 ");
-        print(&p2);
-        fprintf(stderr, " %d\n", a);
+code* cmp_83(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p2);
+    value v2 = {int_8S(st), -1, 0};
+    instruction->base = v2.base;
+    cmp(st, v1, v2);
+    if (v1.is_dynamic) {
+        return instruction;
     }
+    return NULL;
 }
 
-void cmp_39(unsigned char cmd) {
-    parce_reg_mem();
-    //print_params();
-    eval(&p1);
-    //print_value();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp39 ");
-        print(&p2, 1);
-        fprintf(stderr, " ");
-        print(&p1, 1);
-        fprintf(stderr, "\n");
+code* cmp_39(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p1);
+    value v2 = eval(st, instruction->p2);
+    cmp(st, v1, v2);
+    if (v1.is_dynamic) {
+        code* pref = prefix(st, instruction->p2);
+        instruction->next = pref;
+        return instruction;
     }
-    p1 = p2;
-    cmp();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp39 ");
-        print(&p2, 1);
-        fprintf(stderr, " ");
-        print(&p1, 1);
-        fprintf(stderr, "\n");
+    if (v2.is_dynamic) {
+        code* pref1 = prefix(st, instruction->p1);
+        code* pref2 = prefix(st, instruction->p2);
+        if (pref1 == NULL) {
+            instruction->next = pref2;
+            return instruction;
+        }
+        pref1->next = pref2;
+        instruction->next = pref1;
+        return instruction;
     }
+    return NULL;
 }
 
-void cmp_3b(unsigned char cmd) {
-    parce_reg_mem();
-    print_params();
-    eval(&p2);
-    print_value();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp3b ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+code* cmp_3b(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p1);
+    value v2 = eval(st, instruction->p2);
+    cmp(st, v2, v1);
+    if (v1.is_dynamic) {
+        code* pref = prefix(st, instruction->p2);
+        instruction->next = pref;
+        return instruction;
     }
-    cmp();
-    if (is_dynamic) {
-        fprintf(stderr, "cmp3b ");
-        print(&p2);
-        fprintf(stderr, " ");
-        print(&p1);
-        fprintf(stderr, "\n");
+    if (v2.is_dynamic) {
+        code* pref1 = prefix(st, instruction->p1);
+        code* pref2 = prefix(st, instruction->p2);
+        if (pref1 == NULL) {
+            instruction->next = pref2;
+            return instruction;
+        }
+        pref1->next = pref2;
+        instruction->next = pref1;
+        return instruction;
     }
+    return NULL;
 }
 
-void test_85(unsigned char cmd) {
-    parce_reg_mem();
-    print_params();
-    eval(&p1);
-    print_value();
-    long long res = v.base;
-    if(is_dynamic) {
+code* test_85(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v1 = eval(st, instruction->p1);
+    value v2 = eval(st, instruction->p2);
+    if (v1.is_dynamic) {
         st->info_flags.is_dynamic = 1;
-        fprintf(stderr, "test \n");
-        return;
+        code* pref = prefix(st, instruction->p2);
+        instruction->next = pref;
+        return instruction;
     }
-    eval(&p2);
-    print_value();
-    v.base &= res;
-    if (is_dynamic) {
+    if (v2.is_dynamic) {
         st->info_flags.is_dynamic = 1;
-        fprintf(stderr, "test \n");
-        return;
+        code* pref1 = prefix(st, instruction->p1);
+        code* pref2 = prefix(st, instruction->p2);
+        if (pref1 == NULL) {
+            instruction->next = pref2;
+            return instruction;
+        }
+        pref1->next = pref2;
+        instruction->next = pref1;
+        return instruction;
     }
+    v1.base &= v2.base;
     st->flags[0] = 0;
     st->flags[11] = 0;
-    if (v.base) {
+    if (v1.base) {
         st->flags[6] = 0;
     }
     else {
         st->flags[6] = 1;
     }
-    if (v.base < 0) {
+    if (v1.base < 0) {
         st->flags[7] = 1;
     }
     else {

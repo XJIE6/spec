@@ -47,33 +47,25 @@
 #define MIN LLONG_MIN
 #endif
 
-void cmp(state* st, param p, value v) {
-    char dyn = 0;
-    if (v.is_dynamic) {
-        dyn = 1;
-    }
-    value pvalue = eval(st, p);
-    if (pvalue.is_dynamic) {
-        dyn = 1;
-    }
-    if (dyn) {
+void cmp(state* st, value v1, value v2) {
+    if (v1.is_dynamic || v2.is_dynamic) {
         my_clf(st);
         st->info_flags.is_dynamic = 1;
         return;
     }
-    if (pvalue.mem != v.mem) {
-        if (v.mem == -1 && v.base == 0) {
-            pvalue.base = 1;
+    if (v1.mem != v2.mem) {
+        if (v1.mem == -1 && v1.base == 0) {
+            v2.base = 1;
         }
-        else if (pvalue.mem == -1 && pvalue.base == 0) {
-            v.base = 1;
+        else if (v2.mem == -1 && v2.base == 0) {
+            v1.base = 1;
         }
         else {
             fprintf(stderr, "MEM ARE NOT EQUAL\n");
             return;
         }
     }
-    type a = v.base, b = pvalue.base;
+    type a = v1.base, b = v2.base;
     //fprintf(stderr, "CMP %d %d\n", a, b);
     if (a < b) {
         st->flags[0] = 1;

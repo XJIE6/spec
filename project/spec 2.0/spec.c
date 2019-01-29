@@ -11,6 +11,7 @@
 #include "my_malloc.h"
 
 char* spec(state* _state) {
+    int i = 0;
     specialized_part* specialized = NULL;
 
     state_stack* stack = init_state_stack(_state);
@@ -70,6 +71,8 @@ char* spec(state* _state) {
                 REX = current_instruction;
                 current_instruction = get_char(current->current_state);
             }
+
+            fprintf(stderr, "%d cmd %#04x\n", i++, current_instruction);
 
             //call
             if (current_instruction == 0xe8) {
@@ -191,7 +194,12 @@ char* spec(state* _state) {
                 current->specialized->end_state = current->current_state;
                 break;
             }
-            eval_instruction(current->current_state, current_instruction);
+            code* cur = malloc(sizeof(code));
+            cur->number = current_instruction;
+            int x = eval_instruction(current->current_state, cur);
+            if (x == 1) {
+                return NULL;
+            }
         }
     }
     return NULL;
