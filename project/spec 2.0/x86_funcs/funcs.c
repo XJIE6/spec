@@ -5,36 +5,33 @@
 #include "../spec_funcs.h"
 #include <stdio.h>
 
-//#include "jmp_funcs.c"
+#include "jmp_funcs.c"
 
 #define BIT8
 #include "add_funcs.c"
 #include "cmp_funcs.c"
-// #include "imul_funcs.c"
-// #include "mov_funcs.c"
+#include "imul_funcs.c"
+#include "mov_funcs.c"
 #include "pop_funcs.c"
 #include "push_funcs.c"
-// #include "ret_funcs.c"
 #include "sub_funcs.c"
 #undef BIT8
 #define BIT32
 #include "add_funcs.c"
 #include "cmp_funcs.c"
-// #include "imul_funcs.c"
-// #include "mov_funcs.c"
+#include "imul_funcs.c"
+#include "mov_funcs.c"
 #include "pop_funcs.c"
 #include "push_funcs.c"
-// #include "ret_funcs.c"
 #include "sub_funcs.c"
 #undef BIT32
 #define BIT64
 #include "add_funcs.c"
 #include "cmp_funcs.c"
-// #include "imul_funcs.c"
-// #include "mov_funcs.c"
+#include "imul_funcs.c"
+#include "mov_funcs.c"
 #include "pop_funcs.c"
 #include "push_funcs.c"
-// #include "ret_funcs.c"
 #include "sub_funcs.c"
 #undef BIT64
 
@@ -77,6 +74,62 @@ code* eval_instruction(state* st, code* instruction) {
             }
             else {
                 return add_05_32(st, instruction);
+            }
+        break;
+
+        case 0x0f:
+            instruction->pre = 0x0f;
+            instruction->number = get_char(st);
+            switch (instruction->number) {
+                case 0x80:
+                case 0x81:
+                case 0x82:
+                case 0x83:
+                case 0x84:
+                case 0x85:
+                case 0x86:
+                case 0x87:
+                case 0x88:
+                case 0x89:
+                case 0x8a:
+                case 0x8b:
+                case 0x8c:
+                case 0x8d:
+                case 0x8e:
+                case 0x8f:
+                    return jc(st, instruction, 0);
+                break;
+
+                case 0xaf:
+                    return imul_af(st, instruction);
+                break;
+
+                case 0xbe:
+                    if (REXW(instruction->REX)) {
+                        return mov_be_64(st, instruction);
+                    }
+                    else {
+                        return mov_be_32(st, instruction);
+                    }
+                break;
+
+                case 0xb6:
+                    if (REXW(instruction->REX)) {
+                        return mov_b6_64(st, instruction);
+                    }
+                    else {
+                        return mov_b6_32(st, instruction);
+                    }
+                break;
+
+                case 0x1f:
+                    return NULL;
+                break;
+
+                default:
+                    fprintf(stderr, "UNKNOWN 0x0f %#04x\n", instruction->number);
+                    return 1;
+                break;
             }
         break;
 
@@ -190,6 +243,10 @@ code* eval_instruction(state* st, code* instruction) {
             }
         break;
 
+        case 0x63:
+            return movsxd_63(st, instruction);
+        break;
+
         case 0x68:
              if (REXW(instruction->REX)) {
                 return push_68_64(st, instruction);
@@ -197,6 +254,48 @@ code* eval_instruction(state* st, code* instruction) {
             else {
                 return push_68_32(st, instruction);
             }
+        break;
+
+        case 0x6a:
+            return push_68_8(st, instruction);
+        break;
+
+        case 0x70:
+        case 0x71:
+        case 0x72:
+        case 0x73:
+        case 0x74:
+        case 0x75:
+        case 0x76:
+        case 0x77:
+        case 0x78:
+        case 0x79:
+        case 0x7a:
+        case 0x7b:
+        case 0x7c:
+        case 0x7d:
+        case 0x7e:
+        case 0x7f:
+            return jc(st, instruction, 1);
+        break;
+        
+
+        case 0x80:
+        f = read_reg(st);
+        switch(f) {
+            case 0:
+                return add_81_8(st, instruction);
+                break;
+            case 1:
+            case 2:
+            case 3:
+            case 4:
+            case 5:
+            case 6:
+            case 7:
+                return cmp_81_8(st, instruction);
+                break;
+        }
         break;
 
         case 0x81:
@@ -270,6 +369,41 @@ code* eval_instruction(state* st, code* instruction) {
             }
         break;
 
+        case 0x88:
+            return mov_89_8(st, instruction);
+        break;
+
+        case 0x89:
+            if (REXW(instruction->REX)) {
+                return mov_89_64(st, instruction);
+            }
+            else {
+                return mov_89_32(st, instruction);
+            }
+        break;
+
+        case 0x8a:
+            return mov_8b_8(st, instruction);
+        break;
+
+        case 0x8b:
+            if (REXW(instruction->REX)) {
+                return mov_8b_64(st, instruction);
+            }
+            else {
+                return mov_8b_32(st, instruction);
+            }
+        break;
+
+        case 0x8d:
+            if (REXW(instruction->REX)) {
+                return lea_8d_64(st, instruction);
+            }
+            else {
+                return lea_8d_32(st, instruction);
+            }
+        break;
+
         case 0x8f:
             f = read_reg(st);
             switch(f) {
@@ -284,8 +418,82 @@ code* eval_instruction(state* st, code* instruction) {
             }
         break;
 
+        case 0x90:
+            return NULL;
+        break;
+
+        case 0x98:
+            return NULL;
+        break;
+
+        case 0x99:
+            return NULL;
+        break;
+
+        case 0xb0:
+        case 0xb1:
+        case 0xb2:
+        case 0xb3:
+        case 0xb4:
+        case 0xb5:
+        case 0xb6:
+        case 0xb7:
+            return mov_b8_8(st, instruction);
+        break;
+
+        case 0xb8:
+        case 0xb9:
+        case 0xba:
+        case 0xbb:
+        case 0xbc:
+        case 0xbd:
+        case 0xbe:
+        case 0xbf:
+            if (REXW(instruction->REX)) {
+                return mov_b8_64(st, instruction);
+            }
+            else {
+                return mov_b8_32(st, instruction);
+            }
+        break;
+
+        case 0xc6:
+            return mov_c7_8(st, instruction);
+        break;
+
+        case 0xc7:
+            if (REXW(instruction->REX)) {
+                return mov_c7_64(st, instruction);
+            }
+            else {
+                return mov_c7_32(st, instruction);
+            }
+        break;
+
         case 0xc9:
             return leave_c9(st, instruction);
+        break;
+
+        case 0xe9:
+            return jmp_e9(st, instruction);
+        break;
+
+        case 0xeb:
+            return jmp_eb(st, instruction);
+        break;
+
+        case 0xf7:
+            f = read_reg(st);
+            switch(f) {
+                case 7:
+                    if (REXW(instruction->REX)) {
+                        return idiv_f7_64(st, instruction);
+                    }
+                    else {
+                        return idiv_f7_32(st, instruction);
+                    }
+                break;
+            }
         break;
 
         case 0xff:

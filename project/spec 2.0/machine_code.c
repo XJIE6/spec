@@ -98,7 +98,7 @@ unsigned long long int_64(state* st) {
 
 void sib(state* st, code* instruction, char mod) {
     unsigned char cur = get_char(st);
-    unsigned char scale = bit1_2(cur);
+    char scale = bit1_2(cur);
     unsigned char index = bit3_5(cur) + ((REXX(instruction->REX) << 3));
     long long base = bit6_8(cur);
     if (base == 5) {
@@ -179,7 +179,7 @@ void parce_reg_mem(state* st, code* instruction) {
 
         case 3:
             r_m += REXB(instruction->REX) << 3;
-            instruction->p2 = (param) {r_m, -1, -1, base};
+            instruction->p2 = (param) {r_m, -1, -1, 0};
         break;
 
         default:

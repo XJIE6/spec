@@ -16,4 +16,8 @@ void push_8(state* st, value v);
 void push_32(state* st, value v);
 void push_64(state* st, value v);
 
+value lea_8(state* st, param p);
+value lea_32(state* st, param p);
+value lea_64(state* st, param p);
+
 void dynamic(state* st, param p);

@@ -64,6 +64,7 @@ code* sub_81(state* st, code* instruction) {
 
 code* sub_83(state* st, code* instruction) {
     parce_reg_mem(st, instruction);
+    param p = instruction->p2;
     value v = eval(st, instruction->p2);
     instruction->base = int_8S(st);
     if (v.is_dynamic) {

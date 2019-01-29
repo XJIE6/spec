@@ -21,8 +21,8 @@ struct _state {
 typedef struct _param {
     char reg1;
     char reg2;
-    long long base;
     char scale;
+    long long base;
 } param;
 
 typedef struct _value {
@@ -32,8 +32,9 @@ typedef struct _value {
 } value;
 
 typedef struct _code {
-    char REX;
-    char number; 
+    unsigned char REX;
+    unsigned char pre;
+    unsigned char number;
     param p1;
     param p2;
     long long base;

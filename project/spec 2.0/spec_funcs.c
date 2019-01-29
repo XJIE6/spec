@@ -8,6 +8,7 @@
 #define prefix prefix_8
 #define pop pop_8
 #define cmp cmp_8
+#define lea lea_8
 #define assign assign_8
 #define intCur int8
 #define MAX CHAR_MAX
@@ -24,6 +25,7 @@
 #define prefix prefix_32
 #define pop pop_32
 #define cmp cmp_32
+#define lea lea_32
 #define assign assign_32
 #define intCur int32
 #define MAX INT_MAX
@@ -40,6 +42,7 @@
 #define prefix prefix_64
 #define pop pop_64
 #define cmp cmp_64
+#define lea lea_64
 #define assign assign_64
 #define intCur int64
 #define MAX LLONG_MAX
@@ -104,13 +107,13 @@ void cmp(state* st, value v1, value v2) {
 }
 
 void push(state* st, value v) {
-    st->regs[16] -= sizeof(type);
-    assign(st, RSP, v);
+    st->regs[4] -= sizeof(type);
+    assign(st, (param){4, -1, 0, 0}, v);
 }
 
 value pop(state* st) {
-    value v = eval(st, RSP);
-    st->regs[16] += sizeof(type);
+    value v = eval(st, (param){4, -1, 0, 0});
+    st->regs[4] += sizeof(type);
     return v;
 }
 
@@ -154,7 +157,7 @@ void assign(state* st, param p, value v) {
 
 
 
-void prefix(state* st, param p) {
+code* prefix(state* st, param p) {
     value v = eval(st, p);
     if (!v.is_dynamic) {
         //fprintf(stderr, "premov ");
@@ -187,7 +190,28 @@ void prefix(state* st, param p) {
         //     return;
         // }
     }
-    return;
+    return NULL;
+}
+
+value lea(state* st, param p) {
+    value v;
+    if ((p.reg1 != -1 && st->info_regs[p.reg1].is_dynamic) || (p.reg2 != -1 && st->info_regs[p.reg2].is_dynamic)) {
+        v.is_dynamic = 1;
+        return v;
+    }
+    v.base = st->regs[p.reg1] * (1 << p.scale) + p.base;
+    v.mem = st->info_regs[p.reg1].mem;
+    if (p.reg2 != -1) {
+        v.base += st->regs[p.reg2] * (1 << p.scale);
+        if (st->info_regs[p.reg2].mem != -1) {
+            if (v.mem != -1) {
+                fprintf(stderr, "ERROR eval 342\n");
+                return v;
+            }
+            v.mem = st->info_regs[p.reg2].mem;
+        }
+    }
+    return v;
 }
 
 value eval(state* st, param p) {
@@ -202,17 +226,7 @@ value eval(state* st, param p) {
         v.is_dynamic = st->info_regs[p.reg1].is_dynamic;
         return v;
     }
-    char f = 0;
-    if (p.scale < 0) {
-        p.scale += 50;
-        f = 1; 
-    }
-               
     value cur;
-    // if (p.scale != 0 && p.reg2 != -1 && st->info_regs[p.reg2].mem != -1) {
-    //     fprintf(stderr, "ERROR eval 34\n");
-    //     return;
-    // }
     cur.base = st->regs[p.reg1] * (1 << p.scale) + p.base;
     cur.mem = st->info_regs[p.reg1].mem;
     if (p.reg2 != -1) {
@@ -225,16 +239,6 @@ value eval(state* st, param p) {
             cur.mem = st->info_regs[p.reg2].mem;
         }
     }
-    if (f) {
-    	if (p.scale != -1) {
-        	v.base = cur.base; // strange fix * (1 << p.scale);
-		}
-		else {
-			v.base = cur.base;
-		}
-        v.mem = cur.mem;
-        return v;
-    }
     if (cur.mem == -1) {
         v.base = *((type*)cur.base);
         v.mem = -1;
@@ -244,4 +248,5 @@ value eval(state* st, param p) {
     v.base = *((type*)(st->mem[cur.mem] + cur.base));
     v.mem = st->info_mem[cur.mem][cur.base].mem;
     v.is_dynamic = st->info_mem[cur.mem][cur.base].is_dynamic;
+    return v;
 }

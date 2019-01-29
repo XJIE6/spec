@@ -66,18 +66,18 @@ char* spec(state* _state) {
             }
 
             char REX = 0;
-            char current_instruction = get_char(current->current_state);
+            unsigned char current_instruction = get_char(current->current_state);
             if (current_instruction >= 0x40 && current_instruction <= 0x4f) {
                 REX = current_instruction;
                 current_instruction = get_char(current->current_state);
             }
 
-            fprintf(stderr, "%d cmd %#04x\n", i++, current_instruction);
+            fprintf(stderr, "%d cmd %#04x, %d\n", i++, current_instruction, current->current_state->regs[16]  % 1000000);
 
             //call
             if (current_instruction == 0xe8) {
                 value v = eval_64(current->current_state, RIP);
-                long long alignment = int_32(current->current_state);
+                long long alignment = int_32S(current->current_state);
                 if (v.base + alignment == my_malloc) {
                     //TODO generate malloc instruction
                     v = eval_64(current->current_state, RDI);
@@ -186,7 +186,7 @@ char* spec(state* _state) {
             }
 
             if (current_instruction == 0xc3) {
-                prefix(RAX);
+                prefix_64(current->current_state, RAX);
                 state* new = copy(current->current_state);
                 state* result_state = unite(new, current->parallel_state);
                 *(current->result_place) = result_state;

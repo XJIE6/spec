@@ -22,7 +22,7 @@
 
 code* push_50(state* st, code* instruction) {
     int reg = instruction->number - 0x50 + (REXR(instruction->REX) << 3);
-    instruction->p1 = (param) {reg, -1, 0, -1};
+    instruction->p1 = (param) {reg, -1, -1, 0};
     value v = eval(st, instruction->p1);
     push_64(st, v);
     if (v.is_dynamic) {

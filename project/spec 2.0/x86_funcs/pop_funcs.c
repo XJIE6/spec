@@ -26,7 +26,7 @@
 code* pop_58(state* st, code* instruction) {
     value v = pop_64(st);
     int reg = instruction->number - 0x58 + (REXR(instruction->REX) << 3);
-    instruction->p1 = (param) {reg, -1, 0, -1};
+    instruction->p1 = (param) {reg, -1, -1, 0};
     assign(st, instruction->p1, v);
     if (v.is_dynamic) {
         fprintf(stderr, "OPS, NOT IMPLEMENTED 264\n");

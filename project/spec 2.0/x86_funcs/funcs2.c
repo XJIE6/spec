@@ -468,9 +468,7 @@ void init(void *(**a)()) {
 
     a[0x88] = mov_89_8;
     a[0x89] = eval_89;
-    a[0x90] = empty;
-    a[0x98] = empty;
-    a[0x99] = empty;
+
 
     a[0x8a] = mov_8b_8;
     a[0x8b] = eval_8b;
@@ -478,6 +476,10 @@ void init(void *(**a)()) {
     a[0x8d] = eval_8d;
 
     a[0x8f] = eval_8f;
+
+    a[0x90] = empty;
+    a[0x98] = empty;
+    a[0x99] = empty;
 
     a[0xb0] = mov_b8_8;
     a[0xb1] = mov_b8_8;

@@ -109,9 +109,8 @@ void calc_hash(state* cur) {
     cur->hash = res;
 }
 
-state* crop(state* cur) {
+void crop(state* cur) {
     //MAYBE BUG
-    //fprintf(stderr, "IN CROP\n");
     int delta = cur->regs[4];
     cur->mem_mem_len[0] += delta;
     cur->mem[0] += delta;
@@ -121,14 +120,12 @@ state* crop(state* cur) {
             //fprintf(stderr, "reg %d\n", i);
         }
     }
-
     for (int j = -cur->mem_mem_len[0]; j < 0; ++j) {
         if (cur->info_mem[0][j].mem == 0) {
             cur->mem[0][j] -= delta;
             //fprintf(stderr, "stack %d\n", j);
         }
     }
-    //fprintf(stderr, "OUT CROP\n");
     // for (int i = 1; i < cur->mem_len; ++i) {
     //     for (int j = 0; j < cur->mem_mem_len[i]; ++j) {
     //         if (cur->info_mem[i][j].mem == 0) {

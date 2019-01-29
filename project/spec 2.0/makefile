@@ -12,7 +12,7 @@ test_programs/parser.o: test_programs/parser.cpp
 spec_funcs_aggregator.o: spec_funcs_aggregator.c spec_funcs.c
 	gcc -c -O0 -Wall -W -Wfatal-errors -o $@ spec_funcs_aggregator.c -mno-tls-direct-seg-refs
 
-x86_funcs/funcs.o: x86_funcs/funcs.c x86_funcs/add_funcs.c x86_funcs/cmp_funcs.c x86_funcs/imul_funcs.c x86_funcs/jmp_funcs.c x86_funcs/mov_funcs.c x86_funcs/pop_funcs.c x86_funcs/push_funcs.c x86_funcs/ret_funcs.c x86_funcs/sub_funcs.c
+x86_funcs/funcs.o: x86_funcs/funcs.c x86_funcs/add_funcs.c x86_funcs/cmp_funcs.c x86_funcs/imul_funcs.c x86_funcs/jmp_funcs.c x86_funcs/mov_funcs.c x86_funcs/pop_funcs.c x86_funcs/push_funcs.c x86_funcs/sub_funcs.c
 	gcc -c -O0 -Wall -W -Wfatal-errors -o $@ x86_funcs/funcs.c -mno-tls-direct-seg-refs
 
 clean:
