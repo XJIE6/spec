@@ -2,7 +2,6 @@
 #define push_50 push_50_8
 #define push_68 push_68_8
 #define push_ff push_ff_8
-#define parce_reg_mem parce_reg_mem_8
 #define push push_8
 #define eval eval_8
 #endif
@@ -10,7 +9,6 @@
 #define push_50 push_50_32
 #define push_68 push_68_32
 #define push_ff push_ff_32
-#define parce_reg_mem parce_reg_mem_32
 #define push push_32
 #define eval eval_32
 #endif
@@ -18,34 +16,34 @@
 #define push_50 push_50_64
 #define push_68 push_68_64
 #define push_ff push_ff_64
-#define parce_reg_mem parce_reg_mem_64
 #define push push_64
 #define eval eval_64
 #endif
 
-void push_50(unsigned char cmd) {
-    p1.reg1 = cmd - 0x50 + (REXR() << 3);
-    p1.reg2 = -1;
-    p1.base = 0;
-    p1.scale = -1;
-    eval(&p1);
-    if (is_dynamic) {
-        fprintf(stderr, "push%d\n", cmd);
+code* push_50(state* st, code* instruction) {
+    int reg = instruction->number - 0x50 + (REXR(instruction->REX) << 3);
+    instruction->p1 = (param) {reg, -1, 0, -1};
+    value v = eval(st, instruction->p1);
+    push_64(st, v);
+    if (v.is_dynamic) {
+        fprintf(stderr, "OPS, NOT IMPLEMENTED 563\n");
+        // generate mov from p1 to stack
     }
-    push_64();
+    return NULL;
 }
 
-void push_ff(unsigned char cmd) {
-    parce_reg_mem();
-    eval(&p2);
-    if (is_dynamic) {
-        fprintf(stderr, "push_ff\n");
+code* push_ff(state* st, code* instruction) {
+    parce_reg_mem(st, instruction);
+    value v = eval(st, instruction->p2);
+    push_64(st, v);
+    if (v.is_dynamic) {
+        fprintf(stderr, "OPS, NOT IMPLEMENTED 938\n");
+        // generate mov from p2 to stack
     }
-    push_64();
+    return NULL;
 }
 
-void push_68(unsigned char cmd) {
-    v.base = int_cur();
-    v.mem = -1;
-    push();
+code* push_68(state* st, code* instruction) {
+    value v = {int_cur(st), -1, 0};
+    push(st, v);
 }

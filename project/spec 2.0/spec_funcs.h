@@ -8,4 +8,12 @@ void assign_8(state* st, param p, value v);
 void assign_32(state* st, param p, value v);
 void assign_64(state* st, param p, value v);
 
+value pop_8(state* st);
+value pop_32(state* st);
+value pop_64(state* st);
+
+void push_8(state* st, value v);
+void push_32(state* st, value v);
+void push_64(state* st, value v);
+
 void dynamic(state* st, param p);

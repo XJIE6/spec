@@ -12,8 +12,8 @@
 #include "cmp_funcs.c"
 // #include "imul_funcs.c"
 // #include "mov_funcs.c"
-// #include "pop_funcs.c"
-// #include "push_funcs.c"
+#include "pop_funcs.c"
+#include "push_funcs.c"
 // #include "ret_funcs.c"
 #include "sub_funcs.c"
 #undef BIT8
@@ -22,8 +22,8 @@
 #include "cmp_funcs.c"
 // #include "imul_funcs.c"
 // #include "mov_funcs.c"
-// #include "pop_funcs.c"
-// #include "push_funcs.c"
+#include "pop_funcs.c"
+#include "push_funcs.c"
 // #include "ret_funcs.c"
 #include "sub_funcs.c"
 #undef BIT32
@@ -32,8 +32,8 @@
 #include "cmp_funcs.c"
 // #include "imul_funcs.c"
 // #include "mov_funcs.c"
-// #include "pop_funcs.c"
-// #include "push_funcs.c"
+#include "pop_funcs.c"
+#include "push_funcs.c"
 // #include "ret_funcs.c"
 #include "sub_funcs.c"
 #undef BIT64
@@ -158,6 +158,47 @@ code* eval_instruction(state* st, code* instruction) {
             }
         break;
 
+        case 0x50:
+        case 0x51:
+        case 0x52:
+        case 0x53:
+        case 0x54:
+        case 0x55:
+        case 0x56:
+        case 0x57:
+            if (REXW(instruction->REX)) {
+                return push_50_64(st, instruction);
+            }
+            else {
+                return push_50_32(st, instruction);
+            }
+        break;
+
+        case 0x58:
+        case 0x59:
+        case 0x5a:
+        case 0x5b:
+        case 0x5c:
+        case 0x5d:
+        case 0x5e:
+        case 0x5f:
+            if (REXW(instruction->REX)) {
+                return pop_58_64(st, instruction);
+            }
+            else {
+                return pop_58_32(st, instruction);
+            }
+        break;
+
+        case 0x68:
+             if (REXW(instruction->REX)) {
+                return push_68_64(st, instruction);
+            }
+            else {
+                return push_68_32(st, instruction);
+            }
+        break;
+
         case 0x81:
         f = read_reg(st);
         switch(f) {
@@ -229,6 +270,37 @@ code* eval_instruction(state* st, code* instruction) {
             }
         break;
 
+        case 0x8f:
+            f = read_reg(st);
+            switch(f) {
+                case 0:
+                    if (REXW(instruction->REX)) {
+                        return pop_8f_64(st, instruction);
+                    }
+                    else {
+                        return pop_8f_32(st, instruction);
+                    }
+                break;
+            }
+        break;
+
+        case 0xc9:
+            return leave_c9(st, instruction);
+        break;
+
+        case 0xff:
+            f = read_reg(st);
+            switch(f) {
+                case 6:
+                    if (REXW(instruction->REX)) {
+                        return push_ff_64(st, instruction);
+                    }
+                    else {
+                        return push_ff_32(st, instruction);
+                    }
+                break;
+            }
+        break;
 
         default:
             fprintf(stderr, "UNKNOWN %#04x\n", instruction->number);

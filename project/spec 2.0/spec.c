@@ -76,18 +76,18 @@ char* spec(state* _state) {
 
             //call
             if (current_instruction == 0xe8) {
-                value v = eval_32(current->current_state, RIP);
-                v.base += int_32(current->current_state);
-                if (v.base == my_malloc) {
+                value v = eval_64(current->current_state, RIP);
+                long long alignment = int_32(current->current_state);
+                if (v.base + alignment == my_malloc) {
                     //TODO generate malloc instruction
-                    v = eval_32(current->current_state, RDI);
+                    v = eval_64(current->current_state, RDI);
                     current->current_state->mem[current->current_state->mem_len] = my_malloc(v.base);
                     current->current_state->info_mem[current->current_state->mem_len] = my_malloc(sizeof(info) * v.base);
                     current->current_state->mem_mem_len[current->current_state->mem_len] = v.base;
                     v.base = 0;
                     v.mem = current->current_state->mem_len;
                     v.is_dynamic = 0;
-                    assign_32(current->current_state, RAX, v);
+                    assign_64(current->current_state, RAX, v);
                     ++(current->current_state->mem_len);
                     continue;
                 }
@@ -97,8 +97,9 @@ char* spec(state* _state) {
                 stack = current;
                 // create new state
                 state* start = copy(current->current_state);
-                push_64(start);
-                assign_32(start, RIP, v);
+                push_64(start, v);
+                v.base += alignment;
+                assign_64(start, RIP, v);
                 crop(start);
                 calc_hash(start);
                 //check if recursive call
@@ -136,9 +137,9 @@ char* spec(state* _state) {
                 current->next = stack;
                 stack = current;
                 state* start = copy(current->current_state);
-                value v = eval_32(start, RIP);
+                value v = eval_64(start, RIP);
                 v.base += int_8S(start);
-                assign_32(start, RIP, v);
+                assign_64(start, RIP, v);
                 calc_hash(start);
 
                 state* start_copy = copy(start);
@@ -164,9 +165,9 @@ char* spec(state* _state) {
                     current->next = stack;
                     stack = current;
                     state* start = copy(current->current_state);
-                    value v = eval_32(start, RIP);
+                    value v = eval_64(start, RIP);
                     v.base += int_32(start);
-                    assign_32(start, RIP, v);
+                    assign_64(start, RIP, v);
                     calc_hash(start);
 
                     state* start_copy = copy(start);
