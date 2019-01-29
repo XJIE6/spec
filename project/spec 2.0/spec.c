@@ -10,6 +10,13 @@
 #include "spec_funcs.h"
 #include "my_malloc.h"
 
+void print(code* instr) {
+    if (instr->next != NULL) {
+        print(instr->next);
+    }
+    fprintf(stderr, "%#04x\n", instr->number);
+}
+
 char* spec(state* _state) {
     int i = 0;
     specialized_part* specialized = NULL;
@@ -197,11 +204,25 @@ char* spec(state* _state) {
             }
             code* cur = malloc(sizeof(code));
             cur->number = current_instruction;
-            int x = eval_instruction(current->current_state, cur);
-            if (x == 1) {
-                return NULL;
+            cur->next = NULL;
+            code* generated = eval_instruction(current->current_state, cur);
+            if (generated != NULL && generated != 1) {
+                code* tail = generated;
+                while (tail->next != NULL) {
+                    tail = tail->next;
+                }
+                tail->next = current->generated_code;
+                current->generated_code = generated;
             }
         }
+    }
+
+    while (specialized != NULL) {
+        fprintf(stderr, "Block %d\n", specialized->start_state->hash);
+        if (specialized->generated_code != NULL) {
+            print(specialized->generated_code);
+        }
+        specialized = specialized->next;
     }
     return NULL;
 }

@@ -169,4 +169,5 @@ code* test_85(state* st, code* instruction) {
         st->flags[7] = 0;
     }
     st->info_flags.is_dynamic = 0;
+    return NULL;
 }

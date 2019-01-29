@@ -2,10 +2,6 @@
 
 #include "state.h"
 
-void write_instruction(code instruction, char* place);
-void* write_blocks(code_block* blocks);
-int size(code* instructions);
-
 unsigned char get_char(state* st);
 
 unsigned char try_get_char(state* st);

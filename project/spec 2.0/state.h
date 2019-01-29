@@ -41,17 +41,11 @@ typedef struct _code {
     struct _code* next;
 } code;
 
-typedef struct _code_block {
-    long long hash;
-    code* instructions;
-    struct _code_block* next;
-} code_block;
-
 typedef struct _state state;
 
 typedef struct _specialized_part {
     state* start_state;
-    code_block* generated_code;
+    code* generated_code;
     state* end_state;
     struct _specialized_part* next;
 } specialized_part;
@@ -60,7 +54,7 @@ typedef struct _state_stack {
     state* start_state;
     state* current_state;
     state* state_after_call;
-    code_block* generated_code;
+    code* generated_code;
     state* parallel_state;
     state** result_place;
     struct _state_stack* next;
