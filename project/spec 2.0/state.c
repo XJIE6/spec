@@ -148,7 +148,6 @@ state* copy(state* cur) {
     }
 
     new->info_flags.is_dynamic = cur->info_flags.is_dynamic;
-
     new->mem_len = cur->mem_len;
     for (int i = 0; i < cur->mem_len; ++i) {
         new->mem_mem_len[i] = cur->mem_mem_len[i];
@@ -160,15 +159,18 @@ state* copy(state* cur) {
         new->info_mem[k] = malloc(sizeof(info) * cur->mem_mem_len[k]);
         k++;
     }
+
     for (int j = -cur->mem_mem_len[0]; j < 0; ++j) {
         new->mem[0][j] = cur->mem[0][j];
         new->info_mem[0][j].mem = cur->info_mem[0][j].mem;
         new->info_mem[0][j].is_dynamic = cur->info_mem[0][j].is_dynamic;
     }
+
     for (int i = 1; i < cur->mem_len; ++i) {
         for (int j = 0; j < cur->mem_mem_len[i]; ++j) {
             new->mem[i][j] = cur->mem[i][j];
-            new->info_mem[i][j].mem = cur->info_mem[i][j].mem;
+            char c = cur->info_mem[i][j].mem;
+            new->info_mem[i][j].mem = c;
             new->info_mem[i][j].is_dynamic = cur->info_mem[i][j].is_dynamic;
         }
     }

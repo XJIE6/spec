@@ -70,7 +70,7 @@ code* sub_83(state* st, code* instruction) {
     if (v.is_dynamic) {
         return instruction;
     }
-    v.base += instruction->base;
+    v.base -= instruction->base;
     assign(st, instruction->p2, v);
     return NULL;
 }

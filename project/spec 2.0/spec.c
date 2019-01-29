@@ -72,12 +72,12 @@ char* spec(state* _state) {
                 current_instruction = get_char(current->current_state);
             }
 
-            fprintf(stderr, "%d cmd %#04x, %d\n", i++, current_instruction, current->current_state->regs[16]  % 1000000);
+            fprintf(stderr, "%d cmd %#04x, %d\n", i++, current_instruction, current->current_state->regs[4]);
 
             //call
             if (current_instruction == 0xe8) {
-                value v = eval_64(current->current_state, RIP);
                 long long alignment = int_32S(current->current_state);
+                value v = eval_64(current->current_state, RIP);
                 if (v.base + alignment == my_malloc) {
                     //TODO generate malloc instruction
                     v = eval_64(current->current_state, RDI);
@@ -91,6 +91,7 @@ char* spec(state* _state) {
                     ++(current->current_state->mem_len);
                     continue;
                 }
+
                 //TODO
                 // put current state on stack
                 current->next = stack;
@@ -117,7 +118,6 @@ char* spec(state* _state) {
 
                 state* start_copy = copy(start);
                 start_copy->hash = start->hash;
-
                 state_stack* new = malloc(sizeof(state_stack));
                 new->start_state = start;
                 new->current_state = start_copy;
@@ -125,7 +125,6 @@ char* spec(state* _state) {
                 new->generated_code = NULL; //empty
                 new->parallel_state = NULL;
                 new->result_place = & (current->state_after_call);
-
                 new->next = stack;
                 stack = new;
                 break;
@@ -137,8 +136,9 @@ char* spec(state* _state) {
                 current->next = stack;
                 stack = current;
                 state* start = copy(current->current_state);
+                long long alignment = int_8S(start);
                 value v = eval_64(start, RIP);
-                v.base += int_8S(start);
+                v.base += alignment;
                 assign_64(start, RIP, v);
                 calc_hash(start);
 
@@ -165,8 +165,9 @@ char* spec(state* _state) {
                     current->next = stack;
                     stack = current;
                     state* start = copy(current->current_state);
+                    long long alignment = int_32S(start);
                     value v = eval_64(start, RIP);
-                    v.base += int_32(start);
+                    v.base += alignment;
                     assign_64(start, RIP, v);
                     calc_hash(start);
 
