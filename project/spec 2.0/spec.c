@@ -64,7 +64,6 @@ char* spec(state* _state) {
                 current->current_state = current->state_after_call;
                 current->state_after_call = NULL;
             }
-
             char REX = 0;
             unsigned char current_instruction = get_char(current->current_state);
             if (current_instruction >= 0x40 && current_instruction <= 0x4f) {
@@ -72,7 +71,7 @@ char* spec(state* _state) {
                 current_instruction = get_char(current->current_state);
             }
 
-            fprintf(stderr, "%d cmd %#04x, %d\n", i++, current_instruction, current->current_state->regs[4]);
+            fprintf(stderr, "%d cmd %#04x, %lld\n", i++, current_instruction, current->current_state->regs[16]);
 
             //call
             if (current_instruction == 0xe8) {
@@ -135,8 +134,8 @@ char* spec(state* _state) {
                 //put current state on stack
                 current->next = stack;
                 stack = current;
+                long long alignment = int_8S(current->current_state);
                 state* start = copy(current->current_state);
-                long long alignment = int_8S(start);
                 value v = eval_64(start, RIP);
                 v.base += alignment;
                 assign_64(start, RIP, v);
@@ -164,8 +163,8 @@ char* spec(state* _state) {
                     //put current state on stack
                     current->next = stack;
                     stack = current;
+                    long long alignment = int_32S(current->current_state);
                     state* start = copy(current->current_state);
-                    long long alignment = int_32S(start);
                     value v = eval_64(start, RIP);
                     v.base += alignment;
                     assign_64(start, RIP, v);

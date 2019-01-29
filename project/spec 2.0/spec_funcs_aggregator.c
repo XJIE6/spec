@@ -21,6 +21,7 @@ void dynamic(state* st, param p) {
     }
     if (p.scale == -1) {
         st->info_regs[p.reg1].is_dynamic = 1;
+        return;
     }
                
     value cur;
@@ -37,4 +38,5 @@ void dynamic(state* st, param p) {
         }
     }
     st->info_mem[cur.mem][cur.base].is_dynamic = 1;
+    return;
 }

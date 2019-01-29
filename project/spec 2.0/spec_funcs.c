@@ -211,6 +211,7 @@ value lea(state* st, param p) {
             v.mem = st->info_regs[p.reg2].mem;
         }
     }
+    v.is_dynamic = 0;
     return v;
 }
 
