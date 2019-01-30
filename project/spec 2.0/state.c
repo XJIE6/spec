@@ -8,12 +8,14 @@ const int MAX_MEM_SIZE = 10;
 state_stack* init_state_stack(state* start_state) {
     state_stack* stack = malloc(sizeof(state_stack));
     stack->start_state = copy(start_state);
+    stack->start_state->hash = start_state->hash;
     stack->current_state = start_state;
     stack->state_after_call = NULL;
     stack->generated_code = NULL; // empty
     stack->parallel_state = NULL;
     stack->result_place = malloc(sizeof(state));
     stack->next = NULL;
+    stack->specialized = NULL;
     return stack;
 }
 
