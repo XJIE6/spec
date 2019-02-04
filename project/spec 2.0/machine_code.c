@@ -1,13 +1,111 @@
 #include "machine_code.h"
 #include "stdio.h"
 
+void print_reg(int i) {
+    switch(i) {
+        case(0):
+            fprintf(stderr, "rax");
+            break;
+        case(1):
+            fprintf(stderr, "rcx");
+            break;
+        case(2):
+            fprintf(stderr, "rdx");
+            break;
+        case(3):
+            fprintf(stderr, "rbx");
+            break;
+        case(4):
+            fprintf(stderr, "rsp");
+            break;
+        case(5):
+            fprintf(stderr, "rbp");
+            break;
+        case(6):
+            fprintf(stderr, "rsi");
+            break;
+        case(7):
+            fprintf(stderr, "rdi");
+            break;
+    }
+}
+
+void print_param(param p) {
+    if (p.scale == -1) {
+        fprintf(stderr, "%%");
+        print_reg(p.reg1);
+        return;
+    }
+    if (p.base != 0) {
+        fprintf(stderr, "%d", p.base);
+    }
+    fprintf(stderr, "(");
+    if (p.reg2 == -1) {
+        print_reg(p.reg1);
+    }
+    else {
+        print_reg(p.reg1);
+        fprintf(stderr, ", ");
+        print_reg(p.reg2);
+        fprintf(stderr, ", %d", p.scale);
+    }
+    fprintf(stderr, ")");
+}
+
 void print(code* instr) {
     if (instr->next != NULL) {
         print(instr->next);
     }
     fprintf(stderr, "%#04x ", instr->number);
-    if (instr->base != 0) {
-        fprintf(stderr, "%d ", instr->base);
+    switch(instr->type) {
+        case empty:
+        break;
+
+        case bit_8:
+            fprintf(stderr, "%d", instr->base);
+        break;
+
+        case bit_8S:
+            fprintf(stderr, "%d", instr->base);
+        break;
+
+        case bit_32:
+            fprintf(stderr, "%d", instr->base);
+        break;
+
+        case bit_32S:
+            fprintf(stderr, "%d", instr->base);
+        break;
+
+        case bit_64:
+            fprintf(stderr, "%lld", instr->base);
+        break;
+
+        case reg_mem:
+            print_param(instr->p1);
+            fprintf(stderr, " ");
+            print_param(instr->p2);
+        break;
+
+        case reg_mem_bit_8:
+            print_param(instr->p2);
+            fprintf(stderr, " %d", instr->base);
+        break;
+
+        case reg_mem_bit_8S:
+            print_param(instr->p2);
+            fprintf(stderr, " %d", instr->base);
+        break;
+
+        case reg_mem_bit_32:
+            print_param(instr->p2);
+            fprintf(stderr, " %d", instr->base);
+        break;
+
+        case reg_mem_bit_32S:
+            print_param(instr->p2);
+            fprintf(stderr, " %d", instr->base);
+        break;
     }
     fprintf(stderr, "\n");
     return;

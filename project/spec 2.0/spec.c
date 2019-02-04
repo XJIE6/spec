@@ -87,7 +87,7 @@ char* spec(state* _state) {
                     assign_64(current->current_state, RAX, v);
                     ++(current->current_state->mem_len);
 
-                    cur->base = 777777;
+                    cur->base = 777777777;
                     cur->next = current->generated_code;
                     current->generated_code = cur;
                     continue;
