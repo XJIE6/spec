@@ -10,9 +10,6 @@
 #define eval eval_8
 #define lea lea_8
 #define mov mov_8
-#define int_cur int_8
-#define int_c7 int_8
-#define print print_8
 #define prefix prefix_8
 #endif
 #ifdef BIT32
@@ -27,9 +24,6 @@
 #define eval eval_32
 #define lea lea_32
 #define mov mov_32
-#define int_cur int_32
-#define int_c7 int_32
-#define print print_32
 #define prefix prefix_32
 #endif
 #ifdef BIT64
@@ -44,15 +38,10 @@
 #define eval eval_64
 #define lea lea_64
 #define mov mov_64
-#define int_cur int_64
-#define int_c7 int_32S
-#define print print_64
 #define prefix prefix_64
 #endif
 
 code* mov_89(state* st, code* instruction) {    
-    parce_reg_mem(st, instruction);   
-    param p = instruction->p1;
     value v1 = eval(st, instruction->p1);
     if (v1.is_dynamic) {
         dynamic(st, instruction->p2);
@@ -79,7 +68,6 @@ code* mov_89(state* st, code* instruction) {
 }
 
 code* mov_8b(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     value v2 = eval(st, instruction->p2);
     if (v2.is_dynamic) {
@@ -99,7 +87,7 @@ code* mov_8b(state* st, code* instruction) {
 }
 
 code* mov_b8(state* st, code* instruction) {
-    value v = {int_cur(st), -1, 0};
+    value v = {instruction->base, -1, 0};
     char reg = instruction->number - 0xb8 + (REXR(instruction->REX) << 3);
     instruction->p1 = (param) {reg, -1, -1, 0};
     assign(st, instruction->p1, v);
@@ -107,8 +95,6 @@ code* mov_b8(state* st, code* instruction) {
 }
 
 code* mov_c7(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
-    instruction->base = int_c7(st);
     value v = eval(st, instruction->p2);
     if (v.is_dynamic) {
         //TODO if p2 registers are static, generating is ambigous
@@ -122,7 +108,6 @@ code* mov_c7(state* st, code* instruction) {
 }
 
 code* mov_be(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     value v2 = eval_8(st, instruction->p2);
     if (v2.is_dynamic) {
@@ -142,7 +127,6 @@ code* mov_be(state* st, code* instruction) {
 }
 
 code* mov_b6(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval_8(st, instruction->p1);
     if (v1.is_dynamic) {
         dynamic(st, instruction->p2);
@@ -168,7 +152,6 @@ code* mov_b6(state* st, code* instruction) {
 }
 
 code* lea_8d(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v = lea(st, instruction->p2);
     if (v.is_dynamic) {
         code* pref = prefix(st, instruction->p2);

@@ -37,7 +37,6 @@ code* pop_58(state* st, code* instruction) {
 
 code* pop_8f(state* st, code* instruction) {
     value v = pop(st);
-    parce_reg_mem(st, instruction);
     assign(st, instruction->p2, v);
     if (v.is_dynamic) {
         code* pref = prefix(instruction->p2);

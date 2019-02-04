@@ -33,7 +33,6 @@ code* push_50(state* st, code* instruction) {
 }
 
 code* push_ff(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v = eval(st, instruction->p2);
     push_64(st, v);
     if (v.is_dynamic) {
@@ -44,6 +43,6 @@ code* push_ff(state* st, code* instruction) {
 }
 
 code* push_68(state* st, code* instruction) {
-    value v = {int_cur(st), -1, 0};
+    value v = {instruction->base, -1, 0};
     push(st, v);
 }

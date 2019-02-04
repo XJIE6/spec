@@ -22,8 +22,6 @@ int int_32S(state* st);
 
 unsigned int int_32(state* st);
 
-long long int_64S(state* st);
-
 unsigned long long int_64(state* st);
 
 void parce_reg_mem(state* st, code* instruction);

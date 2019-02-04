@@ -6,9 +6,6 @@
 #define sub_83 sub_83_8
 #define assign assign_8
 #define eval eval_8
-#define int_s int_8
-#define int_cur int_8
-#define print print_8
 #define prefix prefix_8
 #endif
 #ifdef BIT32
@@ -19,9 +16,6 @@
 #define sub_83 sub_83_32
 #define assign assign_32
 #define eval eval_32
-#define int_s int_32
-#define int_cur int_32
-#define print print_32
 #define prefix prefix_32
 #endif
 #ifdef BIT64
@@ -32,16 +26,12 @@
 #define sub_83 sub_83_64
 #define assign assign_64
 #define eval eval_64
-#define int_s int_32S
-#define int_cur int_64
-#define print print_64
 #define prefix prefix_64
 #endif
 
 code* sub_2d(state* st, code* instruction) {
     instruction->p1 = RAX;
     value v = eval(st, instruction->p1);
-    instruction->base = int_s(st);
     if (v.is_dynamic) {
         return instruction;
     }
@@ -51,9 +41,7 @@ code* sub_2d(state* st, code* instruction) {
 }
 
 code* sub_81(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v = eval(st, instruction->p2);
-    instruction->base = int_s(st);
     if (v.is_dynamic) {
         return instruction;
     }
@@ -63,10 +51,7 @@ code* sub_81(state* st, code* instruction) {
 }
 
 code* sub_83(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
-    param p = instruction->p2;
     value v = eval(st, instruction->p2);
-    instruction->base = int_8S(st);
     if (v.is_dynamic) {
         return instruction;
     }
@@ -76,7 +61,6 @@ code* sub_83(state* st, code* instruction) {
 }
 
 code* sub_29(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     if (v1.is_dynamic) {
         dynamic(st, instruction->p2);
@@ -109,7 +93,6 @@ code* sub_29(state* st, code* instruction) {
 }
 
 code* sub_2b(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     if (v1.is_dynamic) {
         code* pref = prefix(st, instruction->p2);

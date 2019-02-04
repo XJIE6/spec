@@ -15,63 +15,60 @@ void jump(state* st, int cur) {
     assign(st, RIP, v);
 }
 
-code* jc(state* st, code* instruction, char sh) {
-    int cur = 0;
-    if (sh) {
-        cur = int_8S(st);
+code* jc(state* st, code* instruction) {
+    int cur = instruction->number;
+    if (instruction->pre != 0x0f) {
+        cur += 0x10;
     }
-    else {
-        cur = int_32S(st);
-    }
-    switch(instruction->number + sh * (0x10)) {
+    switch(cur) {
         case 0x80:
             if (OF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x81:
             if (!OF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x82:
             if (CF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x83:
             if (!CF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x84:
             if (ZF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x85:
             if (!ZF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x86:
             if (CF || ZF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x87:
             if (!CF && !ZF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x88:
             if (SF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x89:
             if (!SF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x8a:
@@ -80,22 +77,22 @@ code* jc(state* st, code* instruction, char sh) {
             break;
         case 0x8c:
             if (SF != OF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x8d:
             if (SF == OF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x8e:
             if (ZF || SF != OF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
         case 0x8f:
             if (!ZF && SF == OF) {
-                jump(st, cur);
+                jump(st, instruction->base);
             }
             break;
     }
@@ -103,19 +100,16 @@ code* jc(state* st, code* instruction, char sh) {
 }
 
 code* jmp_e9(state* st, code* instruction) {
-    int cur = int_32S(st);
-    jump(st, cur);
+    jump(st, instruction->base);
     return NULL;
 }
 
 code* jmp_eb(state* st, code* instruction) {
-    int cur = int_8S(st);
-    jump(st, cur);
+    jump(st, instruction->base);
     return NULL;
 }
 
-code* movsxd_63(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);   
+code* movsxd_63(state* st, code* instruction) { 
     param p = instruction->p1;
     value v1 = eval_32(st, instruction->p1);
     if (v1.is_dynamic) {

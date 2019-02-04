@@ -1,6 +1,374 @@
 #include "machine_code.h"
 #include "stdio.h"
 
+void print(code* instr) {
+    if (instr->next != NULL) {
+        print(instr->next);
+    }
+    fprintf(stderr, "%#04x ", instr->number);
+    if (instr->base != 0) {
+        fprintf(stderr, "%d ", instr->base);
+    }
+    fprintf(stderr, "\n");
+    return;
+}
+
+code* read_instruction(state* st) {
+    code* instruction = malloc(sizeof(code));
+    instruction->REX = 0;
+    instruction->pre = 0;
+    instruction->next = NULL;
+    instruction->number = get_char(st);
+    instruction->base = 0;
+    if (instruction->number >= 0x40 && instruction->number <= 0x4f) {
+        instruction->REX = instruction->number;
+        instruction->number = get_char(st);
+    }
+    if (instruction->number == 0x0f) {
+        instruction->pre = instruction->number;
+        instruction->number = get_char(st);
+    }
+
+    if (instruction->pre == 0x0f) {
+        switch (instruction->number) {
+            case 0x80:
+            case 0x81:
+            case 0x82:
+            case 0x83:
+            case 0x84:
+            case 0x85:
+            case 0x86:
+            case 0x87:
+            case 0x88:
+            case 0x89:
+            case 0x8a:
+            case 0x8b:
+            case 0x8c:
+            case 0x8d:
+            case 0x8e:
+            case 0x8f:
+                instruction->type = bit_32S;
+            break;
+
+            case 0xaf:
+                instruction->type = reg_mem;
+            break;
+
+            case 0xb6:
+                instruction->type = reg_mem;
+            break;
+
+            case 0xbe:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x1f:
+                instruction->type = empty;
+            break;
+
+            default:
+                fprintf(stderr, "UNKNOWN 0x0f %#04x\n", instruction->number);
+                st->regs[16] = 0;
+                return NULL;
+            break;
+        }
+    }
+    else {
+        switch(instruction->number) {
+            case 0x00:
+            case 0x01:
+            case 0x02:
+            case 0x03:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x04:
+                instruction->type = bit_8;
+            break;
+
+            case 0x05:
+                if (REXW(instruction->REX)) {
+                    instruction->type = bit_32S;
+                }
+                else {
+                    instruction->type = bit_32;
+                }
+            break;
+
+            case 0x28:
+            case 0x29:
+            case 0x2a:
+            case 0x2b:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x2c:
+                instruction->type = bit_8;
+            break;
+
+            case 0x2d:
+                if (REXW(instruction->REX)) {
+                    instruction->type = bit_32S;
+                }
+                else {
+                    instruction->type = bit_32;
+                }
+            break;
+
+            case 0x38:
+            case 0x39:
+            case 0x3a:
+            case 0x3b:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x3c:
+                instruction->type = bit_8;
+            break;
+
+            case 0x3d:
+                if (REXW(instruction->REX)) {
+                    instruction->type = bit_32S;
+                }
+                else {
+                    instruction->type = bit_32;
+                }
+            break;
+
+            case 0x50:
+            case 0x51:
+            case 0x52:
+            case 0x53:
+            case 0x54:
+            case 0x55:
+            case 0x56:
+            case 0x57:
+                instruction->type = empty;
+            break;
+
+            case 0x58:
+            case 0x59:
+            case 0x5a:
+            case 0x5b:
+            case 0x5c:
+            case 0x5d:
+            case 0x5e:
+            case 0x5f:
+                instruction->type = empty;
+            break;
+
+            case 0x63:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x68:
+                if (REXW(instruction->REX)) {
+                    instruction->type = bit_32S;
+                }
+                else {
+                    instruction->type = bit_32;
+                }
+            break;
+
+            case 0x6a:
+                instruction->type = bit_8;
+            break;
+
+            case 0x70:
+            case 0x71:
+            case 0x72:
+            case 0x73:
+            case 0x74:
+            case 0x75:
+            case 0x76:
+            case 0x77:
+            case 0x78:
+            case 0x79:
+            case 0x7a:
+            case 0x7b:
+            case 0x7c:
+            case 0x7d:
+            case 0x7e:
+            case 0x7f:
+                instruction->type = bit_8S;
+            break;
+            
+
+            case 0x80:
+                instruction->type = reg_mem_bit_8;
+            break;
+
+            case 0x81:
+                if (REXW(instruction->REX)) {
+                    instruction->type = reg_mem_bit_32S;
+                }
+                else {
+                    instruction->type = reg_mem_bit_32;
+                }
+            break;
+
+            case 0x83:
+                instruction->type = reg_mem_bit_8S;
+            break;
+
+            case 0x84:
+            case 0x85:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x88:
+            case 0x89:
+            case 0x8a:
+            case 0x8b:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x8d:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x8f:
+                instruction->type = reg_mem;
+            break;
+
+            case 0x90:
+                instruction->type = empty;
+            break;
+
+            case 0x98:
+                instruction->type = empty;
+            break;
+
+            case 0x99:
+                instruction->type = empty;
+            break;
+
+            case 0xb0:
+            case 0xb1:
+            case 0xb2:
+            case 0xb3:
+            case 0xb4:
+            case 0xb5:
+            case 0xb6:
+            case 0xb7:
+                instruction->type = bit_8;
+            break;
+
+            case 0xb8:
+            case 0xb9:
+            case 0xba:
+            case 0xbb:
+            case 0xbc:
+            case 0xbd:
+            case 0xbe:
+            case 0xbf:
+                if (REXW(instruction->REX)) {
+                    instruction->type = bit_64;
+                }
+                else {
+                    instruction->type = bit_32;
+                }
+            break;
+
+            case 0xc3:
+                instruction->type = empty;
+            break;
+
+            case 0xc6:
+                instruction->type = reg_mem_bit_8S;
+            break;
+
+            case 0xc7:
+                if (REXW(instruction->REX)) {
+                    instruction->type = reg_mem_bit_32S;
+                }
+                else {
+                    instruction->type = reg_mem_bit_32;
+                }
+            break;
+
+            case 0xc9:
+                instruction->type = empty;
+            break;
+
+            case 0xe8:
+                instruction->type = bit_32S;
+            break;
+
+            case 0xe9:
+                instruction->type = bit_32S;
+            break;
+
+            case 0xeb:
+                instruction->type = bit_8S;
+            break;
+
+            case 0xf7:
+                instruction->type = reg_mem;
+            break;
+
+            case 0xff:
+                instruction->type = reg_mem;
+            break;
+
+            default:
+                fprintf(stderr, "UNKNOWN %#04x\n", instruction->number);
+                st->regs[16] = 0;
+                return NULL;
+        }
+    }
+
+    switch(instruction->type) {
+        case empty:
+        break;
+
+        case bit_8:
+            instruction->base = int_8(st);
+        break;
+
+        case bit_8S:
+            instruction->base = int_8S(st);
+        break;
+
+        case bit_32:
+            instruction->base = int_32(st);
+        break;
+
+        case bit_32S:
+            instruction->base = int_32S(st);
+        break;
+
+        case bit_64:
+            instruction->base = int_64(st);
+        break;
+
+        case reg_mem:
+            parce_reg_mem(st, instruction);
+        break;
+
+        case reg_mem_bit_8:
+            parce_reg_mem(st, instruction);
+            instruction->base = int_8(st);
+        break;
+
+        case reg_mem_bit_8S:
+            parce_reg_mem(st, instruction);
+            instruction->base = int_8S(st);
+        break;
+
+        case reg_mem_bit_32:
+            parce_reg_mem(st, instruction);
+            instruction->base = int_32(st);
+        break;
+
+        case reg_mem_bit_32S:
+            parce_reg_mem(st, instruction);
+            instruction->base = int_32S(st);
+        break;
+    }
+
+    return instruction;
+}
 
 unsigned char get_char(state* st) {
     unsigned char res = *((unsigned char*)st->regs[16]);
@@ -57,18 +425,6 @@ unsigned int int_32(state* st) {
     res += get_char(st) << 8;
     res += get_char(st) << 16;
     res += get_char(st) << 24;
-    return res;
-}
-
-long long int_64S(state* st) {
-    long res = get_char(st);
-    res += get_char(st) << 8;
-    res += get_char(st) << 16;
-    res += get_char(st) << 24;
-    res += (long long) get_char(st) << 32;
-    res += (long long) get_char(st) << 40;
-    res += (long long) get_char(st) << 48;
-    res += (long long) get_schar(st) << 56;
     return res;
 }
 

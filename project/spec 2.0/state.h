@@ -31,6 +31,8 @@ typedef struct _value {
     unsigned char is_dynamic;
 } value;
 
+enum parameter_type {empty, reg_mem, bit_8, bit_8S, bit_32, bit_32S, bit_64, reg_mem_bit_8, reg_mem_bit_8S, reg_mem_bit_32, reg_mem_bit_32S};
+
 typedef struct _code {
     unsigned char REX;
     unsigned char pre;
@@ -38,6 +40,7 @@ typedef struct _code {
     param p1;
     param p2;
     long long base;
+    enum parameter_type type;
     struct _code* next;
 } code;
 

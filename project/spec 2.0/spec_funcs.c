@@ -199,6 +199,7 @@ value lea(state* st, param p) {
         v.is_dynamic = 1;
         return v;
     }
+    
     v.base = st->regs[p.reg1] * (1 << p.scale) + p.base;
     v.mem = st->info_regs[p.reg1].mem;
     if (p.reg2 != -1) {
@@ -206,6 +207,7 @@ value lea(state* st, param p) {
         if (st->info_regs[p.reg2].mem != -1) {
             if (v.mem != -1) {
                 fprintf(stderr, "ERROR eval 342\n");
+                st->regs[16] = 0;
                 return v;
             }
             v.mem = st->info_regs[p.reg2].mem;

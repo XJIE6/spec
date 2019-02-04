@@ -36,7 +36,59 @@
 #undef BIT64
 
 code* eval_instruction(state* st, code* instruction) {
-    char f;
+    if (instruction->pre == 0x0f) {
+        switch (instruction->number) {
+            case 0x80:
+            case 0x81:
+            case 0x82:
+            case 0x83:
+            case 0x84:
+            case 0x85:
+            case 0x86:
+            case 0x87:
+            case 0x88:
+            case 0x89:
+            case 0x8a:
+            case 0x8b:
+            case 0x8c:
+            case 0x8d:
+            case 0x8e:
+            case 0x8f:
+                return jc(st, instruction);
+            break;
+
+            case 0xaf:
+                return imul_af(st, instruction);
+            break;
+
+            case 0xbe:
+                if (REXW(instruction->REX)) {
+                    return mov_be_64(st, instruction);
+                }
+                else {
+                    return mov_be_32(st, instruction);
+                }
+            break;
+
+            case 0xb6:
+                if (REXW(instruction->REX)) {
+                    return mov_b6_64(st, instruction);
+                }
+                else {
+                    return mov_b6_32(st, instruction);
+                }
+            break;
+
+            case 0x1f:
+                return NULL;
+            break;
+
+            default:
+                fprintf(stderr, "UNKNOWN 0x0f %#04x\n", instruction->number);
+                return 1;
+            break;
+        }
+    }
     switch(instruction->number) {
         case 0x00:
             return add_01_8(st, instruction);
@@ -74,62 +126,6 @@ code* eval_instruction(state* st, code* instruction) {
             }
             else {
                 return add_05_32(st, instruction);
-            }
-        break;
-
-        case 0x0f:
-            instruction->pre = 0x0f;
-            instruction->number = get_char(st);
-            switch (instruction->number) {
-                case 0x80:
-                case 0x81:
-                case 0x82:
-                case 0x83:
-                case 0x84:
-                case 0x85:
-                case 0x86:
-                case 0x87:
-                case 0x88:
-                case 0x89:
-                case 0x8a:
-                case 0x8b:
-                case 0x8c:
-                case 0x8d:
-                case 0x8e:
-                case 0x8f:
-                    return jc(st, instruction, 0);
-                break;
-
-                case 0xaf:
-                    return imul_af(st, instruction);
-                break;
-
-                case 0xbe:
-                    if (REXW(instruction->REX)) {
-                        return mov_be_64(st, instruction);
-                    }
-                    else {
-                        return mov_be_32(st, instruction);
-                    }
-                break;
-
-                case 0xb6:
-                    if (REXW(instruction->REX)) {
-                        return mov_b6_64(st, instruction);
-                    }
-                    else {
-                        return mov_b6_32(st, instruction);
-                    }
-                break;
-
-                case 0x1f:
-                    return NULL;
-                break;
-
-                default:
-                    fprintf(stderr, "UNKNOWN 0x0f %#04x\n", instruction->number);
-                    return 1;
-                break;
             }
         break;
 
@@ -276,13 +272,12 @@ code* eval_instruction(state* st, code* instruction) {
         case 0x7d:
         case 0x7e:
         case 0x7f:
-            return jc(st, instruction, 1);
+            return jc(st, instruction);
         break;
         
 
         case 0x80:
-        f = read_reg(st);
-        switch(f) {
+        switch(instruction->p1.reg1) {
             case 0:
                 return add_81_8(st, instruction);
                 break;
@@ -299,8 +294,7 @@ code* eval_instruction(state* st, code* instruction) {
         break;
 
         case 0x81:
-        f = read_reg(st);
-        switch(f) {
+        switch(instruction->p1.reg1) {
             case 0:
             if (REXW(instruction->REX)) {
                return add_81_64(st, instruction);
@@ -328,8 +322,7 @@ code* eval_instruction(state* st, code* instruction) {
         }   
 
         case 0x83:
-        f = read_reg(st);
-        switch(f) {
+        switch(instruction->p1.reg1) {
             case 0:
                 if (REXW(instruction->REX)) {
                    return add_83_64(st, instruction);
@@ -405,8 +398,7 @@ code* eval_instruction(state* st, code* instruction) {
         break;
 
         case 0x8f:
-            f = read_reg(st);
-            switch(f) {
+            switch(instruction->p1.reg1) {
                 case 0:
                     if (REXW(instruction->REX)) {
                         return pop_8f_64(st, instruction);
@@ -483,8 +475,7 @@ code* eval_instruction(state* st, code* instruction) {
         break;
 
         case 0xf7:
-            f = read_reg(st);
-            switch(f) {
+            switch(instruction->p1.reg1) {
                 case 7:
                     if (REXW(instruction->REX)) {
                         return idiv_f7_64(st, instruction);
@@ -497,8 +488,7 @@ code* eval_instruction(state* st, code* instruction) {
         break;
 
         case 0xff:
-            f = read_reg(st);
-            switch(f) {
+            switch(instruction->p1.reg1) {
                 case 6:
                     if (REXW(instruction->REX)) {
                         return push_ff_64(st, instruction);
@@ -512,6 +502,7 @@ code* eval_instruction(state* st, code* instruction) {
 
         default:
             fprintf(stderr, "UNKNOWN %#04x\n", instruction->number);
+            st->regs[16] = 0;
             return 1;
     }
 }

@@ -8,10 +8,6 @@
 #define assign assign_8
 #define eval eval_8
 #define cmp cmp_8
-#define int_u int_8
-#define int_s int_8
-#define int_cur int_8
-#define print print_8
 #define prefix prefix_8
 #endif
 #ifdef BIT32
@@ -24,10 +20,6 @@
 #define assign assign_32
 #define eval eval_32
 #define cmp cmp_32
-#define int_u int_32
-#define int_s int_32
-#define int_cur int_32
-#define print print_32
 #define prefix prefix_32
 #endif
 #ifdef BIT64
@@ -40,18 +32,13 @@
 #define assign assign_64
 #define eval eval_64
 #define cmp cmp_64
-#define int_u int_32
-#define int_s int_32S
-#define int_cur int_64
-#define print print_64
 #define prefix prefix_64
 #endif
 
 code* cmp_3d(state* st, code* instruction) {
     instruction->p1 = RAX;
     value v1 = eval(st, instruction->p1);
-    value v2 = {int_u(st), -1, 0};
-    instruction->base = v2.base;
+    value v2 = {instruction->base, -1, 0};
     cmp(st, v1, v2);
     if (v1.is_dynamic) {
         return instruction;
@@ -60,10 +47,8 @@ code* cmp_3d(state* st, code* instruction) {
 }
 
 code* cmp_81(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p2);
-    value v2 = {int_s(st), -1, 0};
-    instruction->base = v2.base;
+    value v2 = {instruction->base, -1, 0};
     cmp(st, v1, v2);
     if (v1.is_dynamic) {
         return instruction;
@@ -72,10 +57,8 @@ code* cmp_81(state* st, code* instruction) {
 }
 
 code* cmp_83(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p2);
-    value v2 = {int_8S(st), -1, 0};
-    instruction->base = v2.base;
+    value v2 = {instruction->base, -1, 0};
     cmp(st, v1, v2);
     if (v1.is_dynamic) {
         return instruction;
@@ -84,7 +67,6 @@ code* cmp_83(state* st, code* instruction) {
 }
 
 code* cmp_39(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     value v2 = eval(st, instruction->p2);
     cmp(st, v1, v2);
@@ -108,7 +90,6 @@ code* cmp_39(state* st, code* instruction) {
 }
 
 code* cmp_3b(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     value v2 = eval(st, instruction->p2);
     cmp(st, v2, v1);
@@ -132,7 +113,6 @@ code* cmp_3b(state* st, code* instruction) {
 }
 
 code* test_85(state* st, code* instruction) {
-    parce_reg_mem(st, instruction);
     value v1 = eval(st, instruction->p1);
     value v2 = eval(st, instruction->p2);
     if (v1.is_dynamic) {
