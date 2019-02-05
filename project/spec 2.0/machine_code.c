@@ -56,6 +56,12 @@ void print(code* instr) {
     if (instr->next != NULL) {
         print(instr->next);
     }
+    if (instr->REX != 0) {  
+        fprintf(stderr, "%#04x ", instr->REX);
+    }
+    if (instr->pre != 0) {  
+        fprintf(stderr, "%#04x ", instr->pre);
+    }
     fprintf(stderr, "%#04x ", instr->number);
     switch(instr->type) {
         case empty:
@@ -111,22 +117,7 @@ void print(code* instr) {
     return;
 }
 
-code* read_instruction(state* st) {
-    code* instruction = malloc(sizeof(code));
-    instruction->REX = 0;
-    instruction->pre = 0;
-    instruction->next = NULL;
-    instruction->number = get_char(st);
-    instruction->base = 0;
-    if (instruction->number >= 0x40 && instruction->number <= 0x4f) {
-        instruction->REX = instruction->number;
-        instruction->number = get_char(st);
-    }
-    if (instruction->number == 0x0f) {
-        instruction->pre = instruction->number;
-        instruction->number = get_char(st);
-    }
-
+void get_type(code* instruction) {
     if (instruction->pre == 0x0f) {
         switch (instruction->number) {
             case 0x80:
@@ -166,8 +157,6 @@ code* read_instruction(state* st) {
 
             default:
                 fprintf(stderr, "UNKNOWN 0x0f %#04x\n", instruction->number);
-                st->regs[16] = 0;
-                return NULL;
             break;
         }
     }
@@ -411,10 +400,27 @@ code* read_instruction(state* st) {
 
             default:
                 fprintf(stderr, "UNKNOWN %#04x\n", instruction->number);
-                st->regs[16] = 0;
-                return NULL;
         }
     }
+}
+
+code* read_instruction(state* st) {
+    code* instruction = malloc(sizeof(code));
+    instruction->REX = 0;
+    instruction->pre = 0;
+    instruction->next = NULL;
+    instruction->number = get_char(st);
+    instruction->base = 0;
+    if (instruction->number >= 0x40 && instruction->number <= 0x4f) {
+        instruction->REX = instruction->number;
+        instruction->number = get_char(st);
+    }
+    if (instruction->number == 0x0f) {
+        instruction->pre = instruction->number;
+        instruction->number = get_char(st);
+    }
+
+    get_type(instruction);
 
     switch(instruction->type) {
         case empty:
@@ -589,7 +595,7 @@ void parce_reg_mem(state* st, code* instruction) {
             }
             if (r_m == 5) {
                 base = int_32S(st);
-                instruction->p2 = (param) {16, 0, 0, base};
+                instruction->p2 = (param) {16, -1, 0, base};
                 return;
             }
             r_m += REXB(instruction->REX) << 3;

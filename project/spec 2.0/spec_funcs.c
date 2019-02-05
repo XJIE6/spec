@@ -155,11 +155,14 @@ void assign(state* st, param p, value v) {
     st->info_mem[cur.mem][cur.base].is_dynamic = v.is_dynamic;
 }
 
-
-
 code* prefix(state* st, param p) {
-    value v = eval(st, p);
-    if (!v.is_dynamic) {
+
+    code* pref = reg_prefix(st, p.reg1);
+    if (p.reg2 != -1) {
+        code* pref2 = reg_prefix(st, p.reg2);
+        pref2->next = pref;
+        pref = pref2;
+    }
         //fprintf(stderr, "premov ");
         //print(st, p, 1);
         //fprintf(stderr, ", ");
@@ -189,8 +192,8 @@ code* prefix(state* st, param p) {
         //     is_end = 1;
         //     return;
         // }
-    }
-    return NULL;
+    
+    return pref;
 }
 
 value lea(state* st, param p) {
@@ -199,7 +202,7 @@ value lea(state* st, param p) {
         v.is_dynamic = 1;
         return v;
     }
-    
+
     v.base = st->regs[p.reg1] * (1 << p.scale) + p.base;
     v.mem = st->info_regs[p.reg1].mem;
     if (p.reg2 != -1) {
