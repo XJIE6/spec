@@ -35,9 +35,14 @@ code* reg_prefix(state* st, int reg) {
     value v = eval_64(st, (param){reg, -1, -1, 0});
     if (!v.is_dynamic) {
         if (v.mem != -1) {
-            fprintf(stderr, "NOT IMPLEMENTED 382");
-            st->regs[16] = 0;
-            return NULL;         
+            code* cur = malloc(sizeof(code));
+            cur->REX = 0x4a;
+            cur->pre = 0;
+            cur->number = 0x8d;
+            get_type(cur);
+            cur->p1 = (param){reg, -1, -1, 0};
+            cur->p2 = (param){v.mem, -1, 0, v.base};
+            return cur;        
         }
         else {
             code* cur = malloc(sizeof(code));

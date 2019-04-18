@@ -113,9 +113,9 @@ code* movsxd_63(state* st, code* instruction) {
     param p = instruction->p1;
     value v1 = eval_32(st, instruction->p1);
     if (v1.is_dynamic) {
-        dynamic(st, instruction->p2);
         code* pref = prefix_64(st, instruction->p2);
         instruction->next = pref;
+        dynamic(st, instruction->p2);
         return instruction;
     }
     value v2 = eval(st, instruction->p2);

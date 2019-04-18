@@ -44,9 +44,9 @@
 code* mov_89(state* st, code* instruction) {    
     value v1 = eval(st, instruction->p1);
     if (v1.is_dynamic) {
-        dynamic(st, instruction->p2);
         code* pref = prefix(st, instruction->p2);
         instruction->next = pref;
+        dynamic(st, instruction->p2);
         return instruction;
     }
     value v2 = eval(st, instruction->p2);
@@ -71,7 +71,6 @@ code* mov_8b(state* st, code* instruction) {
     value v1 = eval(st, instruction->p1);
     value v2 = eval(st, instruction->p2);
     if (v2.is_dynamic) {
-        dynamic(st, instruction->p1);
         code* pref1 = prefix(st, instruction->p1);
         code* pref2 = prefix(st, instruction->p2);
         if (pref1 == NULL) {
@@ -80,6 +79,7 @@ code* mov_8b(state* st, code* instruction) {
         }
         pref1->next = pref2;
         instruction->next = pref1;
+        dynamic(st, instruction->p1);
         return instruction;
     }
     assign(st, instruction->p1, v2);
@@ -111,7 +111,6 @@ code* mov_be(state* st, code* instruction) {
     value v1 = eval(st, instruction->p1);
     value v2 = eval_8(st, instruction->p2);
     if (v2.is_dynamic) {
-        dynamic(st, instruction->p1);
         code* pref1 = prefix(st, instruction->p1);
         code* pref2 = prefix(st, instruction->p2);
         if (pref1 == NULL) {
@@ -120,6 +119,7 @@ code* mov_be(state* st, code* instruction) {
         }
         pref1->next = pref2;
         instruction->next = pref1;
+        dynamic(st, instruction->p1);
         return instruction;
     }
     assign(st, instruction->p1, v2);
@@ -129,9 +129,9 @@ code* mov_be(state* st, code* instruction) {
 code* mov_b6(state* st, code* instruction) {
     value v1 = eval_8(st, instruction->p1);
     if (v1.is_dynamic) {
-        dynamic(st, instruction->p2);
         code* pref = prefix(st, instruction->p2);
         instruction->next = pref;
+        dynamic(st, instruction->p2);
         return instruction;
     }
     value v2 = eval(st, instruction->p2);

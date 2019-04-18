@@ -27,6 +27,30 @@ void print_reg(int i) {
         case(7):
             fprintf(stderr, "rdi");
             break;
+        case(8):
+            fprintf(stderr, "r8");
+            break;
+        case(9):
+            fprintf(stderr, "r9");
+            break;
+        case(10):
+            fprintf(stderr, "r10");
+            break;
+        case(11):
+            fprintf(stderr, "r11");
+            break;
+        case(12):
+            fprintf(stderr, "r12");
+            break;
+        case(13):
+            fprintf(stderr, "r13");
+            break;
+        case(14):
+            fprintf(stderr, "r14");
+            break;
+        case(15):
+            fprintf(stderr, "r15");
+            break;
     }
 }
 
@@ -53,6 +77,8 @@ void print_param(param p) {
 }
 
 void print(code* instr) {
+    instr->p1.reg1 |= REXB(instr->REX) << 3;
+    instr->p2.reg1 |= REXX(instr->REX) << 3;
     if (instr->next != NULL) {
         print(instr->next);
     }

@@ -156,7 +156,6 @@ void assign(state* st, param p, value v) {
 }
 
 code* prefix(state* st, param p) {
-
     code* pref = reg_prefix(st, p.reg1);
     if (p.reg2 != -1) {
         code* pref2 = reg_prefix(st, p.reg2);

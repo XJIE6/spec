@@ -63,9 +63,9 @@ code* add_83(state* st, code* instruction) {
 code* add_01(state* st, code* instruction) {
     value v1 = eval(st, instruction->p1);
     if (v1.is_dynamic) {
-        dynamic(st, instruction->p2);
         code* pref = prefix(st, instruction->p2);
         instruction->next = pref;
+        dynamic(st, instruction->p2);
         return instruction;
     }
     value v2 = eval(st, instruction->p2);
@@ -101,9 +101,9 @@ code* add_03(state* st, code* instruction) {
     }
     value v2 = eval(st, instruction->p2);
     if (v2.is_dynamic) {
-        dynamic(st, instruction->p1);
         code* pref1 = prefix(st, instruction->p1);
         code* pref2 = prefix(st, instruction->p2);
+        dynamic(st, instruction->p1);
         if (pref1 == NULL) {
             instruction->next = pref2;
             return instruction;

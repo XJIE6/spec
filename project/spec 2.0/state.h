@@ -61,6 +61,8 @@ typedef struct _state_stack {
     state* parallel_state;
     state** result_place;
     struct _state_stack* next;
+    struct _state_stack* child;
+    char flag;
     specialized_part* specialized;
 } state_stack;
 

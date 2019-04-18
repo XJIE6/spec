@@ -15,6 +15,8 @@ state_stack* init_state_stack(state* start_state) {
     stack->parallel_state = NULL;
     stack->result_place = malloc(sizeof(state));
     stack->next = NULL;
+    stack->child = NULL;
+    stack->flag = 0;
     stack->specialized = NULL;
     return stack;
 }
